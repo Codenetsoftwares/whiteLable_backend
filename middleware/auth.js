@@ -1,60 +1,121 @@
 import jwt from "jsonwebtoken";
 import { Admin } from "../models/admin.model.js";
-import {SubAdmin} from "../models/subAdmin.model.js"
-import { HyperAgent } from "../models/hyperAgent.model.js";
-import {SuperAgent} from '../models/superAgent.model.js'
-import {MasterAgent} from "../models/master.model.js"
 import {User} from "../models/user.model.js"
-import { WhiteLabel } from "../models/whiteLabel.model.js";
+
+
+
 export const Authorize = (roles) => {
   return async (req, res, next) => {
     try {
       const authToken = req.headers.authorization;
 
-      if (!authToken || !authToken.startsWith("Bearer ")) {
-        throw { status: 401, message: "Invalid token format" };
+      if (!authToken) {  
+        return res
+          .status(401)
+          .send({ code: 401, message: "Invalid login attempt (1)" });
       }
 
-      const token = authToken.split(" ")[1];
-      const user = jwt.verify(token, process.env.JWT_SECRET_KEY);
+      const tokenParts = authToken.split(" ");
+      if (
+        tokenParts.length !== 2 ||
+        !(tokenParts[0] === "Bearer" && tokenParts[1])
+      ) {
+        return res
+          .status(401)
+          .send({ code: 401, message: "Invalid login attempt (2)" });
+      }
 
+      const user = jwt.verify(tokenParts[1], process.env.JWT_SECRET_KEY);
+      console.log('user from jwt',user.id)
       if (!user) {
-        throw { status: 401, message: "Invalid token" };
+        return res
+          .status(401)
+          .send({ code: 401, message: "Invalid login attempt (3)" });
       }
 
       let existingUser;
-
       if (roles.includes("superAdmin")) {
         existingUser = await Admin.findById(user.id).exec();
-      } 
-      else if (roles.includes("subadmin")) {
-        existingUser = await SubAdmin.findById(user.id).exec();
-      } 
-      if (roles.includes("whiteLabel")) {
-        existingUser = await WhiteLabel.findById(user.id).exec();
-      } 
-      else if (roles.includes("hyperAgent")) {
-        existingUser = await HyperAgent.findById(user.id).exec();
-      } 
-      else if (roles.includes("superAgent")) {
-        existingUser = await SuperAgent.findById(user.id).exec();
-      } 
-      else if (roles.includes("masterAgent")) {
-        existingUser = await MasterAgent.findById(user.id).exec();
-      }
-      else if (roles.includes("user")) {
-        existingUser = await User.findById(user.id).exec();
+        console.log('existing user',existingUser.roles)
+        if (!existingUser) {
+          return res
+            .status(401)
+            .send({ code: 401, message: "Invalid login attempt for user (1)" });
+        }
       }
 
-      if (!existingUser) {
-        throw { status: 403, message: "Unauthorized access" };
+      if (roles.includes("SubAdmin")) {
+        existingUser = await Admin.findById(user.id).exec();
+        if (!existingUser) {
+          return res.status(401).send({
+            code: 401,
+            message: "Invalid login attempt for admin (2)",
+          });
+        }
+      }
+      
+      if (roles.includes("WhiteLabel")) {
+        existingUser = await Admin.findById(user.id).exec();
+        if (!existingUser) {
+          return res.status(401).send({
+            code: 401,
+            message: "Invalid login attempt for admin (3)",
+          });
+        }
+      }
+
+      if (roles.includes("HyperAgent")) {
+        existingUser = await Admin.findById(user.id).exec();
+        if (!existingUser) {
+          return res.status(401).send({
+            code: 401,
+            message: "Invalid login attempt for admin (3)",
+          });
+        }
+      }
+
+      if (roles.includes("SuperAgent")) {
+        existingUser = await Admin.findById(user.id).exec();
+        if (!existingUser) {
+          return res.status(401).send({
+            code: 401,
+            message: "Invalid login attempt for admin (3)",
+          });
+        }
+      }
+
+      if (roles.includes("MasterAgent")) {
+        existingUser = await Admin.findById(user.id).exec();
+        if (!existingUser) {
+          return res.status(401).send({
+            code: 401,
+            message: "Invalid login attempt for admin (3)",
+          });
+        }
+      }
+      
+      if (roles && roles.length > 0) {
+        let userHasRequiredRole = false;
+        roles.forEach((role) => {
+          const rolesArray = existingUser.roles;
+          for(const element of rolesArray) {
+            console.log(element,role)
+            if (role === element){
+              userHasRequiredRole = true;
+            }
+          }
+        });
+        if (!userHasRequiredRole)
+          return res
+            .status(401)
+            .send({ code: 401, message: "Unauthorized access" });
       }
 
       req.user = existingUser;
       next();
-    } catch (error) {
-      console.error("Authorization Error:", error.message);
-      return res.status(error.status || 500).send({ code: error.status || 500, message: error.message });
+    } catch (err) {
+      console.error("Authorization Error:", err.message);
+      return res.status(401).send({ code: 401, message: "Unauthorized access" });
     }
   };
-}
+};
