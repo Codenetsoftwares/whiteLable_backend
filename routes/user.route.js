@@ -14,7 +14,7 @@ export const UserRoute = (app) => {
       if (admin && accesstoken) {
         res.status(200).send({ code: 200, message: "Login Successfully", token: accesstoken });
       } else {
-        res.status(404).json({ code: 404, message: 'Invalid Access Token or Admin' });
+        res.status(404).json({ code: 404, message: 'Invalid Access Token or User' });
       }
     }
     catch (err) {

@@ -13,7 +13,7 @@ export const AdminRoute = (app) => {
             console.log(req.body)
             const Admin = await AdminController.createAdmin({ userName, password, roles });
             console.log(Admin)
-            res.status(200).send({ code: 200, message: ` ${userName} Register Successfully` })
+            res.status(200).send({ code: 200, message: `${userName} Register Successfully` })
         }
         catch (err) {
             res.status(500).send({ code: err.code, message: err.message })
@@ -40,17 +40,14 @@ export const AdminRoute = (app) => {
         }
     })
 
-    app.post(
-        "/api/admin/reset-password",
-        async (req, res) => {
+    app.post( "/api/admin/reset-password", async (req, res) => {
           try {
             const { userName, oldPassword, password } = req.body;
             await AdminController.PasswordResetCode(userName, oldPassword, password);
             res.status(200).send({ code: 200, message: "Password reset successful!" });
-          } catch (e) {
-            console.error(e);
-            res.status(e.code).send({ message: e.message });
-          }
+          }  catch (err) {
+            res.status(500).send({ code: err.code, message: err.message })
+        }
         }
       );
 
@@ -120,7 +117,7 @@ export const AdminRoute = (app) => {
     // })
 
 
-    // create Master Agent
+    // create User
 
     app.post("/api/admin/Create-user", Authorize(["superAdmin"]), async (req, res) => {
         try {
@@ -150,7 +147,7 @@ export const AdminRoute = (app) => {
     })
 
 
-    // deposit amt
+    // transfer amt
 
 
     app.post("/api/admin/transfer-amount", Authorize(["superAdmin"]), async (req, res) => {

@@ -27,7 +27,7 @@
 
   // hyperAgent Transfer Amount
 
-  app.post("/api/hyperagent/transfer-amount", Authorize(["hyperAgent"]), async (req, res) => {
+  app.post("/api/hyperagent/transfer-amount", Authorize(["HyperAgent"]), async (req, res) => {
     try {
         const { SuperAgentUserName,hyperAgentUserName, trnsfAmnt } = req.body;
         const transferResult = await HyperAgentController.transferAmount(SuperAgentUserName,hyperAgentUserName, trnsfAmnt);
@@ -41,19 +41,19 @@
 
   // Sub Hyper Agent Create
     
-  app.post("/api/hyperagent/SubHyperAgent-create",Authorize(["hyperAgent"]),async(req,res)=>
-  {
-    try{
-    const {userName,email,password} = req.body;
-    console.log(req.body)
-    const subHyperAgent = await HyperAgentController.createSubHyperAgent({userName,email,password});
-        console.log(subHyperAgent)
-        res.status(200).send({code:200, message:"User Save Successfully"})  
-  }
-  catch(err)
-  {
-    res.status(500).send({code: err.code, message: err.message})
-  }
-  })
+  // app.post("/api/hyperagent/SubHyperAgent-create",Authorize(["hyperAgent"]),async(req,res)=>
+  // {
+  //   try{
+  //   const {userName,email,password} = req.body;
+  //   console.log(req.body)
+  //   const subHyperAgent = await HyperAgentController.createSubHyperAgent({userName,email,password});
+  //       console.log(subHyperAgent)
+  //       res.status(200).send({code:200, message:"User Save Successfully"})  
+  // }
+  // catch(err)
+  // {
+  //   res.status(500).send({code: err.code, message: err.message})
+  // }
+  // })
 
   }

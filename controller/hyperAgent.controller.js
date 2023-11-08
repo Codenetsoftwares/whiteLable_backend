@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken";
+import { Admin } from "../models/admin.model.js";
 
 export const HyperAgentController = {
 
@@ -34,35 +35,35 @@ export const HyperAgentController = {
 //   },
 
 
-//   transferAmount: async (SuperAgentUserName,hyperAgentUserName, trnsfAmnt) => {
-//     try {
-//         const hyperAgent = await HyperAgent.findOne({ userName: hyperAgentUserName }).exec();
+  transferAmount: async (SuperAgentUserName,hyperAgentUserName, trnsfAmnt) => {
+    try {
+        const hyperAgent = await Admin.findOne({ userName: hyperAgentUserName }).exec();
 
-//         if (!hyperAgent) {
-//             throw { code: 404, message: "HyperAgent Not Found For Transfer" };
-//         }
+        if (!hyperAgent) {
+            throw { code: 404, message: "HyperAgent Not Found For Transfer" };
+        }
 
-//         const superAgent = await SuperAgent.findOne({ userName: SuperAgentUserName }).exec();
+        const superAgent = await Admin.findOne({ userName: SuperAgentUserName }).exec();
 
-//         if (!superAgent) {
-//             throw { code: 404, message: "Super Agent Not Found" };
-//         }
+        if (!superAgent) {
+            throw { code: 404, message: "Super Agent Not Found" };
+        }
 
-//         if (hyperAgent.balance < trnsfAmnt) {
-//             throw { code: 400, message: "Insufficient balance for the transfer" };
-//         }
+        if (hyperAgent.balance < trnsfAmnt) {
+            throw { code: 400, message: "Insufficient balance for the transfer" };
+        }
         
-//         hyperAgent.balance -= trnsfAmnt;
-//         superAgent.balance += trnsfAmnt;
-//         hyperAgent.transferAmount += trnsfAmnt;
+        hyperAgent.balance -= trnsfAmnt;
+        superAgent.balance += trnsfAmnt;
+        hyperAgent.transferAmount += trnsfAmnt;
 
-//         await hyperAgent.save();
-//         await superAgent.save();
-//         return { message: "Balance Transfer Successfully" };
-//       } catch (err) {
-//         throw { code: err.code, message: err.message };
-//       }
-// },
+        await hyperAgent.save();
+        await superAgent.save();
+        return { message: "Balance Transfer Successfully" };
+      } catch (err) {
+        throw { code: err.code, message: err.message };
+      }
+},
 
 
 

@@ -1,4 +1,5 @@
 import { SuperAgentController } from "../controller/superAgent.controller.js";
+import { Authorize } from "../middleware/auth.js";
 
 
 
@@ -23,5 +24,16 @@ export const SuperAgentRoute = (app) => {
     // }
     // })
   
+
+    app.post("/api/superAgent/transfer-amount", Authorize(["SuperAgent"]), async (req, res) => {
+        try {
+            const { superAgentUserName,masterAgentUserName, trnsfAmnt } = req.body;
+            const transferResult = await SuperAgentController.transferAmount(superAgentUserName,masterAgentUserName, trnsfAmnt);
+            console.log("transferResult", transferResult);
+            res.status(200).send({ code: 200, message: "Transfer Amount Successfully" });
+        } catch (err) {
+            res.status(500).send({ code: err.code, message: err.message });
+        }
+      });
 
 }
