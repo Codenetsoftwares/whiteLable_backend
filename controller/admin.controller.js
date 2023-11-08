@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken";
 import { Admin } from "../models/admin.model.js";
+import { User } from "../models/user.model.js";
 // import { SubAdmin } from "../models/subAdmin.model.js";
 // import { WhiteLabel } from "../models/whiteLabel.model.js";
 // import {HyperAgent} from "../models/hyperAgent.model.js"
@@ -63,8 +64,6 @@ export const AdminController = {
 
         const accessTokenResponse = {
             id: existingUser._id,
-            firstname: existingUser.firstname,
-            lastname: existingUser.lastname,
             userName: existingUser.userName,
             role: existingUser.roles,
         };
