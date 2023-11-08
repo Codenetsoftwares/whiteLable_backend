@@ -1,7 +1,7 @@
 import express from "express";
-import bodyparser from "body-parser";
 import mongoose from "mongoose";
 import dotenv from "dotenv"
+import bodyParser from 'body-parser';
 import { AdminRoute } from "./routes/admin.route.js";
 import { HyperAgentRoute } from "./routes/hyperAgent.route.js";
 import { MasterAgentRoute } from "./routes/masterAgent.route.js";
@@ -19,21 +19,14 @@ const app = express();
 
 app.use(express.json());
 
-const corsOptions = {
-  origin: 'http://localhost:3000', 
-  methods: 'GET,POST,PUT,DELETE',
-  allowedHeaders: 'Content-Type,Authorization',
-};
-
-app.use(cors(corsOptions));
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.urlencoded({ extended: true }));
+const  allowedOrigins = process.env.FRONTEND_URI.split(",");
+app.use(cors({ origin: allowedOrigins }));
 
 
-mongoose.connect(process.env.DB_URL, {
-}).then(() => {
-  console.log('Connection to MongoDB successful');
-}).catch((err) => {
-  console.error('Connection to MongoDB failed:', err);
-});
+mongoose.connect(process.env.MONGODB_URI, { dbName: process.env.MONGODB_NAME });
 
 AdminRoute(app);
 WhiteLabelRoute(app);
@@ -45,5 +38,5 @@ UserRoute(app);
 SubHypergentRoute(app);
 
 app.listen(process.env.PORT, ()=>{
-    console.log(`Read the docs - http://localhost:${process.env.PORT || 8080}`)
+    console.log(`App is running on  - http://localhost:${process.env.PORT || 8080}`)
 })

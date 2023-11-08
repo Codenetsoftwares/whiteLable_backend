@@ -1,272 +1,273 @@
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken";
 import { Admin } from "../models/admin.model.js";
-import { SubAdmin } from "../models/subAdmin.model.js";
-import { WhiteLabel } from "../models/whiteLabel.model.js";
-import {HyperAgent} from "../models/hyperAgent.model.js"
-import {MasterAgent} from "../models/master.model.js"
-import {SuperAgent} from "../models/superAgent.model.js"
-import {User} from "../models/user.model.js"
+// import { SubAdmin } from "../models/subAdmin.model.js";
+// import { WhiteLabel } from "../models/whiteLabel.model.js";
+// import {HyperAgent} from "../models/hyperAgent.model.js"
+// import {MasterAgent} from "../models/master.model.js"
+// import {SuperAgent} from "../models/superAgent.model.js"
+// import {User} from "../models/user.model.js"
 // import crypto from "crypto"
 // import nodemailer from "nodemailer";
 
 export const AdminController = {
 
-    createAdmin: async(data) => {
-        const existingAdmin = await Admin.findOne({userName: data.userName})
-        console.log(existingAdmin)
-        if(existingAdmin)
-        {
-            throw({code:409, message:"Admin Already Exist"})
+    createAdmin: async (data) => {
+        const existingAdmin = await Admin.findOne({ userName: data.userName })
+        if (existingAdmin) {
+            throw ({ code: 409, message: "Admin Already Exist" })
         }
-        if(!data.userName)
-        {
-            throw({message:"userName Is Required" })
+        if (!data.userName) {
+            throw ({ message: "userName Is Required" })
         }
-        if(!data.password)
-        {
-            throw({message:"Password Is Required"})
+        if (!data.password) {
+            throw ({ message: "Password Is Required" })
         }
-        if(!data.email)
-        {
-            throw({message:"Email Is Required"})
+        if (!data.roles || !Array.isArray(data.roles) || data.roles.length === 0) {
+            throw { code: 400, message: "Roles is required" };
         }
         const Passwordsalt = await bcrypt.genSalt();
         const encryptedPassword = await bcrypt.hash(data.password, Passwordsalt);
         const newAdmin = new Admin({
-                userName: data.userName,
-                password: encryptedPassword,
-                email: data.email
-            });
-            console.log(newAdmin)
-            newAdmin.save().catch((err) => {
-                console.error(err);
-                throw { code: 500, message: "Failed to save user" };
-            });
-    
+            userName: data.userName,
+            password: encryptedPassword,
+            roles: data.roles,
+        });
+        newAdmin.save().catch((err) => {
+            console.error(err);
+            throw { code: 500, message: "Failed to save user" };
+        });
+
     },
 
-GenerateAccessToken: async (userName, password) => {
-if (!userName) {
-    throw { code: 400, message: 'Invalid userName' };
-}
-if (!password) {
-    throw { code: 400, message: 'Invalid password' };
-}
-const existingAdmin = await Admin.findOne({ userName: userName });
+    GenerateAdminAccessToken: async (userName, password, persist) => {
+        if (!userName) {
+            throw { code: 400, message: "Invalid value for: User Name" };
+        }
+        if (!password) {
+            throw { code: 400, message: "Invalid value for: password" };
+        }
 
-if (!existingAdmin) {
-    throw { code: 400, message: 'Invalid userName or Password' };
-}
-const isPasswordValid = await bcrypt.compare(password, existingAdmin.password);
+        const existingUser = await AdminController.findAdmin({
+            userName: userName,
+        });
+        console.log(existingUser)
+        if (!existingUser) {
+            throw { code: 401, message: "Invalid User Name or password" };
+        }
 
-if (!isPasswordValid) {
-    throw { code: 401, message: 'Invalid userName or Password' };
-}
-const accessTokenResponse = {
-    id: existingAdmin._id,
-    userName: existingAdmin.userName,
-};
-const accessToken = jwt.sign(accessTokenResponse, process.env.JWT_SECRET_KEY, {
-    expiresIn: '1d',
-});
-return {
-    userName: existingAdmin.userName,
-    accessToken: accessToken,
-};
-},
+        const passwordValid = await bcrypt.compare(password, existingUser.password);
+        if (!passwordValid) {
+            throw { code: 401, message: "Invalid User Name or password" };
+        }
 
-// create sub admin
+        const accessTokenResponse = {
+            id: existingUser._id,
+            firstname: existingUser.firstname,
+            lastname: existingUser.lastname,
+            userName: existingUser.userName,
+            role: existingUser.roles,
+        };
 
-CreateSubAdmin: async(data) =>
-{
-const existingSubadmin = await SubAdmin.findOne({userName: data.userName})
-console.log(existingSubadmin)
-if(existingSubadmin)
-{
-    throw({code:409, message:"Sub Admin Already Exist"})
-}
-if(!data.userName)
-{
-    throw({message:"userName Is Required" })
-}
-if(!data.password)
-{
-    throw({message:"Password Is Required"})
-}
+        const accessToken = jwt.sign(
+            accessTokenResponse,
+            process.env.JWT_SECRET_KEY,
+            {
+                expiresIn: persist ? "1y" : "8h",
+            }
+        );
 
-const Passwordsalt = await bcrypt.genSalt();
-const encryptedPassword = await bcrypt.hash(data.password, Passwordsalt);
-const newSubAdmin = new SubAdmin({
-        userName: data.userName,
-        password: encryptedPassword,
-        
-    });
-    newSubAdmin.save().catch((err) => {
-        console.error(err);
-        throw { code: 500, message: "Failed to save SubAdmin" };
-    });
-},
+        return {
+            userName: existingUser.userName,
+            accessToken: accessToken,
+            role: existingUser.roles,
+            balance: existingUser.balance
+        };
+    },
 
+    findAdminById: async (id) => {
+        if (!id) {
+            throw { code: 409, message: "Required parameter: id" };
+        }
 
-// create white Label
+        return Admin.findById(id).exec();
+    },
 
-CreateWhiteLabel: async(data) =>
-{
-const existingWhitelabel = await WhiteLabel.findOne({userName: data.userName})
-console.log(existingWhitelabel)
-if(existingWhitelabel)
-{
-    throw({code:409, message:"White Label Already Exist"})
-}
-if(!data.userName)
-{
-    throw({message:"userName Is Required" })
-}
-if(!data.password)
-{
-    throw({message:"Password Is Required"})
-}
+    findAdmin: async (filter) => {
+        if (!filter) {
+            throw { code: 409, message: "Required parameter: filter" };
+        }
+        return Admin.findOne(filter).exec();
+    },
 
-const Passwordsalt = await bcrypt.genSalt();
-const encryptedPassword = await bcrypt.hash(data.password, Passwordsalt);
-const newWhiteLabel = new WhiteLabel({
-        userName: data.userName,
-        password: encryptedPassword,
-        
-    });
-    newWhiteLabel.save().catch((err) => {
-        console.error(err);
-        throw { code: 500, message: "Failed to save WhiteLabel" };
-    });
-},
+    // create sub admin
+
+    // CreateSubAdmin: async (data) => {
+    //     const existingSubadmin = await Admin.findOne({ userName: data.userName })
+    //     console.log(existingSubadmin)
+    //     if (existingSubadmin) {
+    //         throw ({ code: 409, message: "Sub Admin Already Exist" })
+    //     }
+    //     if (!data.userName) {
+    //         throw ({ message: "userName Is Required" })
+    //     }
+    //     if (!data.password) {
+    //         throw ({ message: "Password Is Required" })
+    //     }
+
+    //     const Passwordsalt = await bcrypt.genSalt();
+    //     const encryptedPassword = await bcrypt.hash(data.password, Passwordsalt);
+    //     const newSubAdmin = new SubAdmin({
+    //         userName: data.userName,
+    //         roles: data.roles,
+    //         password: encryptedPassword,
+
+    //     });
+    //     newSubAdmin.save().catch((err) => {
+    //         console.error(err);
+    //         throw { code: 500, message: "Failed to save SubAdmin" };
+    //     });
+    // },
 
 
-//create Hyper Agent
+    // create white Label
 
-CreateHyperAgent: async(data) =>
-{
-const existingHyperAgent = await HyperAgent.findOne({userName: data.userName})
-console.log(existingHyperAgent)
-if(existingHyperAgent)
-{
-    throw({code:409, message:"Hyper Agent Already Exist"})
-}
-if(!data.userName)
-{
-    throw({message:"userName Is Required" })
-}
-if(!data.password)
-{
-    throw({message:"Password Is Required"})
-}
+    // CreateWhiteLabel: async (data) => {
+    //     const existingWhitelabel = await Admin.findOne({ userName: data.userName })
+    //     console.log(existingWhitelabel)
+    //     if (existingWhitelabel) {
+    //         throw ({ code: 409, message: "White Label User Already Exist" })
+    //     }
+    //     if (!data.userName) {
+    //         throw ({ message: "userName Is Required" })
+    //     }
+    //     if (!data.password) {
+    //         throw ({ message: "Password Is Required" })
+    //     }
 
-const Passwordsalt = await bcrypt.genSalt();
-const encryptedPassword = await bcrypt.hash(data.password, Passwordsalt);
-const newHyperAgent = new HyperAgent({
-        userName: data.userName,
-        password: encryptedPassword,
-        
-    });
-    newHyperAgent.save().catch((err) => {
-        console.error(err);
-        throw { code: 500, message: "Failed to save HyperAgent" };
-    });
-},
+    //     const Passwordsalt = await bcrypt.genSalt();
+    //     const encryptedPassword = await bcrypt.hash(data.password, Passwordsalt);
+    //     const newWhiteLabel = new WhiteLabel({
+    //         userName: data.userName,
+    //         password: encryptedPassword,
+
+    //     });
+    //     newWhiteLabel.save().catch((err) => {
+    //         console.error(err);
+    //         throw { code: 500, message: "Failed to save WhiteLabel" };
+    //     });
+    // },
+
+
+    //create Hyper Agent
+
+    // CreateHyperAgent: async (data) => {
+    //     const existingHyperAgent = await HyperAgent.findOne({ userName: data.userName })
+    //     console.log(existingHyperAgent)
+    //     if (existingHyperAgent) {
+    //         throw ({ code: 409, message: "Hyper Agent Already Exist" })
+    //     }
+    //     if (!data.userName) {
+    //         throw ({ message: "userName Is Required" })
+    //     }
+    //     if (!data.password) {
+    //         throw ({ message: "Password Is Required" })
+    //     }
+
+    //     const Passwordsalt = await bcrypt.genSalt();
+    //     const encryptedPassword = await bcrypt.hash(data.password, Passwordsalt);
+    //     const newHyperAgent = new HyperAgent({
+    //         userName: data.userName,
+    //         password: encryptedPassword,
+
+    //     });
+    //     newHyperAgent.save().catch((err) => {
+    //         console.error(err);
+    //         throw { code: 500, message: "Failed to save HyperAgent" };
+    //     });
+    // },
 
     //create Super Agent
 
-    CreateSuperAgent: async(data) =>
-    {
-    const existingSuperAgent = await SuperAgent.findOne({userName: data.userName})
-    console.log(existingSuperAgent)
-    if(existingSuperAgent)
-    {
-        throw({code:409, message:"Super Agent Already Exist"})
-    }
-    if(!data.userName)
-    {
-        throw({message:"userName Is Required" })
-    }
-    if(!data.password)
-    {
-        throw({message:"Password Is Required"})
-    }
+    // CreateSuperAgent: async (data) => {
+    //     const existingSuperAgent = await SuperAgent.findOne({ userName: data.userName })
+    //     console.log(existingSuperAgent)
+    //     if (existingSuperAgent) {
+    //         throw ({ code: 409, message: "Super Agent Already Exist" })
+    //     }
+    //     if (!data.userName) {
+    //         throw ({ message: "userName Is Required" })
+    //     }
+    //     if (!data.password) {
+    //         throw ({ message: "Password Is Required" })
+    //     }
 
-    const Passwordsalt = await bcrypt.genSalt();
-    const encryptedPassword = await bcrypt.hash(data.password, Passwordsalt);
-    const newSuperAgent = new SuperAgent({
-            userName: data.userName,
-            password: encryptedPassword,
-            
-        });
-        newSuperAgent.save().catch((err) => {
-            console.error(err);
-            throw { code: 500, message: "Failed to save super Agent" };
-        });
-    },
+    //     const Passwordsalt = await bcrypt.genSalt();
+    //     const encryptedPassword = await bcrypt.hash(data.password, Passwordsalt);
+    //     const newSuperAgent = new SuperAgent({
+    //         userName: data.userName,
+    //         password: encryptedPassword,
+
+    //     });
+    //     newSuperAgent.save().catch((err) => {
+    //         console.error(err);
+    //         throw { code: 500, message: "Failed to save super Agent" };
+    //     });
+    // },
 
 
 
     //create Hyper Agent
 
-    CreateMasterAgent: async(data) =>
-    {
-    const existingMasterAgent = await MasterAgent.findOne({userName: data.userName})
-    console.log(existingMasterAgent)
-    if(existingMasterAgent)
-    {
-        throw({code:409, message:"Master Agent Already Exist"})
-    }
-    if(!data.userName)
-    {
-        throw({message:"userName Is Required" })
-    }
-    if(!data.password)
-    {
-        throw({message:"Password Is Required"})
-    }
+    // CreateMasterAgent: async (data) => {
+    //     const existingMasterAgent = await MasterAgent.findOne({ userName: data.userName })
+    //     console.log(existingMasterAgent)
+    //     if (existingMasterAgent) {
+    //         throw ({ code: 409, message: "Master Agent Already Exist" })
+    //     }
+    //     if (!data.userName) {
+    //         throw ({ message: "userName Is Required" })
+    //     }
+    //     if (!data.password) {
+    //         throw ({ message: "Password Is Required" })
+    //     }
 
-    const Passwordsalt = await bcrypt.genSalt();
-    const encryptedPassword = await bcrypt.hash(data.password, Passwordsalt);
-    const newMasterAgent = new MasterAgent({
-            userName: data.userName,
-            password: encryptedPassword,
-            
-        });
-        newMasterAgent.save().catch((err) => {
-            console.error(err);
-            throw { code: 500, message: "Failed to save Master Agent" };
-        });
-    },
+    //     const Passwordsalt = await bcrypt.genSalt();
+    //     const encryptedPassword = await bcrypt.hash(data.password, Passwordsalt);
+    //     const newMasterAgent = new MasterAgent({
+    //         userName: data.userName,
+    //         password: encryptedPassword,
+
+    //     });
+    //     newMasterAgent.save().catch((err) => {
+    //         console.error(err);
+    //         throw { code: 500, message: "Failed to save Master Agent" };
+    //     });
+    // },
 
 
 
     //create Hyper Agent
 
-    CreateUser: async(data) =>
-    {
-    const existingUser = await User.findOne({userName: data.userName})
-    console.log(existingUser)
-    if(existingUser)
-    {
-        throw({code:409, message:"User Already Exist"})
-    }
-    if(!data.userName)
-    {
-        throw({message:"userName Is Required" })
-    }
-    if(!data.password)
-    {
-        throw({message:"Password Is Required"})
-    }
+    CreateUser: async (data) => {
+        const existingUser = await User.findOne({ userName: data.userName })
+        console.log(existingUser)
+        if (existingUser) {
+            throw ({ code: 409, message: "User Already Exist" })
+        }
+        if (!data.userName) {
+            throw ({ message: "userName Is Required" })
+        }
+        if (!data.password) {
+            throw ({ message: "Password Is Required" })
+        }
 
-    const Passwordsalt = await bcrypt.genSalt();
-    const encryptedPassword = await bcrypt.hash(data.password, Passwordsalt);
-    const newUser = new User({
+        const Passwordsalt = await bcrypt.genSalt();
+        const encryptedPassword = await bcrypt.hash(data.password, Passwordsalt);
+        const newUser = new User({
             userName: data.userName,
             password: encryptedPassword,
-            
+
         });
         newUser.save().catch((err) => {
             console.error(err);
@@ -276,59 +277,57 @@ const newHyperAgent = new HyperAgent({
 
     // Deposit Amount 
 
-    Deposit: async(adminId, depositeAmount) =>{
-    try{
-    const admin =  await Admin.findById(adminId).exec();
+    Deposit: async (adminId, depositeAmount) => {
+        try {
+            const admin = await Admin.findById(adminId).exec();
 
-    if(!admin)
-    {
-        throw({code:404, message:"Admin Not Found For Deposit"})
-    }
-    admin.depositBalance += depositeAmount;
-    admin.balance += depositeAmount; 
+            if (!admin) {
+                throw ({ code: 404, message: "Admin Not Found For Deposit" })
+            }
+            admin.depositBalance += depositeAmount;
+            admin.balance += depositeAmount;
 
-    await admin.save()
+            await admin.save()
 
-    return ({message: "Balance Deposit Successfully"});
-    }
-    catch(err)
-    {
-    throw({code: err.code , message: err.message})
-    }
+            return ({ message: "Balance Deposit Successfully" });
+        }
+        catch (err) {
+            throw ({ code: err.code, message: err.message })
+        }
 
     },
 
-// trasfer Amount
+    // trasfer Amount
 
-transferAmount: async (adminUserName,hyperAgentUserName, trnsfAmnt) => {
-    try {
-        const admin = await Admin.findOne({ userName: adminUserName }).exec();
+    transferAmount: async (adminUserName, hyperAgentUserName, trnsfAmnt) => {
+        try {
+            const admin = await Admin.findOne({ userName: adminUserName }).exec();
 
-        if (!admin) {
-            throw { code: 404, message: "Admin Not Found For Transfer" };
+            if (!admin) {
+                throw { code: 404, message: "Admin Not Found For Transfer" };
+            }
+
+            const hyperAgent = await Admin.findOne({ userName: hyperAgentUserName }).exec();
+
+            if (!hyperAgent) {
+                throw { code: 404, message: "Hyper Agent Not Found" };
+            }
+
+            if (admin.balance < trnsfAmnt) {
+                throw { code: 400, message: "Insufficient balance for the transfer" };
+            }
+
+            admin.balance -= trnsfAmnt;
+            hyperAgent.balance += trnsfAmnt;
+            admin.transferAmount += trnsfAmnt;
+
+            await admin.save();
+            await hyperAgent.save();
+            return { message: "Balance Transfer Successfully" };
+        } catch (err) {
+            throw { code: err.code, message: err.message };
         }
-
-        const hyperAgent = await HyperAgent.findOne({ userName: hyperAgentUserName }).exec();
-
-        if (!hyperAgent) {
-            throw { code: 404, message: "Hyper Agent Not Found" };
-        }
-
-        if (admin.balance < trnsfAmnt) {
-            throw { code: 400, message: "Insufficient balance for the transfer" };
-        }
-        
-        admin.balance -= trnsfAmnt;
-        hyperAgent.balance += trnsfAmnt;
-        admin.transferAmount += trnsfAmnt;
-
-        await admin.save();
-        await hyperAgent.save();
-        return { message: "Balance Transfer Successfully" };
-    } catch (err) {
-        throw { code: err.code, message: err.message };
-    }
-},
+    },
 
 
 }
