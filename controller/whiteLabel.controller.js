@@ -1,6 +1,8 @@
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken";
 
+import { Admin } from "../models/admin.model.js";
+// import { AdminController } from "./admin.controller.js";
 
 
 export const WhiteLabelController = {
@@ -67,5 +69,36 @@ export const WhiteLabelController = {
     //         throw { code: 500, message: "Failed to save WhiteLabel" };
     //     });
     // },
+
+
+    transferAmountWhitelabel: async (whiteLabelUsername, hyperAgentUserName, trnsfAmnt) => {
+        try {
+            const whiteLabel = await Admin.findOne({ userName: whiteLabelUsername }).exec();
+
+            if (!whiteLabel) {
+                throw { code: 404, message: "whiteLabel Not Found For Transfer" };
+            }
+
+            const hyperAgent = await Admin.findOne({ userName: hyperAgentUserName }).exec();
+
+            if (!hyperAgent) {
+                throw { code: 404, message: "Hyper Agent Not Found" };
+            }
+
+            if (whiteLabel.balance < trnsfAmnt) {
+                throw { code: 400, message: "Insufficient balance for the transfer" };
+            }
+
+            whiteLabel.balance -= trnsfAmnt;
+            hyperAgent.balance += trnsfAmnt;
+            whiteLabel.transferAmount += trnsfAmnt;
+
+            await whiteLabel.save();
+            await hyperAgent.save();
+            return { message: "Balance Transfer Successfully" };
+        } catch (err) {
+            throw { code: err.code, message: err.message };
+        }
+    },
 
 }

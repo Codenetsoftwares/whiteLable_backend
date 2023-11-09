@@ -147,13 +147,13 @@ export const AdminRoute = (app) => {
     })
 
 
-    // transfer amt
+    // admin transfer amt to white label
 
 
     app.post("/api/admin/transfer-amount", Authorize(["superAdmin"]), async (req, res) => {
         try {
-            const { adminUserName, hyperAgentUserName, trnsfAmnt } = req.body;
-            const transferResult = await AdminController.transferAmount(adminUserName, hyperAgentUserName, trnsfAmnt);
+            const { adminUserName, whiteLabelUsername, trnsfAmnt } = req.body;
+            const transferResult = await AdminController.transferAmountadmin(adminUserName, whiteLabelUsername, trnsfAmnt);
             console.log("transferResult", transferResult);
             res.status(200).send({ code: 200, message: "Transfer Amount Successfully" });
         } catch (err) {

@@ -317,29 +317,29 @@ export const AdminController = {
 
     // Deposit Amount 
 
-    Deposit: async (adminId, depositeAmount) => {
+    Deposit: async (adminId, depositAmount) => {
         try {
             const admin = await Admin.findById(adminId).exec();
-
+    
             if (!admin) {
-                throw ({ code: 404, message: "Admin Not Found For Deposit" })
+                throw { code: 404, message: "Admin Not Found For Deposit" };
             }
-            admin.depositBalance += depositeAmount;
-            admin.balance += depositeAmount;
-
-            await admin.save()
-
-            return ({ message: "Balance Deposit Successfully" });
+            
+            admin.depositBalance += depositAmount;
+            admin.balance += depositAmount;
+    
+            await admin.save();
+    
+            return { message: "Balance Deposit Successfully" };
+        } catch (err) {
+            throw { code: err.code, message: err.message };
         }
-        catch (err) {
-            throw ({ code: err.code, message: err.message })
-        }
-
     },
+    
 
-    // trasfer Amount
+    // admin trasfer amount to white label trasfer Amount
 
-    transferAmount: async (adminUserName, hyperAgentUserName, trnsfAmnt) => {
+    transferAmountadmin: async (adminUserName, whiteLabelUsername, trnsfAmnt) => {
         try {
             const admin = await Admin.findOne({ userName: adminUserName }).exec();
 
@@ -347,10 +347,10 @@ export const AdminController = {
                 throw { code: 404, message: "Admin Not Found For Transfer" };
             }
 
-            const hyperAgent = await Admin.findOne({ userName: hyperAgentUserName }).exec();
+            const whiteLabel = await Admin.findOne({ userName: whiteLabelUsername }).exec();
 
-            if (!hyperAgent) {
-                throw { code: 404, message: "Hyper Agent Not Found" };
+            if (!whiteLabel) {
+                throw { code: 404, message: "white label Not Found" };
             }
 
             if (admin.balance < trnsfAmnt) {
@@ -358,11 +358,11 @@ export const AdminController = {
             }
 
             admin.balance -= trnsfAmnt;
-            hyperAgent.balance += trnsfAmnt;
+            whiteLabel.balance += trnsfAmnt;
             admin.transferAmount += trnsfAmnt;
 
             await admin.save();
-            await hyperAgent.save();
+            await whiteLabel.save();
             return { message: "Balance Transfer Successfully" };
         } catch (err) {
             throw { code: err.code, message: err.message };

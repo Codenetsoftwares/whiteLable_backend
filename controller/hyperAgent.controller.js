@@ -68,7 +68,7 @@ export const HyperAgentController = {
 
 
 // createSubHyperAgent: async(data) => {
-//   const existingSubHyperAgent = await SubHyperAgent.findOne({userName: data.userName})
+//   const existingSubHyperAgent = await Admin.findOne({userName: data.userName})
 //   console.log(existingSubHyperAgent)
 //   if(existingSubHyperAgent)
 //   {
