@@ -68,37 +68,46 @@ export const WhiteLabelController = {
     //         console.error(err);
     //         throw { code: 500, message: "Failed to save WhiteLabel" };
     //     });
-    // },
-
+    // },  
 
     transferAmountWhitelabel: async (whiteLabelUsername, hyperAgentUserName, trnsfAmnt) => {
         try {
             const whiteLabel = await Admin.findOne({ userName: whiteLabelUsername }).exec();
-
+    
             if (!whiteLabel) {
                 throw { code: 404, message: "whiteLabel Not Found For Transfer" };
             }
-
+    
             const hyperAgent = await Admin.findOne({ userName: hyperAgentUserName }).exec();
-
+    
             if (!hyperAgent) {
                 throw { code: 404, message: "Hyper Agent Not Found" };
             }
-
+    
             if (whiteLabel.balance < trnsfAmnt) {
                 throw { code: 400, message: "Insufficient balance for the transfer" };
             }
-
+    
+            const transferRecord = {
+                amount: trnsfAmnt,
+                userName: hyperAgent.userName,
+                date: new Date()
+            };
+    
             whiteLabel.balance -= trnsfAmnt;
             hyperAgent.balance += trnsfAmnt;
-            whiteLabel.transferAmount += trnsfAmnt;
-
+            
+            if (!whiteLabel.transferAmount) {
+                whiteLabel.transferAmount = [];
+            }
+    
+            whiteLabel.transferAmount.push(transferRecord);
+    
             await whiteLabel.save();
             await hyperAgent.save();
             return { message: "Balance Transfer Successfully" };
         } catch (err) {
             throw { code: err.code, message: err.message };
         }
-    },
-
+    }
 }

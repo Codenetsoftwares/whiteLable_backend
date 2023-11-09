@@ -49,8 +49,8 @@ export const WhiteLabelRoute = (app) => {
   app.post("/api/whitelabel/transfer-amount", Authorize(["WhiteLabel"]), async (req, res) =>
    {
     try {
-        const { whiteLabelUsername, hyperAgentUserName, trnsfAmnt } = req.body;
-        const transferResult = await WhiteLabelController.transferAmountWhitelabel(whiteLabelUsername, hyperAgentUserName, trnsfAmnt);
+        const { whiteLabelUsername, hyperAgentUserName, amount } = req.body;
+        const transferResult = await WhiteLabelController.transferAmountWhitelabel(whiteLabelUsername, hyperAgentUserName, amount, req.body);
         console.log("transferResult", transferResult);
         res.status(200).send({ code: 200, message: "Transfer Amount Successfully" });
     } catch (err) {
