@@ -324,7 +324,7 @@ export const AdminController = {
             if (!admin) {
                 throw { code: 404, message: "Admin Not Found For Deposit" };
             }
-            
+
             admin.depositBalance += depositAmount;
             admin.balance += depositAmount;
     
@@ -335,39 +335,46 @@ export const AdminController = {
             throw { code: err.code, message: err.message };
         }
     },
-    
 
-    // admin trasfer amount to white label trasfer Amount
+  // admin transfer amount to white label transfer amount
+transferAmountadmin: async (adminUserName, whiteLabelUsername, trnsfAmnt) => {
+    try {
+        const admin = await Admin.findOne({ userName: adminUserName }).exec();
 
-    transferAmountadmin: async (adminUserName, whiteLabelUsername, trnsfAmnt) => {
-        try {
-            const admin = await Admin.findOne({ userName: adminUserName }).exec();
-
-            if (!admin) {
-                throw { code: 404, message: "Admin Not Found For Transfer" };
-            }
-
-            const whiteLabel = await Admin.findOne({ userName: whiteLabelUsername }).exec();
-
-            if (!whiteLabel) {
-                throw { code: 404, message: "white label Not Found" };
-            }
-
-            if (admin.balance < trnsfAmnt) {
-                throw { code: 400, message: "Insufficient balance for the transfer" };
-            }
-
-            admin.balance -= trnsfAmnt;
-            whiteLabel.balance += trnsfAmnt;
-            admin.transferAmount += trnsfAmnt;
-
-            await admin.save();
-            await whiteLabel.save();
-            return { message: "Balance Transfer Successfully" };
-        } catch (err) {
-            throw { code: err.code, message: err.message };
+        if (!admin) {
+            throw { code: 404, message: "Admin Not Found For Transfer" };
         }
-    },
+
+        const whiteLabel = await Admin.findOne({ userName: whiteLabelUsername }).exec();
+
+        if (!whiteLabel) {
+            throw { code: 404, message: "White Label Not Found" };
+        }
+
+        if (admin.balance < trnsfAmnt) {
+            throw { code: 400, message: "Insufficient balance for the transfer" };
+        }
+        const transferRecord = {
+            amount: trnsfAmnt,
+            userName: whiteLabel.userName,
+            date: new Date()
+        };
+        admin.balance -= trnsfAmnt;
+        whiteLabel.balance += trnsfAmnt;
+
+        if (!admin.transferAmount) {
+            admin.transferAmount = [];
+        }
+
+        admin.transferAmount.push(transferRecord);
+
+        await admin.save();
+        await whiteLabel.save();
+        return { message: "Balance Transfer Successfully" };
+    } catch (err) {
+        throw { code: err.code, message: err.message };
+    }
+}
 
 
 }

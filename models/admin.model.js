@@ -8,6 +8,13 @@ export const Admin = new mongoose.model("SuperAdmin", new mongoose.Schema({
     roles: [{ type: String, required: true }],
     balance: { type: Number, default: 0},
     depositBalance: { type: Number, default: 0 },
-    transferAmount:{ type:Number, default: 0 } 
+    transferAmount: [
+        {
+            amount: { type: Number, default: 0 },
+            userName: { type: String },
+            date: { type: Date }
+        }
+    ]    
+    
       
 }), 'SuperAdmin');
