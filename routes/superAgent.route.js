@@ -1,6 +1,6 @@
 import { SuperAgentController } from "../controller/superAgent.controller.js";
 import { Authorize } from "../middleware/auth.js";
-
+import { AdminController } from "../controller/admin.controller.js";
 
 
 export const SuperAgentRoute = (app) => {
@@ -35,5 +35,23 @@ export const SuperAgentRoute = (app) => {
             res.status(500).send({ code: err.code, message: err.message });
         }
       });
+
+
+      
+  // superAgent create evryone
+
+  app.post("/api/superAgent/create-users", Authorize(["SuperAgent","superAdmin"]), async(req,res) =>
+  {
+    try {
+      const { userName, password, roles } = req.body;
+      console.log(req.body)
+      const Admin = await AdminController.createAdmin({ userName, password, roles });
+      console.log(Admin)
+      res.status(200).send({ code: 200, message: `${userName} Register Successfully` })
+  }
+  catch (err) {
+      res.status(500).send({ code: err.code, message: err.message })
+  }
+  })
 
 }
