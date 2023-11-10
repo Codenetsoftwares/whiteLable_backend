@@ -29,20 +29,20 @@
   
   // // Sub Hyper Agent Create
     
-  // app.post("/api/hyperagent/SubHyperAgent-create",Authorize(["hyperAgent"]),async(req,res)=>
-  // {
-  //   try{
-  //   const {userName,email,password} = req.body;
-  //   console.log(req.body)
-  //   const subHyperAgent = await HyperAgentController.createSubHyperAgent({userName,email,password});
-  //       console.log(subHyperAgent)
-  //       res.status(200).send({code:200, message:"User Save Successfully"})  
-  // }
-  // catch(err)
-  // {
-  //   res.status(500).send({code: err.code, message: err.message})
-  // }
-  // })
+  app.post("/api/hyperagent/SubHyperAgent-create",Authorize(["HyperAgent"]),async(req,res)=>
+  {
+    try{
+    const {userName,email,password} = req.body;
+    console.log(req.body)
+    const subHyperAgent = await HyperAgentController.createSubHyperAgent({userName,email,password});
+        console.log(subHyperAgent)
+        res.status(200).send({code:200, message:`${userName} Save Successfully`})  
+  }
+  catch(err)
+  {
+    res.status(500).send({code: err.code, message: err.message})
+  }
+  })
 
   // hyperAgent Transfer Amount
 
@@ -60,19 +60,19 @@
 
   // hyper agent create evryone
 
-  app.post("/api/hyperAgent/create-users", Authorize(["HyperAgent","superAdmin"]), async(req,res) =>
-  {
-    try {
-      const { userName, password, roles } = req.body;
-      console.log(req.body)
-      const Admin = await AdminController.createAdmin({ userName, password, roles });
-      console.log(Admin)
-      res.status(200).send({ code: 200, message: `${userName} Register Successfully` })
-  }
-  catch (err) {
-      res.status(500).send({ code: err.code, message: err.message })
-  }
-  })
+  // app.post("/api/hyperAgent/create-users", Authorize(["HyperAgent","superAdmin"]), async(req,res) =>
+  // {
+  //   try {
+  //     const { userName, password, roles } = req.body;
+  //     console.log(req.body)
+  //     const Admin = await AdminController.createAdmin({ userName, password, roles });
+  //     console.log(Admin)
+  //     res.status(200).send({ code: 200, message: `${userName} Register Successfully` })
+  // }
+  // catch (err) {
+  //     res.status(500).send({ code: err.code, message: err.message })
+  // }
+  // })
 
 
   }
