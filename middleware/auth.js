@@ -1,8 +1,5 @@
 import jwt from "jsonwebtoken";
 import { Admin } from "../models/admin.model.js";
-import {User} from "../models/user.model.js"
-
-
 
 export const Authorize = (roles) => {
   return async (req, res, next) => {

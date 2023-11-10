@@ -88,8 +88,12 @@ export const AdminController = {
                 expiresIn: persist ? "1y" : "8h",
             }
         );
-    
-        return accessToken;
+        return {
+            userName: existingUser.userName,
+            accessToken: accessToken,
+            role: existingUser.roles,
+            balance: existingUser.balance
+        };
     },
 
     findAdminById: async (id) => {
