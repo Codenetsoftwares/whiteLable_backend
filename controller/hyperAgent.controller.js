@@ -1,5 +1,5 @@
-import bcrypt from "bcryptjs"
-import jwt from "jsonwebtoken";
+// import bcrypt from "bcryptjs"
+
 import { Admin } from "../models/admin.model.js";
 
 export const HyperAgentController = {
@@ -94,7 +94,7 @@ export const HyperAgentController = {
 //   console.log(existingSubHyperAgent)
 //   if(existingSubHyperAgent)
 //   {
-//       throw({code:409, message:"Sub Hyper Agent Already Exist"})
+//       throw({code:409, message:"SubHyper Agent Already Exist"})
 //   }
 //   if(!data.userName)
 //   {
