@@ -94,7 +94,7 @@ export const HyperAgentController = {
 //   console.log(existingSubHyperAgent)
 //   if(existingSubHyperAgent)
 //   {
-//       throw({code:409, message:"SubHyper Agent Already Exist"})
+//       throw({code:409, message:"Sub Hyper Agent Already Exist"})
 //   }
 //   if(!data.userName)
 //   {
@@ -106,9 +106,10 @@ export const HyperAgentController = {
 //   }
 //   const Passwordsalt = await bcrypt.genSalt();
 //   const encryptedPassword = await bcrypt.hash(data.password, Passwordsalt);
-//   const newSubHyperAgent = new SubHyperAgent({
+//   const newSubHyperAgent = new Admin({
 //           userName: data.userName,
 //           password: encryptedPassword,
+//           roles:"SubHyperAgent"
 //       });
 //       console.log(newSubHyperAgent)
 //       newSubHyperAgent.save().catch((err) => {

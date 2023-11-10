@@ -1,36 +1,34 @@
 import bcrypt from "bcryptjs"
-import jwt from "jsonwebtoken";
+import { SubAdmin } from "../models/subAdmin.model.js";
 
 
 export const SubAdminController = {
     
-    // SubAdminLoginToken: async(userName,password) => {
-    //     if (!userName) {
-    //         throw { code: 400, message: 'Invalid userName' };
-    //       }
-    //       if (!password) {
-    //         throw { code: 400, message: 'Invalid password' };
-    //       }
-    //       const existingSubadmin = await SubAdmin.findOne({ userName: userName });
-         
-    //       if (!existingSubadmin) {
-    //         throw { code: 400, message: 'Invalid userName or Password' };
-    //       }
-    //       const isPasswordValid = await bcrypt.compare(password, existingSubadmin.password);
-        
-    //       if (!isPasswordValid) {
-    //         throw { code: 401, message: 'Invalid userName or Password' };
-    //       }
-    //       const accessTokenResponse = {
-    //         id: existingSubadmin._id,
-    //         userName: existingSubadmin.userName,
-    //       };
-    //       const accessToken = jwt.sign(accessTokenResponse, process.env.JWT_SECRET_KEY, {
-    //         expiresIn: '1d',
-    //       });
-    //       return {
-    //         userName: existingSubadmin.userName,
-    //         accessToken: accessToken,
-    //       };
-    //     },
+    createSubAdmin: async (data) => {
+        const existingAdmin = await SubAdmin.findOne({ userName: data.userName })
+        if (existingAdmin) {
+            throw ({ code: 409, message: "User Already Exist" })
+        }
+        if (!data.userName) {
+            throw ({ message: "userName Is Required" })
+        }
+        if (!data.password) {
+            throw ({ message: "Password Is Required" })
+        }
+        if (!data.roles || !Array.isArray(data.roles) || data.roles.length === 0) {
+            throw { code: 400, message: "Roles is required" };
+        }
+        const Passwordsalt = await bcrypt.genSalt();
+        const encryptedPassword = await bcrypt.hash(data.password, Passwordsalt);
+        const newsubAdmin = new SubAdmin({
+            userName: data.userName,
+            password: encryptedPassword,
+            roles: data.roles,
+        });
+        newsubAdmin.save().catch((err) => {
+            console.error(err);
+            throw { code: 500, message: "Failed to save user" };
+        });
+
+    },
 }

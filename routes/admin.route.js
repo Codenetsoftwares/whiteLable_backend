@@ -23,13 +23,14 @@ export const AdminRoute = (app) => {
 
     // admin login
 
-    app.post("/api/admin-login", async (req, res) => {
+    app.post("/api/admin-login/:userType", async (req, res) => {
         try {
-            const { userName, password } = req.body;
-            const admin = await Admin.findOne({ userName: userName });
-            const accesstoken = await AdminController.GenerateAdminAccessToken(userName, password);
+            const userType = req.params.userType
+            const {userName, password } = req.body;
+            // const admin = await Admin.findOne({ userName: userName });
+            const accesstoken = await AdminController.GenerateAdminAccessToken(userType,userName, password);
             console.log(accesstoken)
-            if (admin && accesstoken) {
+            if ( accesstoken) {
                 res.status(200).send({ code: 200, message: "Login Successfully", token: accesstoken });
             } else {
                 res.status(404).json({ code: 404, message: 'Invalid Access Token or Admin' });
