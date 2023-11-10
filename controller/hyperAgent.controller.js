@@ -35,7 +35,7 @@ export const HyperAgentController = {
 //   },
 
 
-  transferAmounthyperAgent: async (hyperAgentUserName,SuperAgentUserName, trnsfAmnt) => {
+  transferAmounthyperAgent: async (hyperAgentUserName,SuperAgentUserName,trnsfAmnt) => {
     try {
         const hyperAgent = await Admin.findOne({ userName: hyperAgentUserName }).exec();
 
@@ -53,9 +53,17 @@ export const HyperAgentController = {
             throw { code: 400, message: "Insufficient balance for the transfer" };
         }
 
-        const transferRecord = {
+        const transferRecordDebit = {
+          transactionType:"Debit",
           amount: trnsfAmnt,
-          userName: hyperAgentUserName,
+          userName: superAgent.userName,
+          date: new Date()
+      };
+
+      const transferRecordCredit = {
+          transactionType:"Credit",
+          amount: trnsfAmnt,
+          userName: hyperAgent.userName,
           date: new Date()
       };
       
@@ -67,10 +75,12 @@ export const HyperAgentController = {
         hyperAgent.transferAmount = [];
     }
 
-      hyperAgent.transferAmount.push(transferRecord);
+    hyperAgent.transferAmount.push(transferRecordDebit); 
+    superAgent.transferAmount.push(transferRecordCredit);
 
         await hyperAgent.save();
         await superAgent.save();
+
         return { message: "Balance Transfer Successfully" };
       } catch (err) {
         throw { code: err.code, message: err.message };

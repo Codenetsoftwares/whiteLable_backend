@@ -354,11 +354,22 @@ transferAmountadmin: async (adminUserName, whiteLabelUsername, trnsfAmnt) => {
         if (admin.balance < trnsfAmnt) {
             throw { code: 400, message: "Insufficient balance for the transfer" };
         }
-        const transferRecord = {
+
+        const transferRecordDebit = {
+            transactionType:"Debit",
             amount: trnsfAmnt,
             userName: whiteLabel.userName,
             date: new Date()
         };
+
+        const transferRecordCredit = {
+            transactionType:"Credit",
+            amount: trnsfAmnt,
+            userName: admin.userName,
+            date: new Date()
+        };
+
+
         admin.balance -= trnsfAmnt;
         whiteLabel.balance += trnsfAmnt;
 
@@ -366,7 +377,8 @@ transferAmountadmin: async (adminUserName, whiteLabelUsername, trnsfAmnt) => {
             admin.transferAmount = [];
         }
 
-        admin.transferAmount.push(transferRecord);
+        admin.transferAmount.push(transferRecordDebit); 
+        whiteLabel.transferAmount.push(transferRecordCredit);
 
         await admin.save();
         await whiteLabel.save();
