@@ -88,20 +88,29 @@ export const WhiteLabelController = {
                 throw { code: 400, message: "Insufficient balance for the transfer" };
             }
     
-            const transferRecord = {
+            const transferRecordDebit = {
+                transactionType:"Debit",
                 amount: trnsfAmnt,
                 userName: hyperAgent.userName,
                 date: new Date()
             };
     
+            const transferRecordCredit = {
+                transactionType:"Credit",
+                amount: trnsfAmnt,
+                userName: whiteLabel.userName,
+                date: new Date()
+            };
+    
             whiteLabel.balance -= trnsfAmnt;
             hyperAgent.balance += trnsfAmnt;
-            
+    
             if (!whiteLabel.transferAmount) {
                 whiteLabel.transferAmount = [];
             }
     
-            whiteLabel.transferAmount.push(transferRecord);
+            whiteLabel.transferAmount.push(transferRecordDebit); 
+            hyperAgent.transferAmount.push(transferRecordCredit);
     
             await whiteLabel.save();
             await hyperAgent.save();
@@ -110,4 +119,5 @@ export const WhiteLabelController = {
             throw { code: err.code, message: err.message };
         }
     }
+    
 }

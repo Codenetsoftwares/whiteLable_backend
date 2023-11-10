@@ -35,7 +35,7 @@ export const SuperAgentController = {
     //       };
     //     },
  
-    transferAmountSuperagent: async (superAgentUserName,masterAgentUserName, trnsfAmnt) => {
+    transferAmountSuperagent: async (superAgentUserName,masterAgentUserName,trnsfAmnt) => {
         try {
             const superAgent = await Admin.findOne({ userName: superAgentUserName }).exec();
     
@@ -52,9 +52,17 @@ export const SuperAgentController = {
             if (superAgent.balance < trnsfAmnt) {
                 throw { code: 400, message: "Insufficient balance for the transfer" };
             }
-            const transferRecord = {
+            const transferRecordDebit = {
+                transactionType:"Debit",
                 amount: trnsfAmnt,
-                userName: masterAgentUserName,
+                userName: masterAgent.userName,
+                date: new Date()
+            };
+    
+            const transferRecordCredit = {
+                transactionType:"Credit",
+                amount: trnsfAmnt,
+                userName: superAgent.userName,
                 date: new Date()
             };
          
@@ -65,10 +73,12 @@ export const SuperAgentController = {
                 superAgent.transferAmount = [];
             }
 
-            superAgent.transferAmount.push(transferRecord);
+            superAgent.transferAmount.push(transferRecordDebit); 
+            masterAgent.transferAmount.push(transferRecordCredit);
 
             await superAgent.save();
             await masterAgent.save();
+
             return { message: "Balance Transfer Successfully" };
           } catch (err) {
             throw { code: err.code, message: err.message };

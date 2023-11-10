@@ -48,8 +48,8 @@
 
   app.post("/api/hyperagent/transfer-amount", Authorize(["HyperAgent"]), async (req, res) => {
     try {
-        const { SuperAgentUserName,hyperAgentUserName, trnsfAmnt } = req.body;
-        const transferResult = await HyperAgentController.transferAmounthyperAgent(SuperAgentUserName,hyperAgentUserName, trnsfAmnt);
+        const { hyperAgentUserName,SuperAgentUserName,trnsfAmnt } = req.body;
+        const transferResult = await HyperAgentController.transferAmounthyperAgent(hyperAgentUserName,SuperAgentUserName,trnsfAmnt);
         console.log("transferResult", transferResult);
         res.status(200).send({ code: 200, message: "Transfer Amount Successfully" });
     } catch (err) {
