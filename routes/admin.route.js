@@ -10,7 +10,6 @@ export const AdminRoute = (app) => {
     app.post("/api/admin-create", Authorize(["superAdmin"]), async (req, res) => {
         try {
             const { userName, password, roles } = req.body;
-            console.log(req.body)
             const Admin = await AdminController.createAdmin({ userName, password, roles });
             console.log(Admin)
             res.status(200).send({ code: 200, message: `${userName} Register Successfully` })
@@ -23,13 +22,12 @@ export const AdminRoute = (app) => {
 
     // admin login
 
-    app.post("/api/admin-login/:userType", async (req, res) => {
+    app.post("/api/admin-login", async (req, res) => {
         try {
-            const userType = req.params.userType
             const {userName, password } = req.body;
-            // const admin = await Admin.findOne({ userName: userName });
-            const accesstoken = await AdminController.GenerateAdminAccessToken(userType,userName, password);
-            console.log(accesstoken)
+            const admin = await Admin.findOne({ userName: userName });
+            const accesstoken = await AdminController.GenerateAdminAccessToken(userName, password);
+            console.log(admin && accesstoken)
             if ( accesstoken) {
                 res.status(200).send({ code: 200, message: "Login Successfully", token: accesstoken });
             } else {

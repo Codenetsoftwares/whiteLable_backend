@@ -2,7 +2,6 @@ import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken";
 import { Admin } from "../models/admin.model.js";
 import { User } from "../models/user.model.js";
-import { SubAdminController } from "./subAdmin.controller.js";
 import { SubAdmin } from "../models/subAdmin.model.js";
 // import { SubAdmin } from "../models/subAdmin.model.js";
 // import { WhiteLabel } from "../models/whiteLabel.model.js";
@@ -43,44 +42,33 @@ export const AdminController = {
 
     },
 
-     GenerateAdminAccessToken :  async (userType, userName, password, persist) => {
+    GenerateAdminAccessToken: async (userName, password, persist) => {
         if (!userName) {
             throw { code: 400, message: "Invalid value for: User Name" };
         }
         if (!password) {
-            throw { code: 400, message: "Invalid value for password" };
+            throw { code: 400, message: "Invalid value for: password" };
         }
-    
-        let existingUser;
-    
-        switch (userType) {
-            case 'SubAdmin':
-                existingUser = await SubAdmin.findOne({ userName: userName });
-                break;
-            case 'Admin':
-                existingUser = await Admin.findOne({ userName: userName });
-                break;
-            default:
-                throw { code: 400, message: 'Invalid userType' };
-        }
-    
+
+        const existingUser = await AdminController.findAdmin({
+            userName: userName,
+        });
+        console.log(existingUser)
         if (!existingUser) {
             throw { code: 401, message: "Invalid User Name or password" };
         }
-    
+
         const passwordValid = await bcrypt.compare(password, existingUser.password);
         if (!passwordValid) {
             throw { code: 401, message: "Invalid User Name or password" };
         }
-        
-        console.log("password",password)
-    
+
         const accessTokenResponse = {
             id: existingUser._id,
             userName: existingUser.userName,
             role: existingUser.roles,
         };
-    
+
         const accessToken = jwt.sign(
             accessTokenResponse,
             process.env.JWT_SECRET_KEY,
@@ -88,6 +76,7 @@ export const AdminController = {
                 expiresIn: persist ? "1y" : "8h",
             }
         );
+
         return {
             userName: existingUser.userName,
             accessToken: accessToken,
@@ -349,7 +338,7 @@ export const AdminController = {
     },
 
   // admin transfer amount to white label transfer amount
-transferAmountadmin: async (adminUserName, whiteLabelUsername, trnsfAmnt) => {
+ transferAmountadmin: async (adminUserName, whiteLabelUsername, trnsfAmnt) => {
     try {
         const admin = await Admin.findOne({ userName: adminUserName }).exec();
 
