@@ -7,7 +7,7 @@ export const AdminRoute = (app) => {
 
     //Admin Create
 
-    app.post("/api/admin-create", Authorize(["superAdmin"]), async (req, res) => {
+    app.post("/api/admin-create", Authorize(["superAdmin","WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
             const { userName, password, roles } = req.body;
             const Admin = await AdminController.createAdmin({ userName, password, roles });

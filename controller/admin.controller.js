@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken";
 import { Admin } from "../models/admin.model.js";
 import { User } from "../models/user.model.js";
-import { SubAdmin } from "../models/subAdmin.model.js";
+// import { SubAdmin } from "../models/subAdmin.model.js";
 // import { SubAdmin } from "../models/subAdmin.model.js";
 // import { WhiteLabel } from "../models/whiteLabel.model.js";
 // import {HyperAgent} from "../models/hyperAgent.model.js"
@@ -43,13 +43,13 @@ export const AdminController = {
     },
 
     GenerateAdminAccessToken: async (userName, password, persist) => {
+        
         if (!userName) {
             throw { code: 400, message: "Invalid value for: User Name" };
         }
         if (!password) {
             throw { code: 400, message: "Invalid value for: password" };
         }
-
         const existingUser = await AdminController.findAdmin({
             userName: userName,
         });
@@ -62,6 +62,9 @@ export const AdminController = {
         if (!passwordValid) {
             throw { code: 401, message: "Invalid User Name or password" };
         }
+
+        console.log("Hashed password:", existingUser.password);
+
 
         const accessTokenResponse = {
             id: existingUser._id,
