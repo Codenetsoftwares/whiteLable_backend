@@ -16,7 +16,7 @@ export const WhiteLabelController = {
                 throw { code: 404, message: "whiteLabel Not Found For Transfer" };
             }
     
-            const hyperAgent = await Admin.findOne({ userName: hyperAgentUserName }).exec();
+            const hyperAgent = await Admin.findOne({ userName: hyperAgentUserName,roles: { $in: ["HyperAgent"] } }).exec();
     
             if (!hyperAgent) {
                 throw { code: 404, message: "Hyper Agent Not Found" };

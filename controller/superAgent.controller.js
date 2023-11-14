@@ -45,7 +45,7 @@ export const SuperAgentController = {
                 throw { code: 404, message: "superAgent Not Found For Transfer" };
             }
     
-            const masterAgent = await Admin.findOne({ userName: masterAgentUserName }).exec();
+            const masterAgent = await Admin.findOne({ userName: masterAgentUserName,roles: { $in: ["MasterAgent"] } }).exec();
     
             if (!masterAgent) {
                 throw { code: 404, message: "masterAgent Not Found" };
