@@ -4,6 +4,7 @@ import { SubAdmin } from "../models/subAdmin.model.js";
 
 export const SubAdminController = {
     
+    // create every sub admins
     createSubAdmin: async (data) => {
         const existingAdmin = await SubAdmin.findOne({ userName: data.userName })
         if (existingAdmin) {
