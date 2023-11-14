@@ -25,33 +25,36 @@ export const SuperAgentRoute = (app) => {
     // })
   
 
-    app.post("/api/superAgent/transfer-amount", Authorize(["SuperAgent"]), async (req, res) => {
-        try {
-            const { superAgentUserName,masterAgentUserName,trnsfAmnt } = req.body;
-            const transferResult = await SuperAgentController. transferAmountSuperagent(superAgentUserName,masterAgentUserName, trnsfAmnt);
-            console.log("transferResult", transferResult);
-            res.status(200).send({ code: 200, message: "Transfer Amount Successfully" });
-        } catch (err) {
-            res.status(500).send({ code: err.code, message: err.message });
-        }
-      });
-
 
       
   // superAgent create evryone
 
-  app.post("/api/superAgent/create-users", Authorize(["SuperAgent","superAdmin"]), async(req,res) =>
-  {
+//   app.post("/api/superAgent/create-users", Authorize(["SuperAgent","superAdmin"]), async(req,res) =>
+//   {
+//     try {
+//       const { userName, password, roles } = req.body;
+//       console.log(req.body)
+//       const Admin = await AdminController.createAdmin({ userName, password, roles });
+//       console.log(Admin)
+//       res.status(200).send({ code: 200, message: `${userName} Register Successfully` })
+//   }
+//   catch (err) {
+//       res.status(500).send({ code: err.code, message: err.message })
+//   }
+//   })
+
+
+//  trasfer amount super agent to master agent
+
+app.post("/api/superAgent/transfer-amount", Authorize(["SuperAgent"]), async (req, res) => {
     try {
-      const { userName, password, roles } = req.body;
-      console.log(req.body)
-      const Admin = await AdminController.createAdmin({ userName, password, roles });
-      console.log(Admin)
-      res.status(200).send({ code: 200, message: `${userName} Register Successfully` })
-  }
-  catch (err) {
-      res.status(500).send({ code: err.code, message: err.message })
-  }
-  })
+        const { superAgentUserName,masterAgentUserName,trnsfAmnt } = req.body;
+        const transferResult = await SuperAgentController. transferAmountSuperagent(superAgentUserName,masterAgentUserName, trnsfAmnt);
+        console.log("transferResult", transferResult);
+        res.status(200).send({ code: 200, message: "Transfer Amount Successfully" });
+    } catch (err) {
+        res.status(500).send({ code: err.code, message: err.message });
+    }
+  });
 
 }

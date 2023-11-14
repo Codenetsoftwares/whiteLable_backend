@@ -39,6 +39,8 @@ export const AdminRoute = (app) => {
         }
     })
 
+    // reset password
+
     app.post( "/api/admin/reset-password", async (req, res) => {
           try {
             const { userName, oldPassword, password } = req.body;
@@ -49,72 +51,6 @@ export const AdminRoute = (app) => {
         }
         }
       );
-
-    // sub admin Create
-    // app.post("/api/admin/Create-SubAdmin", Authorize(["superAdmin"]), async (req, res) => {
-    //     try {
-    //         const { userName, password, roles } = req.body;
-    //         const Subadmin = await AdminController.CreateSubAdmin({ userName, password });
-    //         console.log(Subadmin)
-    //         res.status(200).send({ code: 200, message: "Sub Admin Register Successfully" })
-    //     }
-    //     catch (err) {
-    //         res.status(500).send({ code: err.code, message: err.message })
-    //     }
-    // })
-
-    // create white label
-    // app.post("/api/admin/Create-whiteLabel", Authorize(["superAdmin"]), async (req, res) => {
-    //     try {
-    //         const { userName, password } = req.body;
-    //         const whiteLabel = await AdminController.CreateWhiteLabel({ userName, password });
-    //         console.log(whiteLabel)
-    //         res.status(200).send({ code: 200, message: "whiteLabel Register Successfully" })
-    //     }
-    //     catch (err) {
-    //         res.status(500).send({ code: err.code, message: err.message })
-    //     }
-    // })
-
-    // create Hyper Agent
-    // app.post("/api/admin/Create-HyperAgent", Authorize(["superAdmin"]), async (req, res) => {
-    //     try {
-    //         const { userName, password } = req.body;
-    //         const HyperAgent = await AdminController.CreateHyperAgent({ userName, password });
-    //         console.log(HyperAgent)
-    //         res.status(200).send({ code: 200, message: "HyperAgent Register Successfully" })
-    //     }
-    //     catch (err) {
-    //         res.status(500).send({ code: err.code, message: err.message })
-    //     }
-    // })
-
-    // create super Agent
-    // app.post("/api/admin/Create-SuperAgent", Authorize(["superAdmin"]), async (req, res) => {
-    //     try {
-    //         const { userName, password } = req.body;
-    //         const SuperAgent = await AdminController.CreateSuperAgent({ userName, password });
-    //         console.log(SuperAgent)
-    //         res.status(200).send({ code: 200, message: "Super Agent Register Successfully" })
-    //     }
-    //     catch (err) {
-    //         res.status(500).send({ code: err.code, message: err.message })
-    //     }
-    // })
-
-    // create Master Agent
-    // app.post("/api/admin/Create-MasterAgent", Authorize(["superAdmin"]), async (req, res) => {
-    //     try {
-    //         const { userName, password } = req.body;
-    //         const MasterAgent = await AdminController.CreateMasterAgent({ userName, password });
-    //         console.log(MasterAgent)
-    //         res.status(200).send({ code: 200, message: "Master Agent Register Successfully" })
-    //     }
-    //     catch (err) {
-    //         res.status(500).send({ code: err.code, message: err.message })
-    //     }
-    // })
-
 
     // create User
 
@@ -145,9 +81,7 @@ export const AdminRoute = (app) => {
 
     })
 
-
     // admin transfer amt to white label
-
 
     app.post("/api/admin/transfer-amount", Authorize(["superAdmin"]), async (req, res) => {
         try {

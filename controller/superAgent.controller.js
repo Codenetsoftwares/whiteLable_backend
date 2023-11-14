@@ -34,6 +34,8 @@ export const SuperAgentController = {
     //         accessToken: accessToken,
     //       };
     //     },
+
+    // trasfer amount super agent to master agent
  
     transferAmountSuperagent: async (superAgentUserName,masterAgentUserName,trnsfAmnt) => {
         try {
