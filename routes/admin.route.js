@@ -1,7 +1,10 @@
 import { AdminController } from "../controller/admin.controller.js";
-// import { Admin } from "../models/admin.model.js";
+import { Admin } from "../models/admin.model.js";
 import { Authorize } from "../middleware/auth.js";
-import { SubAdminController } from "../controller/subAdmin.controller.js";
+import { WhiteLabelController } from "../controller/whiteLabel.controller.js";
+import { HyperAgentController } from "../controller/hyperAgent.controller.js";
+import { SuperAgentController } from "../controller/superAgent.controller.js";
+
 
 
 export const AdminRoute = (app) => {
@@ -26,33 +29,19 @@ export const AdminRoute = (app) => {
     app.post("/api/admin-login", async (req, res) => {
         try {
             const { userName, password } = req.body;
-    
-            try {
-                const subAdminAccess = await SubAdminController.GenerateSubAdminAccessToken(userName, password);    
-                if (subAdminAccess) {
-                    return res.status(200).send({ code: 200, message: "Login Successfully", token: subAdminAccess.accessToken, role: subAdminAccess.role });
-                }
-            } catch (subAdminError) {
- 
-                console.error(subAdminError);
+            const admin = await Admin.findOne({ userName: userName });
+            const accesstoken = await AdminController.GenerateAdminAccessToken(userName, password);
+            console.log(accesstoken)
+            if (admin && accesstoken) {
+                res.status(200).send({ code: 200, message: "Login Successfully", token: accesstoken });
+            } else {
+                res.status(404).json({ code: 404, message: 'Invalid Access Token or Admin' });
             }
-            try {
-                const accesstoken = await AdminController.GenerateAdminAccessToken(userName, password);
-    
-                if (accesstoken) {
-                    return res.status(200).send({ code: 200, message: "Login Successfully", token: accesstoken.accessToken, role: accesstoken.role });
-                }
-            } catch (adminError) {
-
-                console.error(adminError);
-            }
-            res.status(404).json({ code: 404, message: 'Invalid Access Token or User not authorized as Admin or Sub-Admin' });
-        } catch (err) {
-            res.status(500).send({ code: err.code, message: err.message });
         }
-    });
-    
-    
+        catch (err) {
+            res.status(500).send({ code: err.code, message: err.message })
+        }
+    })
     
     
     // reset password
@@ -99,16 +88,45 @@ export const AdminRoute = (app) => {
 
     // admin transfer amt to white label
 
-    app.post("/api/admin/transfer-amount", Authorize(["superAdmin"]), async (req, res) => {
+    app.post("/api/transfer-amount", Authorize(["superAdmin","WhiteLabel", "HyperAgent", "SuperAgent"]), async (req, res) => {
         try {
-            const { adminUserName, whiteLabelUsername, trnsfAmnt } = req.body;
-            const transferResult = await AdminController.transferAmountadmin(adminUserName, whiteLabelUsername, trnsfAmnt);
+            const { adminUserName, whiteLabelUsername, hyperAgentUserName,  SuperAgentUserName, masterAgentUserName, trnsfAmnt } = req.body;
+    
+            let transferResult;
+    
+            if (adminUserName && whiteLabelUsername) {
+
+                transferResult = await AdminController.transferAmountadmin(adminUserName, whiteLabelUsername, trnsfAmnt);
+
+            } 
+            else if (whiteLabelUsername  &&  hyperAgentUserName) {
+              
+                transferResult = await WhiteLabelController.transferAmountWhitelabel(whiteLabelUsername, hyperAgentUserName, trnsfAmnt);
+
+            }
+            else if (hyperAgentUserName && SuperAgentUserName) {
+                
+                transferResult = await HyperAgentController.transferAmounthyperAgent(hyperAgentUserName,SuperAgentUserName,trnsfAmnt);
+
+            }
+            else if (SuperAgentUserName && masterAgentUserName) {
+                
+                transferResult = await SuperAgentController.transferAmountSuperagent(SuperAgentUserName, masterAgentUserName, trnsfAmnt);
+
+            }         
+             else {
+                throw { code: 400, message: "Invalid transfer details provided" };
+            }
+    
             console.log("transferResult", transferResult);
+
             res.status(200).send({ code: 200, message: "Transfer Amount Successfully" });
+
         } catch (err) {
             res.status(500).send({ code: err.code, message: err.message });
         }
     });
+    
 
 
 

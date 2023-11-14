@@ -188,7 +188,7 @@ export const AdminController = {
   // admin transfer amount to white label transfer amount
     transferAmountadmin: async (adminUserName, whiteLabelUsername, trnsfAmnt) => {
     try {
-        const admin = await Admin.findOne({ userName: adminUserName }).exec();
+        const admin = await Admin.findOne({ userName: adminUserName ,roles: { $in: ["superAdmin"]}}).exec();
 
         if (!admin) {
             throw { code: 404, message: "Admin Not Found For Transfer" };

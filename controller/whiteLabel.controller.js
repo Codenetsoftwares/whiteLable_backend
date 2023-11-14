@@ -10,7 +10,7 @@ export const WhiteLabelController = {
 
     transferAmountWhitelabel: async (whiteLabelUsername, hyperAgentUserName, trnsfAmnt) => {
         try {
-            const whiteLabel = await Admin.findOne({ userName: whiteLabelUsername }).exec();
+            const whiteLabel = await Admin.findOne({ userName: whiteLabelUsername ,roles: { $in: ["WhiteLabel"]} }).exec();
     
             if (!whiteLabel) {
                 throw { code: 404, message: "whiteLabel Not Found For Transfer" };

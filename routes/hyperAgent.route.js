@@ -24,16 +24,16 @@
   
   // Transfer Amount to hyper agent to super agent
 
-  app.post("/api/hyperagent/transfer-amount", Authorize(["HyperAgent"]), async (req, res) => {
-    try {
-        const { hyperAgentUserName,SuperAgentUserName,trnsfAmnt } = req.body;
-        const transferResult = await HyperAgentController.transferAmounthyperAgent(hyperAgentUserName,SuperAgentUserName,trnsfAmnt);
-        console.log("transferResult", transferResult);
-        res.status(200).send({ code: 200, message: "Transfer Amount Successfully" });
-    } catch (err) {
-        res.status(500).send({ code: err.code, message: err.message });
-    }
-  });
+  // app.post("/api/hyperagent/transfer-amount", Authorize(["HyperAgent"]), async (req, res) => {
+  //   try {
+  //       const { hyperAgentUserName,SuperAgentUserName,trnsfAmnt } = req.body;
+  //       const transferResult = await HyperAgentController.transferAmounthyperAgent(hyperAgentUserName,SuperAgentUserName,trnsfAmnt);
+  //       console.log("transferResult", transferResult);
+  //       res.status(200).send({ code: 200, message: "Transfer Amount Successfully" });
+  //   } catch (err) {
+  //       res.status(500).send({ code: err.code, message: err.message });
+  //   }
+  // });
 
   
   }
