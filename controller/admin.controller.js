@@ -186,7 +186,7 @@ export const AdminController = {
     },
 
   // admin transfer amount to white label transfer amount
- transferAmountadmin: async (adminUserName, whiteLabelUsername, trnsfAmnt) => {
+    transferAmountadmin: async (adminUserName, whiteLabelUsername, trnsfAmnt) => {
     try {
         const admin = await Admin.findOne({ userName: adminUserName }).exec();
 
@@ -194,40 +194,38 @@ export const AdminController = {
             throw { code: 404, message: "Admin Not Found For Transfer" };
         }
 
-        const whiteLabel = await Admin.findOne({ userName: whiteLabelUsername }).exec();
+        const whiteLabel = await Admin.findOne({ userName: whiteLabelUsername ,roles: { $in: ["WhiteLabel"] } }).exec();
 
         if (!whiteLabel) {
             throw { code: 404, message: "White Label Not Found" };
         }
+           if (admin.balance < trnsfAmnt) {
+                throw { code: 400, message: "Insufficient balance for the transfer" };
+            }
+    
+            const transferRecordDebit = {
+                transactionType:"Debit",
+                amount: trnsfAmnt,
+                userName: whiteLabel.userName,
+                date: new Date()
+            };
+    
+            const transferRecordCredit = {
+                transactionType:"Credit",
+                amount: trnsfAmnt,
+                userName: admin.userName,
+                date: new Date()
+            };
+            admin.balance -= trnsfAmnt;
+            whiteLabel.balance += trnsfAmnt;
 
-        if (admin.balance < trnsfAmnt) {
-            throw { code: 400, message: "Insufficient balance for the transfer" };
-        }
+            if (!admin.transferAmount) {
+                admin.transferAmount = [];
+            }
 
-        const transferRecordDebit = {
-            transactionType:"Debit",
-            amount: trnsfAmnt,
-            userName: whiteLabel.userName,
-            date: new Date()
-        };
-
-        const transferRecordCredit = {
-            transactionType:"Credit",
-            amount: trnsfAmnt,
-            userName: admin.userName,
-            date: new Date()
-        };
-
-
-        admin.balance -= trnsfAmnt;
-        whiteLabel.balance += trnsfAmnt;
-
-        if (!admin.transferAmount) {
-            admin.transferAmount = [];
-        }
-
-        admin.transferAmount.push(transferRecordDebit); 
-        whiteLabel.transferAmount.push(transferRecordCredit);
+            admin.transferAmount.push(transferRecordDebit); 
+            whiteLabel.transferAmount.push(transferRecordCredit);
+           
 
         await admin.save();
         await whiteLabel.save();
