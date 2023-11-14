@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs"
+import  jwt from "jsonwebtoken";
 import { SubAdmin } from "../models/subAdmin.model.js";
 
 
@@ -32,4 +33,64 @@ export const SubAdminController = {
         });
 
     },
+
+    findAdminById: async (id) => {
+        if (!id) {
+            throw { code: 409, message: "Required parameter: id" };
+        }
+
+        return Admin.findById(id).exec();
+    },
+
+    findSubAdmin: async (filter) => {
+        if (!filter) {
+            throw { code: 409, message: "Required parameter: filter" };
+        }
+        return SubAdmin.findOne(filter).exec();
+    },
+
+
+    GenerateSubAdminAccessToken: async (userName, password, persist) => {
+        
+        if (!userName) {
+            throw { code: 400, message: "Invalid value for: User Name" };
+        }
+        if (!password) {
+            throw { code: 400, message: "Invalid value for: password" };
+        }
+        const existingUser = await SubAdmin.findOne({userName: userName});
+        // console.log(existingUser)
+        if (!existingUser) {
+            throw { code: 401, message: "Invalid User Name or password" };
+        }
+
+        const passwordValid = await bcrypt.compare(password, existingUser.password);
+        if (!passwordValid) {
+            throw { code: 401, message: "Invalid User Name or password" };
+        }
+
+        // console.log("Hashed password:", existingUser.password);
+
+
+        const accessTokenResponse = {
+            id: existingUser._id,
+            userName: existingUser.userName,
+            role: existingUser.roles,
+        };
+
+        const accessToken = jwt.sign(
+            accessTokenResponse,
+            process.env.JWT_SECRET_KEY,
+            {
+                expiresIn: persist ? "1y" : "8h",
+            }
+        );
+
+        return {
+            userName: existingUser.userName,
+            accessToken: accessToken,
+            role: existingUser.roles,
+            balance: existingUser.balance
+        };
+    }
 }

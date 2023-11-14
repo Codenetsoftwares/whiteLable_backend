@@ -1,6 +1,7 @@
 import { AdminController } from "../controller/admin.controller.js";
-import { Admin } from "../models/admin.model.js";
+// import { Admin } from "../models/admin.model.js";
 import { Authorize } from "../middleware/auth.js";
+import { SubAdminController } from "../controller/subAdmin.controller.js";
 
 
 export const AdminRoute = (app) => {
@@ -24,21 +25,36 @@ export const AdminRoute = (app) => {
 
     app.post("/api/admin-login", async (req, res) => {
         try {
-            const {userName, password } = req.body;
-            const admin = await Admin.findOne({ userName: userName });
-            const accesstoken = await AdminController.GenerateAdminAccessToken(userName, password);
-            console.log(admin && accesstoken)
-            if ( accesstoken) {
-                res.status(200).send({ code: 200, message: "Login Successfully", token: accesstoken });
-            } else {
-                res.status(404).json({ code: 404, message: 'Invalid Access Token or Admin' });
+            const { userName, password } = req.body;
+    
+            try {
+                const subAdminAccess = await SubAdminController.GenerateSubAdminAccessToken(userName, password);    
+                if (subAdminAccess) {
+                    return res.status(200).send({ code: 200, message: "Login Successfully", token: subAdminAccess.accessToken, role: subAdminAccess.role });
+                }
+            } catch (subAdminError) {
+ 
+                console.error(subAdminError);
             }
-        }
-        catch (err) {
-            res.status(500).send({ code: err.code, message: err.message })
-        }
-    })
+            try {
+                const accesstoken = await AdminController.GenerateAdminAccessToken(userName, password);
+    
+                if (accesstoken) {
+                    return res.status(200).send({ code: 200, message: "Login Successfully", token: accesstoken.accessToken, role: accesstoken.role });
+                }
+            } catch (adminError) {
 
+                console.error(adminError);
+            }
+            res.status(404).json({ code: 404, message: 'Invalid Access Token or User not authorized as Admin or Sub-Admin' });
+        } catch (err) {
+            res.status(500).send({ code: err.code, message: err.message });
+        }
+    });
+    
+    
+    
+    
     // reset password
 
     app.post( "/api/admin/reset-password", async (req, res) => {
