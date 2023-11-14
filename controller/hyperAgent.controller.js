@@ -8,7 +8,7 @@ export const HyperAgentController = {
 
   transferAmounthyperAgent: async (hyperAgentUserName,SuperAgentUserName,trnsfAmnt) => {
     try {
-        const hyperAgent = await Admin.findOne({ userName: hyperAgentUserName }).exec();
+        const hyperAgent = await Admin.findOne({ userName: hyperAgentUserName,roles: { $in: ["HyperAgent"]} }).exec();
 
         if (!hyperAgent) {
             throw { code: 404, message: "HyperAgent Not Found For Transfer" };

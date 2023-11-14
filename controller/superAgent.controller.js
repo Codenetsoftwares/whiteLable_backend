@@ -37,9 +37,9 @@ export const SuperAgentController = {
 
     // trasfer amount super agent to master agent
  
-    transferAmountSuperagent: async (superAgentUserName,masterAgentUserName,trnsfAmnt) => {
+    transferAmountSuperagent: async (SuperAgentUserName,masterAgentUserName,trnsfAmnt) => {
         try {
-            const superAgent = await Admin.findOne({ userName: superAgentUserName }).exec();
+            const superAgent = await Admin.findOne({ userName: SuperAgentUserName ,roles: { $in: ["SuperAgent"]}}).exec();
     
             if (!superAgent) {
                 throw { code: 404, message: "superAgent Not Found For Transfer" };
