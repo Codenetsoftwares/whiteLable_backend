@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import mongoose from "mongoose";
 
 export const Admin = new mongoose.model("Admin", new mongoose.Schema({
@@ -15,6 +16,6 @@ export const Admin = new mongoose.model("Admin", new mongoose.Schema({
             transactionType: {type:String}
         }
     ]    ,
-    createBy : {type:String}
+    createBy : {type:ObjectId}
       
 }), 'Admin');
