@@ -25,6 +25,7 @@ export const AdminController = {
             userName: data.userName,
             password: encryptedPassword,
             roles: data.roles,
+            createBy: data.createBy,
         });
         newAdmin.save().catch((err) => {
             console.error(err);

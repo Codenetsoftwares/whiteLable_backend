@@ -14,7 +14,8 @@ export const AdminRoute = (app) => {
     app.post("/api/admin-create", Authorize(["superAdmin","WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
             const { userName, password, roles } = req.body;
-            const Admin = await AdminController.createAdmin({ userName, password, roles });
+            const createdBy = req.user.userName;
+            const Admin = await AdminController.createAdmin({ userName, password, roles, createBy : createdBy });
             console.log(Admin)
             res.status(200).send({ code: 200, message: `${userName} Register Successfully` })
         }
@@ -87,7 +88,7 @@ export const AdminRoute = (app) => {
 
     })
 
-    // admin transfer amt to white label
+    // transfer Amount
 
     app.post("/api/transfer-amount", Authorize(["superAdmin","WhiteLabel", "HyperAgent", "SuperAgent"]), async (req, res) => {
         try {
@@ -128,8 +129,6 @@ export const AdminRoute = (app) => {
         }
     });
 
-
-
     // view transaction details
 
     app.get("/api/transaction-view/:id", async (req, res) => {
@@ -156,6 +155,28 @@ export const AdminRoute = (app) => {
         }
     });
     
+// view creates
+
+    app.get("/api/view-all-creates/:createdBy", async (req, res) => {
+        try {
+            const createdBy = req.params.createdBy;
+    
+            const admin = await Admin.find({ createBy: createdBy });
+    
+            if (!admin) {
+                return res.status(404).send({ code: 404, message: `Not Found` });
+            }
+            const user = admin.map((users) => {
+                return {
+                    userName: users.userName,
+                    roles : users.roles          
+                };
+            })  
+            res.status(200).send({ code: 200, user });
+        } catch (err) {
+            res.status(500).send({ code: err.code, message: err.message });
+        }
+    });
     
 
 }
