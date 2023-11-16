@@ -127,8 +127,35 @@ export const AdminRoute = (app) => {
             res.status(500).send({ code: err.code, message: err.message });
         }
     });
+
+
+
+    // view transaction details
+
+    app.get("/api/transaction-view/:id", async (req, res) => {
+        try {
+            const id = req.params.id;
+            const admin = await Admin.findById(id);
     
-
-
+            if (!admin) {
+                return res.status(404).json({ message: "User not found" });
+            }
+    
+            const transferData = admin.transferAmount.map((transfer) => {
+                return {
+                    transferAmount: transfer.amount,
+                    userName: transfer.userName,
+                    date: transfer.date,
+                    transactionType: transfer.transactionType
+                };
+            });
+    
+            res.status(200).json(transferData);
+        } catch (err) {
+            res.status(500).json({ code: err.code, message: err.message });
+        }
+    });
+    
+    
 
 }
