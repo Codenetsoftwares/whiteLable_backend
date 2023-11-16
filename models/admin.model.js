@@ -14,7 +14,7 @@ export const Admin = new mongoose.model("Admin", new mongoose.Schema({
             date: { type: Date },
             transactionType: {type:String}
         }
-    ]    
-    
+    ]    ,
+    createBy : {type:String}
       
 }), 'Admin');
