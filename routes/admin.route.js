@@ -14,7 +14,7 @@ export const AdminRoute = (app) => {
     app.post("/api/admin-create", Authorize(["superAdmin","WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
             const { userName, password, roles } = req.body;
-            const createdBy = req.user.userName;
+            const createdBy = req.user.id;
             const Admin = await AdminController.createAdmin({ userName, password, roles, createBy : createdBy });
             console.log(Admin)
             res.status(200).send({ code: 200, message: `${userName} Register Successfully` })
@@ -172,7 +172,7 @@ export const AdminRoute = (app) => {
                     roles : users.roles          
                 };
             })  
-            res.status(200).send({ code: 200, user });
+            res.status(200).send({ user });
         } catch (err) {
             res.status(500).send({ code: err.code, message: err.message });
         }
