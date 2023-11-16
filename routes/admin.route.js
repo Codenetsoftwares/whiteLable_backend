@@ -179,4 +179,29 @@ export const AdminRoute = (app) => {
     });
     
 
+    // view balance
+
+    app.get("/api/view-balance/:id", async (req, res) => {
+        try {
+            const id = req.params.id;
+    
+            const admin = await Admin.findById(id);
+    
+            if (!admin) {
+                return res.status(404).send({ code: 404, message: `Not Found` });
+            }
+    
+            const amount = {
+                balance: admin.balance
+            };
+    
+            res.status(200).send({ amount });
+        } catch (err) {
+            res.status(500).send({ code: err.code, message: err.message });
+        }
+    });
+    
+
+
+
 }
