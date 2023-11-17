@@ -131,7 +131,7 @@ export const AdminRoute = (app) => {
 
     // view transaction details
 
-    app.get("/api/transaction-view/:id", async (req, res) => {
+    app.get("/api/transaction-view/:id", Authorize(["superAdmin","WhiteLabel", "HyperAgent", "SuperAgent","MasterAgent"]),async (req, res) => {
         try {
             const id = req.params.id;
             const admin = await Admin.findById(id);
@@ -157,7 +157,7 @@ export const AdminRoute = (app) => {
     
 // view creates
 
-    app.get("/api/view-all-creates/:createdBy", async (req, res) => {
+    app.get("/api/view-all-creates/:createdBy",Authorize(["superAdmin","WhiteLabel", "HyperAgent", "SuperAgent","MasterAgent"]), async (req, res) => {
         try {
             const createdBy = req.params.createdBy;
     
