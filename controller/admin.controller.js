@@ -234,7 +234,31 @@ export const AdminController = {
     } catch (err) {
         throw { code: err.code, message: err.message };
     }
-}
+},
 
+// User Active
+
+activateAdmin: async (adminId, isActive) => {
+    try {
+        const admin = await Admin.findById(adminId);
+
+        if (!admin) {
+            return { success: false, message: "Admin not found" };
+        }
+
+        if (isActive) {
+            admin.isActive = true;
+            await admin.save();
+            return { success: true, message: "Admin activated successfully" };
+        } else {
+            admin.isActive = false;
+            await admin.save();
+            return { success: true, message: "Admin deactivated successfully" };
+        }
+
+    } catch (e) {
+        throw { code: err.code, message: err.message };
+    }
+}
 
 }
