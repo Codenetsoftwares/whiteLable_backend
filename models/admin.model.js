@@ -16,6 +16,7 @@ export const Admin = new mongoose.model("Admin", new mongoose.Schema({
             transactionType: {type:String}
         }
     ]    ,
-    createBy : {type:ObjectId}
+    createBy : {type:ObjectId},
+    isActive: {type: Boolean, default: false, required: true}
       
 }), 'Admin');

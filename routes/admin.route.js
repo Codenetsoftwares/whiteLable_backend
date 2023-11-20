@@ -200,8 +200,23 @@ export const AdminRoute = (app) => {
             res.status(500).send({ code: err.code, message: err.message });
         }
     });
+
+
+    app.post("/api/activate/:adminId", async (req, res) => {
+        try {
+            const adminId = req.params.adminId;
+            const isActive = req.body.isActive;
+            const result = await AdminController.activateAdmin(adminId, isActive);
+          if (result.success) {
+            res.status(200).send(result);
+          } else {
+            res.status(404).send(result);
+          }
+        } catch (err) {
+          console.error(err);
+          res.status(err.code || 500).send({ success: false, message: err.message || "Internal server error" });
+        }
+      });
     
-
-
 
 }
