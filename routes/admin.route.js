@@ -201,8 +201,9 @@ export const AdminRoute = (app) => {
         }
     });
 
+    // active status
 
-    app.post("/api/activate/:adminId", async (req, res) => {
+    app.post("/api/activate/:adminId", Authorize(["superAdmin"]),async (req, res) => {
         try {
             const adminId = req.params.adminId;
             const isActive = req.body.isActive;
@@ -214,7 +215,7 @@ export const AdminRoute = (app) => {
           }
         } catch (err) {
           console.error(err);
-          res.status(err.code || 500).send({ success: false, message: err.message || "Internal server error" });
+          res.status(500).send({ code: err.code, message: err.message });
         }
       });
     

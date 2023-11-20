@@ -236,7 +236,7 @@ export const AdminController = {
     }
 },
 
-// User Active
+// User Active status
 
 activateAdmin: async (adminId, isActive) => {
     try {
