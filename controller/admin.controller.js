@@ -256,7 +256,7 @@ activateAdmin: async (adminId, isActive) => {
             return { success: true, message: "Admin deactivated successfully" };
         }
 
-    } catch (e) {
+    } catch (err) {
         throw { code: err.code, message: err.message };
     }
 }
