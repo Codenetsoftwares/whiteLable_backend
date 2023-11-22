@@ -204,7 +204,7 @@ export const AdminRoute = (app) => {
 
     // active status
 
-    app.post("/api/activate/:adminId", Authorize(["superAdmin"]),async (req, res) => {
+    app.post("/api/activate/:adminId", Authorize(["superAdmin","WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]),async (req, res) => {
         try {
             const adminId = req.params.adminId;
             const isActive = req.body.isActive;

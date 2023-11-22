@@ -20,6 +20,14 @@ export const HyperAgentController = {
             throw { code: 404, message: "Super Agent Not Found" };
         }
 
+        if (!hyperAgent.isActive) {
+          throw { code: 401, message: 'hyperAgent is inactive' };
+      }
+
+      if (!superAgent.isActive) {
+          throw { code: 401, message: 'superAgent is inactive' };
+      }
+
         if (hyperAgent.balance < trnsfAmnt) {
             throw { code: 400, message: "Insufficient balance for the transfer" };
         }

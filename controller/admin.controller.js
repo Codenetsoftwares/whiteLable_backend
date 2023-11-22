@@ -82,7 +82,8 @@ export const AdminController = {
             userName: existingUser.userName,
             accessToken: accessToken,
             role: existingUser.roles,
-            balance: existingUser.balance
+            balance: existingUser.balance,
+            isActive: existingUser.isActive
         };
     },
 
@@ -201,13 +202,22 @@ export const AdminController = {
             throw { code: 404, message: "Admin Not Found For Transfer" };
         }
 
-        
-
         const whiteLabel = await Admin.findOne({ userName: whiteLabelUsername ,roles: { $in: ["WhiteLabel"] } }).exec();
 
         if (!whiteLabel) {
             throw { code: 404, message: "White Label Not Found" };
         }
+
+
+         if (!admin.isActive) {
+            throw { code: 401, message: 'Admin is inactive' };
+        }
+
+        if (!whiteLabel.isActive) {
+            throw { code: 401, message: 'White Label is inactive' };
+        }
+
+
            if (admin.balance < trnsfAmnt) {
                 throw { code: 400, message: "Insufficient balance for the transfer" };
             }
