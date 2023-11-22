@@ -15,7 +15,8 @@ export const AdminRoute = (app) => {
         try {
             const { userName, password, roles } = req.body;
             const createdBy = req.user.id;
-            const Admin = await AdminController.createAdmin({ userName, password, roles, createBy : createdBy });
+            const isActived = req.body.isActive;
+            const Admin = await AdminController.createAdmin({ userName, password, roles, createBy : createdBy, isActive:isActived });
             console.log(Admin)
             res.status(200).send({ code: 200, message: `${userName} Register Successfully` })
         }

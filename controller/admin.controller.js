@@ -19,6 +19,10 @@ export const AdminController = {
         if (!data.roles || !Array.isArray(data.roles) || data.roles.length === 0) {
             throw { code: 400, message: "Roles is required" };
         }
+        const isActive = await Admin.findOne({ isActive: true });
+        if (!isActive) {
+            throw { code: 401, message: 'User is inactive' };
+        }
         const Passwordsalt = await bcrypt.genSalt();
         const encryptedPassword = await bcrypt.hash(data.password, Passwordsalt);
         const newAdmin = new Admin({
@@ -26,6 +30,8 @@ export const AdminController = {
             password: encryptedPassword,
             roles: data.roles,
             createBy: data.createBy,
+            isActive : isActive === true
+
         });
         newAdmin.save().catch((err) => {
             console.error(err);
@@ -195,6 +201,8 @@ export const AdminController = {
             throw { code: 404, message: "Admin Not Found For Transfer" };
         }
 
+        
+
         const whiteLabel = await Admin.findOne({ userName: whiteLabelUsername ,roles: { $in: ["WhiteLabel"] } }).exec();
 
         if (!whiteLabel) {
@@ -243,21 +251,21 @@ activateAdmin: async (adminId, isActive) => {
         const admin = await Admin.findById(adminId);
 
         if (!admin) {
-            return { success: false, message: "Admin not found" };
+            throw {code: 404,message: "Admin not found" };
         }
 
         if (isActive) {
             admin.isActive = true;
             await admin.save();
-            return { success: true, message: "Admin activated successfully" };
+            return {message: "Admin activated successfully" };
         } else {
             admin.isActive = false;
             await admin.save();
-            return { success: true, message: "Admin deactivated successfully" };
+            return {message: "Admin inactived successfully" };
         }
 
     } catch (err) {
-        throw { code: err.code, message: err.message };
+        throw { code: err.code, message: err.message }; 
     }
 }
 
