@@ -51,6 +51,14 @@ export const SuperAgentController = {
                 throw { code: 404, message: "masterAgent Not Found" };
             }
     
+            if (!superAgent.isActive) {
+                throw { code: 401, message: 'superAgent is inactive' };
+            }
+      
+            if (!masterAgent.isActive) {
+                throw { code: 401, message: 'masterAgent is inactive' };
+            }
+
             if (superAgent.balance < trnsfAmnt) {
                 throw { code: 400, message: "Insufficient balance for the transfer" };
             }

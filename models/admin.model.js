@@ -17,6 +17,6 @@ export const Admin = new mongoose.model("Admin", new mongoose.Schema({
         }
     ]    ,
     createBy : {type:ObjectId},
-    isActive: {type: Boolean, default: false, required: true}
+    isActive: {type: Boolean, default: true, required: true}
       
 }), 'Admin');

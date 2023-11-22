@@ -21,6 +21,14 @@ export const WhiteLabelController = {
             if (!hyperAgent) {
                 throw { code: 404, message: "Hyper Agent Not Found" };
             }
+
+            if (!whiteLabel.isActive) {
+                throw { code: 401, message: 'superAgent is inactive' };
+            }
+      
+            if (!hyperAgent.isActive) {
+                throw { code: 401, message: 'masterAgent is inactive' };
+            }
     
             if (whiteLabel.balance < trnsfAmnt) {
                 throw { code: 400, message: "Insufficient balance for the transfer" };
