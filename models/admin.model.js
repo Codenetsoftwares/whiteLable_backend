@@ -17,6 +17,8 @@ export const Admin = new mongoose.model("Admin", new mongoose.Schema({
         }
     ]    ,
     loadBalance : {type : Number , default : 0},
+    creditRef : {type : Number, default : 0},
+    refProfitLoss : {type : Number, default : 0},
     createBy : {type:ObjectId},
     isActive: {type: Boolean, default: true, required: true}
       
