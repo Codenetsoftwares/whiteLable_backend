@@ -50,6 +50,7 @@ export const WhiteLabelController = {
     
             whiteLabel.balance -= trnsfAmnt;
             hyperAgent.balance += trnsfAmnt;
+            hyperAgent.loadBalance += trnsfAmnt
     
             if (!whiteLabel.transferAmount) {
                 whiteLabel.transferAmount = [];

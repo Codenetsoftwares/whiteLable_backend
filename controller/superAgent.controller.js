@@ -78,6 +78,7 @@ export const SuperAgentController = {
          
             superAgent.balance -= trnsfAmnt;
             masterAgent.balance += trnsfAmnt;
+            masterAgent.loadBalance += trnsfAmnt
     
             if (!superAgent.transferAmount) {
                 superAgent.transferAmount = [];

@@ -237,6 +237,7 @@ export const AdminController = {
             };
             admin.balance -= trnsfAmnt;
             whiteLabel.balance += trnsfAmnt;
+            whiteLabel.loadBalance += trnsfAmnt
 
             if (!admin.transferAmount) {
                 admin.transferAmount = [];
@@ -277,6 +278,12 @@ activateAdmin: async (adminId, isActive) => {
     } catch (err) {
         throw { code: err.code, message: err.message }; 
     }
+}
+
+,
+editLog : async() =>{
+
+    
 }
 
 }
