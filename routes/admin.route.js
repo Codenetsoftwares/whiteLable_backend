@@ -173,6 +173,8 @@ export const AdminRoute = (app) => {
                     roles : users.roles,    
                     balance : users.balance,
                     loadBalance : users.loadBalance,
+                    creditRef : users.creditRef,
+                    refProfitLoss : users.refProfitLoss,
                     
                 };
             })  
