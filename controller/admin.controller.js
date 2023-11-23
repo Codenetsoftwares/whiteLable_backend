@@ -83,7 +83,9 @@ export const AdminController = {
             accessToken: accessToken,
             role: existingUser.roles,
             balance: existingUser.balance,
+            loadBalance :existingUser.loadBalance,
             isActive: existingUser.isActive
+
         };
     },
 
@@ -237,14 +239,16 @@ export const AdminController = {
             };
             admin.balance -= trnsfAmnt;
             whiteLabel.balance += trnsfAmnt;
-            whiteLabel.loadBalance += trnsfAmnt
+            whiteLabel.loadBalance += trnsfAmnt;
+            whiteLabel.creditRef += trnsfAmnt;
+            whiteLabel.refProfitLoss = whiteLabel.creditRef - whiteLabel.balance ;
 
             if (!admin.transferAmount) {
                 admin.transferAmount = [];
             }
 
             admin.transferAmount.push(transferRecordDebit); 
-            whiteLabel.transferAmount.push(transferRecordCredit);
+            whiteLabel.transferAmount.push(transferRecordCredit);   
            
 
         await admin.save();
@@ -283,7 +287,7 @@ activateAdmin: async (adminId, isActive) => {
 ,
 editLog : async() =>{
 
-    
+
 }
 
 }

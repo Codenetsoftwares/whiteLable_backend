@@ -172,7 +172,7 @@ export const AdminRoute = (app) => {
                     userName: users.userName,
                     roles : users.roles,    
                     balance : users.balance,
-                    loadBalance : user.loadBalance,
+                    loadBalance : users.loadBalance,
                     
                 };
             })  
