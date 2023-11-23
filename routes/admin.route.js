@@ -170,7 +170,10 @@ export const AdminRoute = (app) => {
             const user = admin.map((users) => {
                 return {
                     userName: users.userName,
-                    roles : users.roles          
+                    roles : users.roles,    
+                    balance : users.balance,
+                    loadBalance : user.loadBalance,
+                    
                 };
             })  
             res.status(200).send({ user });
