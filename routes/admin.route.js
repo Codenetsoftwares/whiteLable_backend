@@ -226,6 +226,21 @@ export const AdminRoute = (app) => {
           res.status(500).send({ code: err.code, message: err.message });
         }
       });
+
+
+      app.put("/api/admin/update-credit-ref/:adminId", async (req, res) => {
+        try {
+            const adminId = req.params.adminId;
+            const { creditRef } = req.body;
     
+            const updatedAdmin = await AdminController.editCreditRef(adminId, creditRef);
+    
+            // Respond with the updated admin object
+            res.json(updatedAdmin);
+        } catch (error) {
+            console.error(error.message);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    });
 
 }
