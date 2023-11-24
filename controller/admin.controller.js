@@ -228,14 +228,14 @@ export const AdminController = {
                 transactionType:"Debit",
                 amount: trnsfAmnt,
                 userName: whiteLabel.userName,
-                date: new Date()
+                date: new Date().toLocaleDateString('en-GB')
             };
     
             const transferRecordCredit = {
                 transactionType:"Credit",
                 amount: trnsfAmnt,
                 userName: admin.userName,
-                date: new Date()
+                date: new Date().toLocaleDateString('en-GB')
             };
             admin.balance -= trnsfAmnt;
             whiteLabel.balance += trnsfAmnt;
