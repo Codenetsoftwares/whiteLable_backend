@@ -140,17 +140,17 @@ export const AdminRoute = (app) => {
             if (!admin) {
                 return res.status(404).json({ message: "User not found" });
             }
-    
+            
             const transferData = admin.transferAmount.map((transfer) => {
-                return {
-                    id : transfer.id,        
+                return {   
+                    id: transfer.id,
                     transferAmount: transfer.amount,
                     userName: transfer.userName,
                     date: transfer.date,
                     transactionType: transfer.transactionType
                 };
             });
-    
+            // res.status(200).json(user);
             res.status(200).json(transferData);
         } catch (err) {
             res.status(500).json({ code: err.code, message: err.message });
@@ -170,6 +170,7 @@ export const AdminRoute = (app) => {
             }
             const user = admin.map((users) => {
                 return {
+                    id : users.id, 
                     userName: users.userName,
                     roles : users.roles,    
                     balance : users.balance,
