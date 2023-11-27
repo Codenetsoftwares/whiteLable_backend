@@ -241,7 +241,7 @@
                 whiteLabel.balance += trnsfAmnt;
                 whiteLabel.loadBalance += trnsfAmnt;
                 whiteLabel.creditRef += trnsfAmnt;
-                whiteLabel.refProfitLoss = whiteLabel.creditRef - whiteLabel.balance ;
+                whiteLabel.refProfitLoss = whiteLabel.balance - whiteLabel.creditRef;
 
                 if (!admin.transferAmount) {
                     admin.transferAmount = [];
@@ -282,9 +282,8 @@
         } catch (err) {
             throw { code: err.code, message: err.message }; 
         }
-    }
-
-    ,
+    },
+    
     editCreditRef: async (adminId, creditRef) => {
         try {
             if (typeof creditRef !== 'number' || isNaN(creditRef)) {
