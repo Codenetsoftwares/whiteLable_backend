@@ -143,6 +143,7 @@ export const AdminRoute = (app) => {
     
             const transferData = admin.transferAmount.map((transfer) => {
                 return {
+                    id : transfer.id,        
                     transferAmount: transfer.amount,
                     userName: transfer.userName,
                     date: transfer.date,
