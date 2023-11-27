@@ -53,6 +53,7 @@ export const HyperAgentController = {
       superAgent.creditRef += trnsfAmnt;
       superAgent.refProfitLoss = superAgent.creditRef - superAgent.balance ;
       hyperAgent.refProfitLoss = hyperAgent.creditRef - hyperAgent.balance ;
+      
 
       if (!hyperAgent.transferAmount) {
         hyperAgent.transferAmount = [];
