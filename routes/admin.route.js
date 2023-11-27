@@ -143,7 +143,7 @@ export const AdminRoute = (app) => {
             
             const transferData = admin.transferAmount.map((transfer) => {
                 return {   
-                    id: transfer.id,
+                    userId: admin.id,
                     transferAmount: transfer.amount,
                     userName: transfer.userName,
                     date: transfer.date,
@@ -194,7 +194,7 @@ export const AdminRoute = (app) => {
     app.get("/api/view-balance/:id", async (req, res) => {
         try {
             const id = req.params.id;
-    
+            
             const admin = await Admin.findById(id);
     
             if (!admin) {
