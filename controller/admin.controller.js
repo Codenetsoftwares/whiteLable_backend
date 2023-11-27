@@ -241,7 +241,7 @@
                 whiteLabel.balance += trnsfAmnt;
                 whiteLabel.loadBalance += trnsfAmnt;
                 whiteLabel.creditRef += trnsfAmnt;
-                whiteLabel.refProfitLoss = whiteLabel.balance - whiteLabel.creditRef;
+                whiteLabel.refProfitLoss =  whiteLabel.creditRef - whiteLabel.balance;
 
                 if (!admin.transferAmount) {
                     admin.transferAmount = [];
@@ -283,21 +283,33 @@
             throw { code: err.code, message: err.message }; 
         }
     },
-    
+
     editCreditRef: async (adminId, creditRef) => {
         try {
             if (typeof creditRef !== 'number' || isNaN(creditRef)) {
-                throw new Error('Invalid creditRef value');
+                throw { code: 400, message: 'Invalid creditRef value' };
             }
-            const updatedAdmin = await Admin.findByIdAndUpdate(adminId, { $set: { creditRef: creditRef } },{ new: true }
-            );  
+    
+            const admin = await Admin.findById(adminId);
+    
+            if (!admin) {
+                throw { code: 404, message: 'Admin not found' };
+            }
+    
+            admin.creditRef = creditRef;
+            admin.refProfitLoss = creditRef - admin.balance ;
+    
+            const updatedAdmin = await admin.save();
+    
             if (!updatedAdmin) {
-                throw new Error('Admin not found');
+                throw { code: 500, message: 'Error updating admin creditRef' };
             }
-           
+    
             return updatedAdmin;
         } catch (error) {
-            throw error;
-          }
+            throw { code: error.code || 500, message: error.message };
+        }
     }
+    
+    
 }
