@@ -217,7 +217,8 @@ export const AdminRoute = (app) => {
         try {
             const adminId = req.params.adminId;
             const isActive = req.body.isActive;
-            const result = await AdminController.activateAdmin(adminId, isActive);
+            const locked = req.body.locked;
+            const result = await AdminController.activateAdmin(adminId, isActive,locked);
           if (result.success) {
             res.status(200).send(result);
           } else {
@@ -235,7 +236,7 @@ export const AdminRoute = (app) => {
             const adminId = req.params.adminId;
             const { creditRef } = req.body;   
             const updatedAdmin = await AdminController.editCreditRef(adminId, creditRef);
-            
+
             res.json(updatedAdmin);
         } catch (error) {
             console.error(error.message);

@@ -55,7 +55,9 @@
             if (!existingUser) {
                 throw { code: 401, message: "Invalid User Name or password" };
             }
-
+            if (existingUser.locked === false) {
+                throw { code: 401, message: "User account is locked" };
+            }
             const passwordValid = await bcrypt.compare(password, existingUser.password);
             if (!passwordValid) {
                 throw { code: 401, message: "Invalid User Name or password" };
@@ -261,28 +263,31 @@
 
     // User Active status
 
-    activateAdmin: async (adminId, isActive) => {
+    activateAdmin: async (adminId, isActive, locked) => {
         try {
             const admin = await Admin.findById(adminId);
-
+    
             if (!admin) {
-                throw {code: 404,message: "Admin not found" };
-            }
-
-            if (isActive) {
+                throw { code: 404, message: "Admin not found" };
+            }       
+    
+            if (isActive || locked ) {
                 admin.isActive = true;
+                admin.locked = true;
                 await admin.save();
-                return {message: "Admin activated successfully" };
+                return { message: "Admin activated or unlocked successfully" };
             } else {
                 admin.isActive = false;
+                admin.locked = false;
                 await admin.save();
-                return {message: "Admin inactived successfully" };
+                return { message: "Admin inactivated or locked successfully" };
             }
-
+    
         } catch (err) {
-            throw { code: err.code, message: err.message }; 
+            throw { code: err.code || 500, message: err.message || "Internal Server Error" };
         }
     },
+    
 
     editCreditRef: async (adminId, creditRef) => {
         try {
