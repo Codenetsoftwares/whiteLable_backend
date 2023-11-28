@@ -137,7 +137,7 @@ export const AdminRoute = (app) => {
         try {
             const id = req.params.id;
             const admin = await Admin.findById(id);
-    
+            let balances = 0;
             if (!admin) {
                 return res.status(404).json({ message: "User not found" });
             }
@@ -152,8 +152,20 @@ export const AdminRoute = (app) => {
                     transactionType: transfer.transactionType
                 };
             });
-            // res.status(200).json(user);
-            res.status(200).json(transferData);
+            transferData.sort((a, b) => {
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+                return dateB - dateA;
+              });
+            let allData = JSON.parse(JSON.stringify(transferData));
+            allData.slice(0).reverse().map((data) => {
+                if(data.transactionType === "Debit"){
+                    balances -= data.transferAmount;
+                    data.balance = balances;
+                    console.log("balances", balances)
+                }
+            });
+            res.status(200).json(allData);
         } catch (err) {
             res.status(500).json({ code: err.code, message: err.message });
         }

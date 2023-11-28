@@ -66,14 +66,14 @@ export const SuperAgentController = {
                 transactionType:"Debit",
                 amount: trnsfAmnt,
                 userName: masterAgent.userName,
-                date: new Date().toLocaleDateString('en-GB')
+                date: new Date()
             };
     
             const transferRecordCredit = {
                 transactionType:"Credit",
                 amount: trnsfAmnt,
                 userName: superAgent.userName,
-                date: new Date().toLocaleDateString('en-GB')
+                date: new Date()
             };
          
             superAgent.balance -= trnsfAmnt;
