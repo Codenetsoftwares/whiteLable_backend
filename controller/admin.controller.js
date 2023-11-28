@@ -2,6 +2,7 @@
     import jwt from "jsonwebtoken";
     import { Admin } from "../models/admin.model.js";
     import { User } from "../models/user.model.js";
+    import { Trash } from "../models/trash.model.js";
 
     export const AdminController = {
 
@@ -320,7 +321,42 @@
         } catch (error) {
             throw { code: error.code || 500, message: error.message };
         }
-    }
+    },
+
+
+    trashAdminUser: async (adminUserId) => {
+        try {
+          const existingAdminUser = await Admin.findById(adminUserId);
+      
+          if (!existingAdminUser) {
+            throw { code: 404, message: `Admin User not found with id: ${adminUserId}` };
+          }
+      
+          const updatedTransactionData = {
+            id: existingAdminUser._id,
+            userName: existingAdminUser.userName,
+            balance: existingAdminUser.balance,
+            loadBalance: existingAdminUser.loadBalance,
+            creditRef: existingAdminUser.creditRef,
+            refProfitLoss: existingAdminUser.refProfitLoss,
+            createBy: existingAdminUser.createBy
+          };
+      
+          const backupTransaction = new Trash(updatedTransactionData);
+          await backupTransaction.save();
+      
+          const deletedAdminUser = await Admin.findByIdAndDelete(adminUserId);
+      
+          if (!deletedAdminUser) {
+            throw { code: 500, message: `Failed to delete Admin User with id: ${adminUserId}` };
+          }
+      
+          return true;
+        } catch (error) {
+          throw error;
+        }
+      },
+      
     
     
 }
