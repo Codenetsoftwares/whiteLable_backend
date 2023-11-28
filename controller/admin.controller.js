@@ -19,7 +19,7 @@
             if (!data.roles || !Array.isArray(data.roles) || data.roles.length === 0) {
                 throw { code: 400, message: "Roles is required" };
             }
-            const isActive = await Admin.findOne({ isActive: true });
+            const isActive = await Admin.findOne({  userName: data.userName ,isActive: { $in: ["true"]} });
             if (!isActive) {
                 throw { code: 401, message: 'User is inactive' };
             }
@@ -30,7 +30,7 @@
                 password: encryptedPassword,
                 roles: data.roles,
                 createBy: data.createBy,
-                isActive : isActive === true
+                // isActive : isActive === true
 
             });
             newAdmin.save().catch((err) => {
@@ -55,6 +55,7 @@
             if (!existingUser) {
                 throw { code: 401, message: "Invalid User Name or password" };
             }
+            
             if (existingUser.locked === false) {
                 throw { code: 401, message: "User account is locked" };
             }
@@ -271,12 +272,17 @@
                 throw { code: 404, message: "Admin not found" };
             }       
     
-            if (isActive || locked ) {
+            if (isActive ) {
                 admin.isActive = true;
                 admin.locked = true;
                 await admin.save();
                 return { message: "Admin activated or unlocked successfully" };
-            } else {
+            }
+             else if(locked){
+                admin.locked = true;
+                await admin.save();
+                return { message: "Admin activated or unlocked successfully"}
+              } else {
                 admin.isActive = false;
                 admin.locked = false;
                 await admin.save();
