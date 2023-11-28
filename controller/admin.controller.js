@@ -21,7 +21,7 @@
                 throw { code: 400, message: "Roles is required" };
             }
             const isActive = await Admin.findOne({  userName: data.userName ,isActive: { $in: ["true"]} });
-            if (!isActive) {
+            if (isActive) {
                 throw { code: 401, message: 'User is inactive' };
             }
             const Passwordsalt = await bcrypt.genSalt();
