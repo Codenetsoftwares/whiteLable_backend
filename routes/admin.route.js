@@ -4,6 +4,7 @@ import { Authorize } from "../middleware/auth.js";
 import { WhiteLabelController } from "../controller/whiteLabel.controller.js";
 import { HyperAgentController } from "../controller/hyperAgent.controller.js";
 import { SuperAgentController } from "../controller/superAgent.controller.js";
+import { Trash } from "../models/trash.model.js";
 
 
 
@@ -243,5 +244,50 @@ export const AdminRoute = (app) => {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     });
+   
 
+    app.post("/api/admin/move-to-trash-user", Authorize(["superAdmin"]), async (req, res) => {
+        try {
+          const { requestId } = req.body;
+          const adminUser = await Admin.findById(requestId);
+          if (!adminUser) {
+            return res.status(404).send("Admin User not found");
+          }
+          console.log("Admin User not found", adminUser);
+          const updateResult = await AdminController.trashAdminUser(adminUser);
+          console.log(updateResult);
+          if (updateResult) {
+            res.status(201).send("Admin User Moved To Trash");
+          }
+        } catch (e) {
+          console.error(e);
+          res.status(e.code).send({ message: e.message });
+        }
+      });
+
+      app.get("/api/admin/view-trash",Authorize(["superAdmin"]), async (req, res) => {
+          try {
+            const resultArray = await Trash.find().exec();
+            res.status(200).send(resultArray);
+          } catch (error) {
+            console.log(error);
+            res.status(500).send("Internal Server error");
+          }
+        }
+      );
+
+      app.delete("/api/delete/admin-user/:id", Authorize(["superAdmin"]), async (req, res) => {
+        try {
+          const id = req.params.id;
+          const result = await Trash.deleteOne({ _id: id });
+          if (result.deletedCount === 1) {
+            res.status(200).send({ message: "Data deleted successfully" });
+          } else {
+            res.status(404).send({ message: "Data not found" });
+          }
+        } catch (e) {
+          console.error(e);
+          res.status(500).send({ message: e.message });
+        }
+      });
 }
