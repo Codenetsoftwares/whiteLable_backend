@@ -91,28 +91,28 @@ export const AdminRoute = (app) => {
 
     app.post("/api/transfer-amount", Authorize(["superAdmin","WhiteLabel", "HyperAgent", "SuperAgent"]), async (req, res) => {
         try {
-            const { adminUserName, whiteLabelUsername, hyperAgentUserName,  SuperAgentUserName, masterAgentUserName, trnsfAmnt } = req.body;
+            const { adminUserName, whiteLabelUsername, hyperAgentUserName,  SuperAgentUserName, masterAgentUserName, trnsfAmnt,remarks } = req.body;
     
             let transferResult;
     
             if (adminUserName && whiteLabelUsername) {
 
-                transferResult = await AdminController.transferAmountadmin(adminUserName, whiteLabelUsername, trnsfAmnt);
+                transferResult = await AdminController.transferAmountadmin(adminUserName, whiteLabelUsername, trnsfAmnt,remarks);
 
             } 
             else if (whiteLabelUsername  &&  hyperAgentUserName) {
               
-                transferResult = await WhiteLabelController.transferAmountWhitelabel(whiteLabelUsername, hyperAgentUserName, trnsfAmnt);
+                transferResult = await WhiteLabelController.transferAmountWhitelabel(whiteLabelUsername, hyperAgentUserName, trnsfAmnt,remarks);
 
             }
             else if (hyperAgentUserName && SuperAgentUserName) {
                 
-                transferResult = await HyperAgentController.transferAmounthyperAgent(hyperAgentUserName,SuperAgentUserName,trnsfAmnt);
+                transferResult = await HyperAgentController.transferAmounthyperAgent(hyperAgentUserName,SuperAgentUserName,trnsfAmnt,remarks);
 
             }
             else if (SuperAgentUserName && masterAgentUserName) {
                 
-                transferResult = await SuperAgentController.transferAmountSuperagent(SuperAgentUserName, masterAgentUserName, trnsfAmnt);
+                transferResult = await SuperAgentController.transferAmountSuperagent(SuperAgentUserName, masterAgentUserName, trnsfAmnt,remarks);
 
             }         
              else {
@@ -184,9 +184,6 @@ export const AdminRoute = (app) => {
             if (!admin) {
                 return res.status(404).json({ message: "Admin not found" });
             }
-            const transactionData = admin.transferAmount;
-            // console.log("transactionData", transactionData);
-            transactionData.sort((a, b) => {
                 const dateA = new Date(a.date);
                 const dateB = new Date(b.date);
                 return dateA - dateB;

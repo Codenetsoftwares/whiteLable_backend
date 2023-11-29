@@ -37,7 +37,7 @@ export const SuperAgentController = {
 
     // trasfer amount super agent to master agent
  
-    transferAmountSuperagent: async (SuperAgentUserName,masterAgentUserName,trnsfAmnt) => {
+    transferAmountSuperagent: async (SuperAgentUserName,masterAgentUserName,trnsfAmnt,remarks) => {
         try {
             const superAgent = await Admin.findOne({ userName: SuperAgentUserName ,roles: { $in: ["SuperAgent"]}}).exec();
     
@@ -65,17 +65,22 @@ export const SuperAgentController = {
             const transferRecordDebit = {
                 transactionType:"Debit",
                 amount: trnsfAmnt,
-                userName: masterAgent.userName,
-                date: new Date()
+                From: superAgent.userName,
+                To: masterAgent.userName,
+                date: new Date(),
+                remarks : remarks 
             };
     
             const transferRecordCredit = {
                 transactionType:"Credit",
                 amount: trnsfAmnt,
-                userName: superAgent.userName,
-                date: new Date()
+                From: superAgent.userName,
+                To: masterAgent.userName,
+                date: new Date(),
+                remarks : remarks 
             };
-         
+   
+            superAgent.remarks = remarks;
             superAgent.balance -= trnsfAmnt;
             masterAgent.balance += trnsfAmnt;
             masterAgent.loadBalance += trnsfAmnt
