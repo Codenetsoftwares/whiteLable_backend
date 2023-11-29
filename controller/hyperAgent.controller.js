@@ -6,7 +6,7 @@ export const HyperAgentController = {
 
 // trasfer amount hyperagent to super agent
 
-  transferAmounthyperAgent: async (hyperAgentUserName,SuperAgentUserName,trnsfAmnt) => {
+  transferAmounthyperAgent: async (hyperAgentUserName,SuperAgentUserName,trnsfAmnt,remarks) => {
     try {
         const hyperAgent = await Admin.findOne({ userName: hyperAgentUserName,roles: { $in: ["HyperAgent"]} }).exec();
 
@@ -36,17 +36,19 @@ export const HyperAgentController = {
           transactionType:"Debit",
           amount: trnsfAmnt,
           userName: superAgent.userName,
-          date: new Date()
+          date: new Date(),
+          remarks : remarks 
       };
 
       const transferRecordCredit = {
           transactionType:"Credit",
           amount: trnsfAmnt,
           userName: hyperAgent.userName,
-          date: new Date()
-      };
-      
-        
+          date: new Date(),
+          remarks : remarks 
+         };
+
+      hyperAgent.remarks = remarks;
       hyperAgent.balance -= trnsfAmnt;
       superAgent.balance += trnsfAmnt;
       superAgent.loadBalance += trnsfAmnt
