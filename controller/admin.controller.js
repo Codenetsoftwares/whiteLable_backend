@@ -21,7 +21,8 @@
             const existingAdmin = await Admin.findOne({ userName: data.userName })
             if (existingAdmin) {
                 throw ({ code: 409, message: "Admin Already Exist" })
-            const Passwordsalt = await bcrypt.genSalt();
+            }
+            const Passwordsalt = await bcrypt.genSalt();            
             const encryptedPassword = await bcrypt.hash(data.password, Passwordsalt);
             const newAdmin = new Admin({
                 userName: data.userName,
@@ -33,7 +34,7 @@
                 console.error(err);
                 throw { code: 500, message: "Failed to save user" };
             });
-
+        
         },
 
         GenerateAdminAccessToken: async (userName, password, persist) => {
@@ -365,3 +366,4 @@
     
     
 }
+    
