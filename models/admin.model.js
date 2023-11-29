@@ -13,10 +13,7 @@ export const Admin = new mongoose.model("Admin", new mongoose.Schema({
             amount: { type: Number, default: 0 },
             userName: { type: String },
             date: { type: Date },
-            transactionType: {type:String},
-            remarks: {type : String},
-            From:{type : String},
-            To : {type : String}
+            transactionType: {type:String}
         }
     ]    ,
     loadBalance : {type : Number , default : 0},

@@ -194,7 +194,7 @@ export const AdminRoute = (app) => {
             allData.slice(0).reverse().map((data) => {
                 // console.log("data", data)
                 if(data.transactionType === "Debit"){
-                    adminBal -= data.amount;
+                    adminBal -= data.amount    ;
                     data.balance = adminBal;
                     // console.log("bal2", admin.balance)
                 }
@@ -229,7 +229,7 @@ export const AdminRoute = (app) => {
                     balance : users.balance,
                     loadBalance : users.loadBalance,
                     creditRef : users.creditRef,
-                    refProfitLoss : users.refProfitLoss,
+                    refProfitLoss : users.refProfitLoss,                 
                     
                 };
             })  
@@ -342,4 +342,26 @@ export const AdminRoute = (app) => {
           res.status(500).send({ message: e.message });
         }
       });
+      app.get("/api/admin/active-status/:adminId", Authorize(["superAdmin"]), async (req, res) => {
+        try {
+            const adminId = req.params.adminId
+            const activateStatus = await Admin.findById(adminId).exec();
+            if (!activateStatus) {
+                return res.status(404).send({ code: 404, message: `Admin Not Found` });
+            }
+    
+            const active = {
+                id: activateStatus.id,
+                isActive: activateStatus.isActive,
+                locked: activateStatus.locked
+            };
+    
+            res.status(200).send(active);
+        } catch (err) {
+            console.log(err);
+            res.status(500).send({ code: err.code, message: err.message });
+        }
+    });
+    
+
 }
