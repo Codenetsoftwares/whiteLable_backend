@@ -149,7 +149,7 @@ export const AdminRoute = (app) => {
                     transferAmount: transfer.amount,
                     To: transfer.userName,
                     date: transfer.date,
-                    transactionType: transfer.transactionType
+                    transactionType: transfer.transactionType,
                 };
             });
             transferData.sort((a, b) => {
@@ -161,6 +161,11 @@ export const AdminRoute = (app) => {
             allData.slice(0).reverse().map((data) => {
                 if(data.transactionType === "Debit"){
                     balances -= data.transferAmount;
+                    data.balance = balances;
+                    console.log("balances", balances)
+                }
+                if(data.transactionType === "Credit"){
+                    balances += data.transferAmount;
                     data.balance = balances;
                     console.log("balances", balances)
                 }
