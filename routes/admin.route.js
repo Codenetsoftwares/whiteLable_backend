@@ -173,7 +173,6 @@ export const AdminRoute = (app) => {
     //     }
     // });
 
-
     app.get("/api/transaction-view/:id", Authorize(["superAdmin","WhiteLabel", "HyperAgent", "SuperAgent","MasterAgent"]), async (req, res) => {
         try {
             const id = req.params.id;
@@ -184,6 +183,9 @@ export const AdminRoute = (app) => {
             if (!admin) {
                 return res.status(404).json({ message: "Admin not found" });
             }
+            const transactionData = admin.transferAmount;
+            // console.log("transactionData", transactionData);
+            transactionData.sort((a, b) => {
                 const dateA = new Date(a.date);
                 const dateB = new Date(b.date);
                 return dateA - dateB;
