@@ -16,8 +16,8 @@ export const AdminRoute = (app) => {
         try {
             const { userName, password, roles } = req.body;
             const createdBy = req.user.id;
-            const isActived = req.body.isActive;
-            const Admin = await AdminController.createAdmin({ userName, password, roles, createBy : createdBy, isActive:isActived });
+            // const isActived = req.body.isActive;
+            const Admin = await AdminController.createAdmin({ userName, password, roles, createBy : createdBy });
             console.log(Admin)
             res.status(200).send({ code: 200, message: `${userName} Register Successfully` })
         }
@@ -94,28 +94,28 @@ export const AdminRoute = (app) => {
 
     app.post("/api/transfer-amount", Authorize(["superAdmin","WhiteLabel", "HyperAgent", "SuperAgent"]), async (req, res) => {
         try {
-            const { adminUserName, whiteLabelUsername, hyperAgentUserName,  SuperAgentUserName, masterAgentUserName, trnsfAmnt } = req.body;
+            const { adminUserName, whiteLabelUsername, hyperAgentUserName,  SuperAgentUserName, masterAgentUserName, trnsfAmnt,remarks } = req.body;
     
             let transferResult;
     
             if (adminUserName && whiteLabelUsername) {
 
-                transferResult = await AdminController.transferAmountadmin(adminUserName, whiteLabelUsername, trnsfAmnt);
+                transferResult = await AdminController.transferAmountadmin(adminUserName, whiteLabelUsername, trnsfAmnt,remarks);
 
             } 
             else if (whiteLabelUsername  &&  hyperAgentUserName) {
               
-                transferResult = await WhiteLabelController.transferAmountWhitelabel(whiteLabelUsername, hyperAgentUserName, trnsfAmnt);
+                transferResult = await WhiteLabelController.transferAmountWhitelabel(whiteLabelUsername, hyperAgentUserName, trnsfAmnt,remarks);
 
             }
             else if (hyperAgentUserName && SuperAgentUserName) {
                 
-                transferResult = await HyperAgentController.transferAmounthyperAgent(hyperAgentUserName,SuperAgentUserName,trnsfAmnt);
+                transferResult = await HyperAgentController.transferAmounthyperAgent(hyperAgentUserName,SuperAgentUserName,trnsfAmnt,remarks);
 
             }
             else if (SuperAgentUserName && masterAgentUserName) {
                 
-                transferResult = await SuperAgentController.transferAmountSuperagent(SuperAgentUserName, masterAgentUserName, trnsfAmnt);
+                transferResult = await SuperAgentController.transferAmountSuperagent(SuperAgentUserName, masterAgentUserName, trnsfAmnt,remarks);
 
             }         
              else {
@@ -145,9 +145,9 @@ export const AdminRoute = (app) => {
             const transferData = admin.transferAmount.map((transfer) => {
                 return {   
                     userId: admin.id,
-                    From : admin.userName,
+                    From : transfer.From,
                     transferAmount: transfer.amount,
-                    To: transfer.userName,
+                    To: transfer.To,
                     date: transfer.date,
                     transactionType: transfer.transactionType,
                 };
