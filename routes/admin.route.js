@@ -14,12 +14,9 @@ export const AdminRoute = (app) => {
 
     app.post("/api/admin-create", Authorize(["superAdmin","WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
-            const { userName, password, roles } = req.body;
-            const createdBy = req.user.id;
-            // const isActived = req.body.isActive;
-            const Admin = await AdminController.createAdmin({ userName, password, roles, createBy : createdBy });
-            console.log(Admin)
-            res.status(200).send({ code: 200, message: `${userName} Register Successfully` })
+            const user = req.user;
+            await AdminController.createAdmin(req.body, user);
+            res.status(200).send({ code: 200, message: 'Admin registered successfully!' })
         }
         catch (err) {
             res.status(500).send({ code: err.code, message: err.message })
@@ -133,48 +130,83 @@ export const AdminRoute = (app) => {
 
     // view transaction details
 
-    app.get("/api/transaction-view/:id", Authorize(["superAdmin","WhiteLabel", "HyperAgent", "SuperAgent","MasterAgent"]),async (req, res) => {
+    // app.get("/api/transaction-view/:id", Authorize(["superAdmin","WhiteLabel", "HyperAgent", "SuperAgent","MasterAgent"]),async (req, res) => {
+    //     try {
+    //         const id = req.params.id;
+    //         const admin = await Admin.findById(id);
+    //         console.log("bal", admin.balance)
+    //         let balances = 0;
+    //         if (!admin) {
+    //             return res.status(404).json({ message: "User not found" });
+    //         }
+            
+    //         const transferData = admin.transferAmount.map((transfer) => {
+    //             return {   
+    //                 userId: admin.id,
+    //                 From : admin.userName,
+    //                 transferAmount: transfer.amount,
+    //                 To: transfer.userName,
+    //                 date: transfer.date,
+    //                 transactionType: transfer.transactionType,
+    //             };
+    //         });
+    //         transferData.sort((a, b) => {
+    //             const dateA = new Date(a.date);
+    //             const dateB = new Date(b.date);
+    //             return dateB - dateA;
+    //           });
+    //         let allData = JSON.parse(JSON.stringify(transferData));
+    //         allData.slice(0).reverse().map((data) => {
+                // if(data.transactionType === "Debit"){
+                //     admin.balance -= data.transferAmount;
+                //     data.balance = admin.balance;
+                //     console.log("bal2", data.balance)
+                // }
+                // if(data.transactionType === "Credit"){
+                //     balances += data.transferAmount;
+                //     data.balance = balances;
+                // }
+    //         });
+    //         res.status(200).json(allData);
+    //     } catch (err) {
+    //         res.status(500).json({ code: err.code, message: err.message });
+    //     }
+    // });
+
+
+    app.get("/api/transaction-view/:id", Authorize(["superAdmin","WhiteLabel", "HyperAgent", "SuperAgent","MasterAgent"]), async (req, res) => {
         try {
             const id = req.params.id;
-            const admin = await Admin.findById(id);
             let balances = 0;
+            const admin = await Admin.findById(id).exec();
+            let adminBal = admin.balance;
+            console.log("adminBal", adminBal)
             if (!admin) {
-                return res.status(404).json({ message: "User not found" });
+                return res.status(404).json({ message: "Admin not found" });
             }
-            
-            const transferData = admin.transferAmount.map((transfer) => {
-                return {   
-                    userId: admin.id,
-                    From : transfer.From,
-                    transferAmount: transfer.amount,
-                    To: transfer.To,
-                    date: transfer.date,
-                    transactionType: transfer.transactionType,
-                };
-            });
-            transferData.sort((a, b) => {
                 const dateA = new Date(a.date);
                 const dateB = new Date(b.date);
-                return dateB - dateA;
-              });
-            let allData = JSON.parse(JSON.stringify(transferData));
+                return dateA - dateB;
+            });
+            let allData = JSON.parse(JSON.stringify(transactionData));
             allData.slice(0).reverse().map((data) => {
+                // console.log("data", data)
                 if(data.transactionType === "Debit"){
-                    balances -= data.transferAmount;
-                    data.balance = balances;
-                    console.log("balances", balances)
+                    adminBal -= data.amount;
+                    data.balance = adminBal;
+                    // console.log("bal2", admin.balance)
                 }
                 if(data.transactionType === "Credit"){
-                    balances += data.transferAmount;
+                    balances += data.amount;
                     data.balance = balances;
-                    console.log("balances", balances)
                 }
-            });
+            })
             res.status(200).json(allData);
         } catch (err) {
             res.status(500).json({ code: err.code, message: err.message });
         }
     });
+    
     
 // view creates
 

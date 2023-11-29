@@ -5,14 +5,7 @@
     import { Trash } from "../models/trash.model.js";
 
     export const AdminController = {
-
-        createAdmin: async (data) => {
-            console.log("data...",data)
-            const existingAdmin = await Admin.findOne({ userName: data.userName })
-            console.log("first...",existingAdmin)
-            if (existingAdmin) {
-                throw ({ code: 409, message: "Admin Already Exist" })
-            }
+        createAdmin: async (data,user) => {
             if (!data.userName) {
                 throw ({ message: "userName Is Required" })
             }
@@ -22,20 +15,19 @@
             if (!data.roles || !Array.isArray(data.roles) || data.roles.length === 0) {
                 throw { code: 400, message: "Roles is required" };
             }
-        
-        //     if(data.isActive)
-        //   {
-        //     throw { code: 401, message: 'User is inactive' };
-        //   }
+            if(user.isActive === false){
+                throw { code: 400, message: "Account is in Inactive Mode" };
+            }
+            const existingAdmin = await Admin.findOne({ userName: data.userName })
+            if (existingAdmin) {
+                throw ({ code: 409, message: "Admin Already Exist" })
             const Passwordsalt = await bcrypt.genSalt();
             const encryptedPassword = await bcrypt.hash(data.password, Passwordsalt);
             const newAdmin = new Admin({
                 userName: data.userName,
                 password: encryptedPassword,
                 roles: data.roles,
-                createBy: data.createBy,  
-                isActive : data.isActive              
-
+                createBy: user._id
             });
             newAdmin.save().catch((err) => {
                 console.error(err);
