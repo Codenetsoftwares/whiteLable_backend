@@ -36,14 +36,14 @@ export const HyperAgentController = {
           transactionType:"Debit",
           amount: trnsfAmnt,
           userName: superAgent.userName,
-          date: new Date().toLocaleDateString('en-GB')
+          date: new Date()
       };
 
       const transferRecordCredit = {
           transactionType:"Credit",
           amount: trnsfAmnt,
           userName: hyperAgent.userName,
-          date: new Date().toLocaleDateString('en-GB')
+          date: new Date()
       };
       
         

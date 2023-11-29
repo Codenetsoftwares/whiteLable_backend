@@ -38,14 +38,14 @@ export const WhiteLabelController = {
                 transactionType:"Debit",
                 amount: trnsfAmnt,
                 userName: hyperAgent.userName,
-                date: new Date().toLocaleDateString('en-GB')
+                date: new Date()
             };
     
             const transferRecordCredit = {
                 transactionType:"Credit",
                 amount: trnsfAmnt,
                 userName: whiteLabel.userName,
-                date: new Date().toLocaleDateString('en-GB')
+                date: new Date()
             };
     
             whiteLabel.balance -= trnsfAmnt;

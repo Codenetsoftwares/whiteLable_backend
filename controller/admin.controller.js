@@ -232,14 +232,14 @@
                     transactionType:"Debit",
                     amount: trnsfAmnt,
                     userName: whiteLabel.userName,
-                    date: new Date().toLocaleDateString('en-GB')
+                    date: new Date()
                 };
         
                 const transferRecordCredit = {
                     transactionType:"Credit",
                     amount: trnsfAmnt,
                     userName: admin.userName,
-                    date: new Date().toLocaleDateString('en-GB')
+                    date: new Date()
                 };
                 admin.balance -= trnsfAmnt;
                 whiteLabel.balance += trnsfAmnt;
