@@ -7,7 +7,9 @@
     export const AdminController = {
 
         createAdmin: async (data) => {
+            console.log("data...",data)
             const existingAdmin = await Admin.findOne({ userName: data.userName })
+            console.log("first...",existingAdmin)
             if (existingAdmin) {
                 throw ({ code: 409, message: "Admin Already Exist" })
             }
@@ -20,18 +22,19 @@
             if (!data.roles || !Array.isArray(data.roles) || data.roles.length === 0) {
                 throw { code: 400, message: "Roles is required" };
             }
-            const isActive = await Admin.findOne({  userName: data.userName ,isActive: { $in: ["true"]} });
-            if (isActive) {
-                throw { code: 401, message: 'User is inactive' };
-            }
+        
+        //     if(data.isActive)
+        //   {
+        //     throw { code: 401, message: 'User is inactive' };
+        //   }
             const Passwordsalt = await bcrypt.genSalt();
             const encryptedPassword = await bcrypt.hash(data.password, Passwordsalt);
             const newAdmin = new Admin({
                 userName: data.userName,
                 password: encryptedPassword,
                 roles: data.roles,
-                createBy: data.createBy,
-                // isActive : isActive === true
+                createBy: data.createBy,  
+                isActive : data.isActive              
 
             });
             newAdmin.save().catch((err) => {
@@ -200,7 +203,7 @@
         },
 
     // admin transfer amount to white label transfer amount
-        transferAmountadmin: async (adminUserName, whiteLabelUsername, trnsfAmnt) => {
+        transferAmountadmin: async (adminUserName, whiteLabelUsername, trnsfAmnt,remarks) => {
         try {
             const admin = await Admin.findOne({ userName: adminUserName ,roles: { $in: ["superAdmin"]}}).exec();
 
@@ -231,16 +234,22 @@
                 const transferRecordDebit = {
                     transactionType:"Debit",
                     amount: trnsfAmnt,
-                    userName: whiteLabel.userName,
-                    date: new Date()
+                    From: admin.userName,
+                    To: whiteLabel.userName,
+                    date: new Date(),
+                    remarks : remarks 
+                    
                 };
         
                 const transferRecordCredit = {
                     transactionType:"Credit",
                     amount: trnsfAmnt,
-                    userName: admin.userName,
-                    date: new Date()
+                    From: admin.userName,
+                    To: whiteLabel.userName,
+                    date: new Date(),
+                    remarks : remarks 
                 };
+                admin.remarks = remarks;
                 admin.balance -= trnsfAmnt;
                 whiteLabel.balance += trnsfAmnt;
                 whiteLabel.loadBalance += trnsfAmnt;
@@ -274,20 +283,24 @@
             }       
     
             if (isActive ) {
-                admin.isActive = true;
-                admin.locked = true;
+                admin.isActive = true;               
                 await admin.save();
-                return { message: "Admin activated or unlocked successfully" };
+                return { message: "Admin activated successfully" };
             }
              else if(locked){
                 admin.locked = true;
                 await admin.save();
-                return { message: "Admin activated or unlocked successfully"}
-              } else {
+                return { message: "Admin unlocked successfully"}
+              } 
+              else if (isActive === false){
                 admin.isActive = false;
+                // admin.locked = false;
+                await admin.save();
+                return { message: "Admin inactivated successfully" };
+            } else{
                 admin.locked = false;
                 await admin.save();
-                return { message: "Admin inactivated or locked successfully" };
+                return { message: "Admin locked successfully" };
             }
     
         } catch (err) {

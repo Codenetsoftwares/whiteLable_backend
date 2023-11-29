@@ -8,7 +8,7 @@ export const WhiteLabelController = {
 
     // tarnsfer amount white label to hyper agent
 
-    transferAmountWhitelabel: async (whiteLabelUsername, hyperAgentUserName, trnsfAmnt) => {
+    transferAmountWhitelabel: async (whiteLabelUsername, hyperAgentUserName, trnsfAmnt,remarks) => {
         try {
             const whiteLabel = await Admin.findOne({ userName: whiteLabelUsername ,roles: { $in: ["WhiteLabel"]} }).exec();
     
@@ -37,17 +37,21 @@ export const WhiteLabelController = {
             const transferRecordDebit = {
                 transactionType:"Debit",
                 amount: trnsfAmnt,
-                userName: hyperAgent.userName,
+                From: whiteLabel.userName,
+                To: hyperAgent.userName,
                 date: new Date()
             };
     
             const transferRecordCredit = {
                 transactionType:"Credit",
                 amount: trnsfAmnt,
-                userName: whiteLabel.userName,
-                date: new Date()
+                From: whiteLabel.userName,
+                To: hyperAgent.userName,
+                date: new Date(),
+                remarks : remarks 
             };
-    
+   
+            whiteLabel.remarks = remarks;
             whiteLabel.balance -= trnsfAmnt;
             hyperAgent.balance += trnsfAmnt;
             hyperAgent.loadBalance += trnsfAmnt;

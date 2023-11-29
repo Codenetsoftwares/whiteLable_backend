@@ -35,7 +35,8 @@ export const HyperAgentController = {
         const transferRecordDebit = {
           transactionType:"Debit",
           amount: trnsfAmnt,
-          userName: superAgent.userName,
+          From: hyperAgent.userName,
+          To: superAgent.userName,
           date: new Date(),
           remarks : remarks 
       };
@@ -43,7 +44,8 @@ export const HyperAgentController = {
       const transferRecordCredit = {
           transactionType:"Credit",
           amount: trnsfAmnt,
-          userName: hyperAgent.userName,
+          From: hyperAgent.userName,
+          To: superAgent.userName,
           date: new Date(),
           remarks : remarks 
          };
