@@ -173,36 +173,39 @@ export const AdminRoute = (app) => {
     //     }
     // });
 
-    app.get("/api/transaction-view/:id", Authorize(["superAdmin","WhiteLabel", "HyperAgent", "SuperAgent","MasterAgent"]), async (req, res) => {
+    app.get("/api/transaction-view/:id", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
             const id = req.params.id;
             let balances = 0;
             const admin = await Admin.findById(id).exec();
-            let adminBal = admin.balance;
-            console.log("adminBal", adminBal)
+    
             if (!admin) {
                 return res.status(404).json({ message: "Admin not found" });
             }
+    
             const transactionData = admin.transferAmount;
-            // console.log("transactionData", transactionData);
+    
             transactionData.sort((a, b) => {
                 const dateA = new Date(a.date);
                 const dateB = new Date(b.date);
                 return dateA - dateB;
             });
+    
             let allData = JSON.parse(JSON.stringify(transactionData));
+            let adminBal = admin.balance;
+    
             allData.slice(0).reverse().map((data) => {
-                // console.log("data", data)
-                if(data.transactionType === "Debit"){
-                    adminBal -= data.amount    ;
-                    data.balance = adminBal;
-                    // console.log("bal2", admin.balance)
-                }
-                if(data.transactionType === "Credit"){
+                if (data.transactionType === "Credit") {
                     balances += data.amount;
                     data.balance = balances;
                 }
-            })
+                if (data.transactionType === "Debit") {
+                    data.debitBalance = adminBal;
+                    // data.amount = -data.amount;
+                    adminBal += data.amount;
+                }
+            });
+    
             res.status(200).json(allData);
         } catch (err) {
             res.status(500).json({ code: err.code, message: err.message });
@@ -278,8 +281,9 @@ export const AdminRoute = (app) => {
             res.status(404).send(result);
           }
         } catch (err) {
-          console.error(err);
+          console.error("message",err.message );
           res.status(500).send({ code: err.code, message: err.message });
+
         }
       });
 
