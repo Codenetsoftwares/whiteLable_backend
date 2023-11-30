@@ -269,23 +269,23 @@ export const AdminRoute = (app) => {
 
     // active status
 
-    app.post("/api/activate/:adminId", Authorize(["superAdmin","WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]),async (req, res) => {
-        try {
-            const adminId = req.params.adminId;
-            const isActive = req.body.isActive;
-            const locked = req.body.locked;
-            const result = await AdminController.activateAdmin(adminId, isActive,locked);
-          if (result.success) {
-            res.status(200).send(result);
-          } else {
-            res.status(404).send(result);
-          }
-        } catch (err) {
-          console.error("message",err.message );
-          res.status(500).send({ code: err.code, message: err.message });
+    app.post("/api/activate/:adminId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
+    try {
+        const adminId = req.params.adminId;
+        const isActive = req.body.isActive;
+        const locked = req.body.locked;
+        const result = await AdminController.activateAdmin(adminId, isActive, locked);
 
+        if (result.code === 200) {
+            res.status(200).send(result);
+        } else {
+            res.status(result.code).send(result);
         }
-      });
+    } catch (err) {
+        console.error("message", err.message);
+        res.status(500).send({ code: err.code, message: err.message });
+    }
+});
 
 
       app.put("/api/admin/update-credit-ref/:adminId", async (req, res) => {
