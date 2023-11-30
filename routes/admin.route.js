@@ -302,7 +302,7 @@ export const AdminRoute = (app) => {
     });
    
 
-    app.post("/api/admin/move-to-trash-user", Authorize(["superAdmin"]), async (req, res) => {
+    app.post("/api/admin/move-to-trash-user", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
           const { requestId } = req.body;
           const adminUser = await Admin.findById(requestId);
@@ -321,7 +321,7 @@ export const AdminRoute = (app) => {
         }
       });
 
-      app.get("/api/admin/view-trash",Authorize(["superAdmin"]), async (req, res) => {
+      app.get("/api/admin/view-trash",Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
           try {
             const resultArray = await Trash.find().exec();
             res.status(200).send(resultArray);
@@ -332,7 +332,7 @@ export const AdminRoute = (app) => {
         }
       );
 
-      app.delete("/api/delete/admin-user/:id", Authorize(["superAdmin"]), async (req, res) => {
+      app.delete("/api/delete/admin-user/:id", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
           const id = req.params.id;
           const result = await Trash.deleteOne({ _id: id });
@@ -346,7 +346,7 @@ export const AdminRoute = (app) => {
           res.status(500).send({ message: e.message });
         }
       });
-      app.get("/api/admin/active-status/:adminId", Authorize(["superAdmin"]), async (req, res) => {
+      app.get("/api/admin/active-status/:adminId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
             const adminId = req.params.adminId
             const activateStatus = await Admin.findById(adminId).exec();
