@@ -267,33 +267,39 @@
 
     // User Active status
 
- activateAdmin : async (adminId, isActive, locked) => {
+    activateAdmin: async (adminId, isActive, locked) => {
         try {
             const admin = await Admin.findById(adminId);
     
             if (!admin) {
-                return { code: 404, message: "Admin not found" };
-            }
+                throw { code: 404, message: "Admin not found" };
+            }       
     
-            if (isActive) {
-                admin.isActive = true;
+            if (isActive ) {
+                admin.isActive = true;               
                 await admin.save();
-                return { code: 200, message: "Admin activated successfully" };
-            } else if (locked) {
+                return { message: "Admin activated successfully" };
+            }
+             else if(locked){
                 admin.locked = true;
                 await admin.save();
-                return { code: 200, message: "Admin unlocked successfully" };
-            } else {
+                return { message: "Admin unlocked successfully"}
+              } 
+              else if (isActive === false){
                 admin.isActive = false;
+                // admin.locked = false;
+                await admin.save();
+                return { message: "Admin inactivated successfully" };
+            } else{
                 admin.locked = false;
                 await admin.save();
-                return { code: 200, message: "Admin inactivated successfully" };
+                return { message: "Admin locked successfully" };
             }
+    
         } catch (err) {
-            return { code: err.code || 500, message: err.message || "Internal Server Error" };
+            throw { code: err.code || 500, message: err.message || "Internal Server Error" };
         }
     },
-    
     
 
     editCreditRef: async (adminId, creditRef) => {

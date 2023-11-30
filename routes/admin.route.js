@@ -276,7 +276,7 @@ export const AdminRoute = (app) => {
         const locked = req.body.locked;
         const result = await AdminController.activateAdmin(adminId, isActive, locked);
 
-        if (result.code === 200) {
+        if (result) {
             res.status(200).send(result);
         } else {
             res.status(result.code).send(result);
