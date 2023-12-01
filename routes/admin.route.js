@@ -377,17 +377,31 @@ export const AdminRoute = (app) => {
         try {
           const { userId } = req.body;      
           const restoreResult = await AdminController.restoreUser(userId); 
-
           if (restoreResult) {
             res.status(201).send("Admin User Moved To Wallet");
-
           } else {          
             res.status(500).send("Failed to restore Admin User to Wallet");
-
           }
-
         } catch (err) {
           res.status(500).send({ message: err.message});
         }
       });
+
+      app.get("/api/User-Profile-view/:id", Authorize(["superAdmin","WhiteLabel", "HyperAgent", "SuperAgent","MasterAgent"]),async (req, res) => {
+            try {
+                const id = req.params.id;
+                const admin = await Admin.findById(id);
+               
+                const transferData =  {
+                    
+                        userId: admin.id,
+                        Roles : admin.roles,
+                        userName: admin.userName,                     
+                    
+                };
+                res.status(200).json(transferData);
+            } catch (err) {
+                res.status(500).json({ code: err.code, message: err.message });
+            }
+        });
     }
