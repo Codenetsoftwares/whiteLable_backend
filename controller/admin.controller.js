@@ -325,7 +325,7 @@
         const updatedAdmin = await admin.save();
 
         if (!updatedAdmin) {
-            throw { code: 500, message: 'Error updating admin creditRef' };
+            throw { code: 500, message: 'Can not updating admin creditRef' };
         }
 
         return updatedAdmin;
