@@ -21,11 +21,11 @@ export const HyperAgentController = {
         }
 
         if (!hyperAgent.isActive) {
-          throw { code: 401, message: 'hyperAgent is inactive' };
+          throw { code: 404, message: 'hyperAgent is inactive' };
       }
 
       if (!superAgent.isActive) {
-          throw { code: 401, message: 'superAgent is inactive' };
+          throw { code: 404, message: 'superAgent is inactive' };
       }
 
         if (hyperAgent.balance < trnsfAmnt) {

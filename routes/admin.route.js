@@ -99,6 +99,7 @@ export const AdminRoute = (app) => {
 
                 transferResult = await AdminController.transferAmountadmin(adminUserName, whiteLabelUsername, trnsfAmnt,remarks);
 
+
             } 
             else if (whiteLabelUsername  &&  hyperAgentUserName) {
               
@@ -114,7 +115,11 @@ export const AdminRoute = (app) => {
                 
                 transferResult = await SuperAgentController.transferAmountSuperagent(SuperAgentUserName, masterAgentUserName, trnsfAmnt,remarks);
 
-            }         
+            }       
+        //    else if (!transferResult.isActive) {
+        //         throw { code: 404, message: 'Admin is inactive' };
+        //     }
+  
              else {
                 throw { code: 400, message: "Invalid transfer details provided" };
             }
@@ -124,7 +129,8 @@ export const AdminRoute = (app) => {
             res.status(200).send({ code: 200, message: "Transfer Amount Successfully" });
 
         } catch (err) {
-            res.status(500).send({ code: err.code, message: err.message });
+            const statusCode = err.code || 500;
+            res.status(statusCode).send({ code: err.code, message: err.message });
         }
     });
 

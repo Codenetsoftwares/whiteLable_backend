@@ -52,11 +52,11 @@ export const SuperAgentController = {
             }
     
             if (!superAgent.isActive) {
-                throw { code: 401, message: 'superAgent is inactive' };
+                throw { code: 404, message: 'superAgent is inactive' };
             }
       
             if (!masterAgent.isActive) {
-                throw { code: 401, message: 'masterAgent is inactive' };
+                throw { code: 404, message: 'masterAgent is inactive' };
             }
 
             if (superAgent.balance < trnsfAmnt) {

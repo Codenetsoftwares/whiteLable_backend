@@ -212,11 +212,11 @@
 
 
             if (!admin.isActive) {
-                throw { code: 401, message: 'Admin is inactive' };
+                throw { code: 404, message: 'Admin is inactive' };
             }
 
             if (!whiteLabel.isActive) {
-                throw { code: 401, message: 'White Label is inactive' };
+                throw { code: 404, message: 'White Label is inactive' };
             }
 
 
