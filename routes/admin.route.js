@@ -288,16 +288,15 @@ export const AdminRoute = (app) => {
 });
 
 
-      app.put("/api/admin/update-credit-ref/:adminId", async (req, res) => {
+      app.put("/api/admin/update-credit-ref/:adminId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
             const adminId = req.params.adminId;
             const { creditRef } = req.body;   
-            const updatedAdmin = await AdminController.editCreditRef(adminId, creditRef);
-
+            const updatedAdmin = await AdminController.editCreditRef(adminId, creditRef);       
             res.json(updatedAdmin);
-        } catch (error) {
-            console.error(error.message);
-            res.status(500).json({ error: 'Internal Server Error' });
+        } catch (err) {
+            // console.error(err.message);
+            res.status(500).json({ err: err.message });
         }
     });
    
