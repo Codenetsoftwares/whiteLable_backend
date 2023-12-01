@@ -344,6 +344,7 @@
       
           const updatedTransactionData = {
             id: existingAdminUser._id,
+            roles: existingAdminUser.roles,
             userName: existingAdminUser.userName,
             balance: existingAdminUser.balance,
             loadBalance: existingAdminUser.loadBalance,
@@ -366,8 +367,36 @@
           throw error;
         }
       },
+
+      restoreUser: async (adminId) => {
+        try {
+          const existingAdminUser = await Trash.findById(adminId);
       
-    
-    
+          if (!existingAdminUser) {
+            throw { code: 404, message: `Admin not found in trash` };
+          }
+      
+          const restoreRemoveData = {
+            roles: existingAdminUser.roles,
+            userName: existingAdminUser.userName,
+            balance: existingAdminUser.balance,
+            loadBalance: existingAdminUser.loadBalance,
+            creditRef: existingAdminUser.creditRef,
+            refProfitLoss: existingAdminUser.refProfitLoss,
+            createBy: existingAdminUser.createBy,
+          };
+          const restoreTransaction = new Admin(restoreRemoveData);
+          await restoreTransaction.save();
+          await Trash.findByIdAndDelete(adminId);
+      
+          return true;
+        } catch (err) {
+          console.error(err);
+          throw { code: 500, message: err.message };
+        }
+      },
+      
+      
+      
 }
     

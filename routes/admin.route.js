@@ -373,4 +373,21 @@ export const AdminRoute = (app) => {
     });
     
 
-}
+    app.post("/api/admin/restore-to-wallet-user", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
+        try {
+          const { userId } = req.body;      
+          const restoreResult = await AdminController.restoreUser(userId); 
+
+          if (restoreResult) {
+            res.status(201).send("Admin User Moved To Wallet");
+
+          } else {          
+            res.status(500).send("Failed to restore Admin User to Wallet");
+
+          }
+
+        } catch (err) {
+          res.status(500).send({ message: err.message});
+        }
+      });
+    }

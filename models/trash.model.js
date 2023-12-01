@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 
 export const Trash = new mongoose.model("Trash", new mongoose.Schema({
     id: { type: mongoose.Schema.Types.ObjectId },
+    roles: [{ type: String, required: true }],
     userName:  { type: String, required: true },
     balance: { type: Number, default: 0},
     loadBalance : {type : Number , default : 0},
