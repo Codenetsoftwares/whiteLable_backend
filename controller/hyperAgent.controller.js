@@ -54,7 +54,7 @@ export const HyperAgentController = {
       hyperAgent.balance -= trnsfAmnt;
       superAgent.balance += trnsfAmnt;
       superAgent.loadBalance += trnsfAmnt
-      superAgent.creditRef += trnsfAmnt;
+      // superAgent.creditRef += trnsfAmnt;
       // superAgent.refProfitLoss = superAgent.creditRef - superAgent.balance;
       // hyperAgent.refProfitLoss = hyperAgent.creditRef - hyperAgent.balance;
 
