@@ -294,6 +294,7 @@ export const AdminRoute = (app) => {
 });
 
 
+
       app.put("/api/admin/update-credit-ref/:adminId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
             const adminId = req.params.adminId;
@@ -306,6 +307,7 @@ export const AdminRoute = (app) => {
         }
     });
    
+  //  Move To Trash 
 
     app.post("/api/admin/move-to-trash-user", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
@@ -326,6 +328,8 @@ export const AdminRoute = (app) => {
         }
       });
 
+    //   View Trash Data
+
       app.get("/api/admin/view-trash",Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
           try {
             const resultArray = await Trash.find().exec();
@@ -336,6 +340,8 @@ export const AdminRoute = (app) => {
           }
         }
       );
+
+    //   Delete From Trash
 
       app.delete("/api/delete/admin-user/:id", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
@@ -351,6 +357,9 @@ export const AdminRoute = (app) => {
           res.status(500).send({ message: e.message });
         }
       });
+
+    //   View Active Locked Status
+
       app.get("/api/admin/active-status/:adminId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
             const adminId = req.params.adminId
@@ -372,6 +381,7 @@ export const AdminRoute = (app) => {
         }
     });
     
+     //   Restore Transh Data
 
     app.post("/api/admin/restore-to-wallet-user", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
@@ -387,13 +397,14 @@ export const AdminRoute = (app) => {
         }
       });
 
+    //   View User Profile
+
       app.get("/api/User-Profile-view/:id", Authorize(["superAdmin","WhiteLabel", "HyperAgent", "SuperAgent","MasterAgent"]),async (req, res) => {
             try {
                 const id = req.params.id;
                 const admin = await Admin.findById(id);
                
-                const transferData =  {
-                    
+                const transferData =  {           
                         userId: admin.id,
                         Roles : admin.roles,
                         userName: admin.userName,                     
