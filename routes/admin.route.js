@@ -183,6 +183,7 @@ export const AdminRoute = (app) => {
         try {
             const id = req.params.id;
             let balances = 0;
+            let debitBalances = 0
             const admin = await Admin.findById(id).exec();
     
             if (!admin) {
@@ -191,12 +192,14 @@ export const AdminRoute = (app) => {
     
             const transactionData = admin.transferAmount;
     
-            transactionData.sort((a, b) => {
-                const dateA = new Date(a.date);
-                const dateB = new Date(b.date);
-                return dateA - dateB;
-            });
-    
+            // transactionData.sort((a, b) => {
+            //     const dateA = new Date(a.date);
+            //     const dateB = new Date(b.date);
+            //     return dateA - dateB;
+            // });
+
+            transactionData.sort((a, b) => new Date(a.date) - new Date(b.date));
+
             let allData = JSON.parse(JSON.stringify(transactionData));
     
             allData.slice(0).reverse().map((data) => {
@@ -205,11 +208,11 @@ export const AdminRoute = (app) => {
                     data.balance = balances;
                 }
                 if (data.transactionType === "Debit") {
-                    balances += data.amount;
-                    data.debitBalance = balances;
+                    debitBalances += data.amount;
+                    data.debitBalance = debitBalances;
                 }
             });
-    
+     
             res.status(200).json(allData);
         } catch (err) {
             res.status(500).json({ code: err.code, message: err.message });
