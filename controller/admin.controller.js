@@ -246,8 +246,8 @@
                 admin.balance -= trnsfAmnt;
                 whiteLabel.balance += trnsfAmnt;
                 whiteLabel.loadBalance += trnsfAmnt;
-                whiteLabel.creditRef += trnsfAmnt;
-                whiteLabel.refProfitLoss =  whiteLabel.creditRef - whiteLabel.balance;
+                // whiteLabel.creditRef += trnsfAmnt;
+                // whiteLabel.refProfitLoss =  whiteLabel.creditRef - whiteLabel.balance;
 
                 if (!admin.transferAmount) {
                     admin.transferAmount = [];
@@ -302,37 +302,37 @@
     },
     
 
-    editCreditRef: async (adminId, creditRef) => {
-        try{
-        if (typeof creditRef !== 'number' || isNaN(creditRef)) {
-            throw { code: 400, message: 'Invalid creditRef value' };
-        }
+//     editCreditRef: async (adminId, creditRef) => {
+//         try{
+//         if (typeof creditRef !== 'number' || isNaN(creditRef)) {
+//             throw { code: 400, message: 'Invalid creditRef value' };
+//         }
 
-        const admin = await Admin.findById(adminId);
+//         const admin = await Admin.findById(adminId);
 
-        if (!admin) {
-            throw { code: 404, message: 'Admin not found' };
-        }
+//         if (!admin) {
+//             throw { code: 404, message: 'Admin not found' };
+//         }
 
-        if (admin.isActive === false) {
+//         if (admin.isActive === false) {
          
-            return { code: 200, message: 'Admin is inactive. Update not allowed.' };
-        }
+//             return { code: 200, message: 'Admin is inactive. Update not allowed.' };
+//         }
 
-        admin.creditRef = creditRef;
-        admin.refProfitLoss = creditRef - admin.balance;
+//         admin.creditRef = creditRef;
+//         admin.refProfitLoss = creditRef - admin.balance;
 
-        const updatedAdmin = await admin.save();
+//         const updatedAdmin = await admin.save();
 
-        if (!updatedAdmin) {
-            throw { code: 500, message: 'Can not updating admin creditRef' };
-        }
+//         if (!updatedAdmin) {
+//             throw { code: 500, message: 'Can not updating admin creditRef' };
+//         }
 
-        return updatedAdmin;
-    } catch (error) {          
-        throw { code: error.code || 500, message: error.message };
-    }
-},
+//         return updatedAdmin;
+//     } catch (error) {          
+//         throw { code: error.code || 500, message: error.message };
+//     }
+// },
 
     trashAdminUser: async (adminUserId) => {
         try {

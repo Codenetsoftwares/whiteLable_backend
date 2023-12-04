@@ -294,18 +294,20 @@ export const AdminRoute = (app) => {
 });
 
 
-      app.put("/api/admin/update-credit-ref/:adminId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
-        try {
-            const adminId = req.params.adminId;
-            const { creditRef } = req.body;   
-            const updatedAdmin = await AdminController.editCreditRef(adminId, creditRef);       
-            res.json(updatedAdmin);
-        } catch (err) {
-            // console.error(err.message);
-            res.status(500).json({ err: err.message });
-        }
-    });
+
+    //   app.put("/api/admin/update-credit-ref/:adminId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
+    //     try {
+    //         const adminId = req.params.adminId;
+    //         const { creditRef } = req.body;   
+    //         const updatedAdmin = await AdminController.editCreditRef(adminId, creditRef);       
+    //         res.json(updatedAdmin);
+    //     } catch (err) {
+    //         // console.error(err.message);
+    //         res.status(500).json({ err: err.message });
+    //     }
+    // });
    
+  //  Move To Trash 
 
     app.post("/api/admin/move-to-trash-user", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
@@ -326,6 +328,8 @@ export const AdminRoute = (app) => {
         }
       });
 
+    //   View Trash Data
+
       app.get("/api/admin/view-trash",Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
           try {
             const resultArray = await Trash.find().exec();
@@ -336,6 +340,8 @@ export const AdminRoute = (app) => {
           }
         }
       );
+
+    //   Delete From Trash
 
       app.delete("/api/delete/admin-user/:id", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
@@ -351,6 +357,9 @@ export const AdminRoute = (app) => {
           res.status(500).send({ message: e.message });
         }
       });
+
+    //   View Active Locked Status
+
       app.get("/api/admin/active-status/:adminId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
             const adminId = req.params.adminId
@@ -372,22 +381,38 @@ export const AdminRoute = (app) => {
         }
     });
     
+     //   Restore Transh Data
 
     app.post("/api/admin/restore-to-wallet-user", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
           const { userId } = req.body;      
           const restoreResult = await AdminController.restoreUser(userId); 
-
           if (restoreResult) {
             res.status(201).send("Admin User Moved To Wallet");
-
           } else {          
             res.status(500).send("Failed to restore Admin User to Wallet");
-
           }
-
         } catch (err) {
           res.status(500).send({ message: err.message});
         }
       });
+
+    //   View User Profile
+
+      app.get("/api/User-Profile-view/:id", Authorize(["superAdmin","WhiteLabel", "HyperAgent", "SuperAgent","MasterAgent"]),async (req, res) => {
+            try {
+                const id = req.params.id;
+                const admin = await Admin.findById(id);
+               
+                const transferData =  {           
+                        userId: admin.id,
+                        Roles : admin.roles,
+                        userName: admin.userName,                     
+                    
+                };
+                res.status(200).json(transferData);
+            } catch (err) {
+                res.status(500).json({ code: err.code, message: err.message });
+            }
+        });
     }
