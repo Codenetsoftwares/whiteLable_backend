@@ -55,7 +55,7 @@ export const WhiteLabelController = {
             whiteLabel.balance -= trnsfAmnt;
             hyperAgent.balance += trnsfAmnt;
             hyperAgent.loadBalance += trnsfAmnt;
-            hyperAgent.creditRef += trnsfAmnt;
+            // hyperAgent.creditRef += trnsfAmnt;
             // hyperAgent.refProfitLoss = hyperAgent.creditRef - hyperAgent.balance;
             // whiteLabel.refProfitLoss = whiteLabel.creditRef - whiteLabel.balance;
     

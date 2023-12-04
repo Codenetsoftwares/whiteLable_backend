@@ -84,7 +84,7 @@ export const SuperAgentController = {
             superAgent.balance -= trnsfAmnt;
             masterAgent.balance += trnsfAmnt;
             masterAgent.loadBalance += trnsfAmnt
-            masterAgent.creditRef += trnsfAmnt;
+            // masterAgent.creditRef += trnsfAmnt;
             // superAgent.refProfitLoss = superAgent.creditRef - superAgent.balance;
             // masterAgent.refProfitLoss = masterAgent.creditRef - masterAgent.balance;
     
