@@ -198,7 +198,6 @@ export const AdminRoute = (app) => {
             });
     
             let allData = JSON.parse(JSON.stringify(transactionData));
-            let adminBal = admin.balance;
     
             allData.slice(0).reverse().map((data) => {
                 if (data.transactionType === "Credit") {
@@ -206,9 +205,8 @@ export const AdminRoute = (app) => {
                     data.balance = balances;
                 }
                 if (data.transactionType === "Debit") {
-                    data.debitBalance = adminBal;
-                    // data.amount = -data.amount;
-                    adminBal += data.amount;
+                    balances += data.amount;
+                    data.debitBalance = balances;
                 }
             });
     
