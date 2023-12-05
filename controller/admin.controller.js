@@ -270,32 +270,31 @@ export const AdminController = {
     activateAdmin: async (adminId, isActive, locked) => {
         try {
             const admin = await Admin.findById(adminId);
-
             if (!admin) {
                 throw { code: 404, message: "Admin not found" };
             }
-
             if (isActive === true) {
                 admin.isActive = true;
                 admin.locked = true;
                 await admin.save();
                 return { message: "Admin activated successfully" };
             }
-            else if (isActive === false) {
+             else if (isActive === false) {
+                if (locked === false) {
+                    admin.locked = false;
+                    admin.isActive = false;
+                    await admin.save();
+                    return { message: "Admin locked successfully" };
+                } else{
                 admin.isActive = false;
                 await admin.save();
                 return { message: "Admin Suspended successfully" };
-            } else if (locked === false) {
-                admin.locked = false;
-                await admin.save();
-                return { message: "Admin locked successfully" };
             }
-
+            }
         } catch (err) {
             throw { code: err.code || 500, message: err.message || "Internal Server Error" };
         }
     },
-
 
     editCreditRef: async (adminId, creditRef) => {
         try {
