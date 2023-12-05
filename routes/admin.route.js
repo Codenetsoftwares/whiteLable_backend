@@ -33,19 +33,19 @@ export const AdminRoute = (app) => {
             const { userName, password } = req.body;
             const admin = await Admin.findOne({ userName: userName });
             const accesstoken = await AdminController.GenerateAdminAccessToken(userName, password);
-            const loginTime = new Date();
-            const ipAddress = req.headers['cf-connecting-ip'] || req.headers['x-real-ip'] || req.headers['x-forwarded-for'] || req.connection.remoteAddress || ' ';
-            console.log(`Client IP address: ${ipAddress}`);
-            console.log('first')
-            const ipinfoResponse = await axios.get(`http://ipinfo.io/${ipAddress}?token=377a39a48cae33`);
-            console.log('second')
-            console.log('ipinfo', ipinfoResponse);
+            // const loginTime = new Date();
+            // const ipAddress = req.headers['cf-connecting-ip'] || req.headers['x-real-ip'] || req.headers['x-forwarded-for'] || req.connection.remoteAddress || ' ';
+            // console.log(`Client IP address: ${ipAddress}`);
+            // console.log('first')
+            // const ipinfoResponse = await axios.get(`http://ipinfo.io/${ipAddress}?token=377a39a48cae33`);
+            // console.log('second')
+            // console.log('ipinfo', ipinfoResponse);
 
-            const location = ipinfoResponse.data;
-            const user = { accesstoken, loginTime, ipAddress, location };
-            console.log('third')
+            // const location = ipinfoResponse.data;
+            // const user = { accesstoken, loginTime, ipAddress, location };
+            // console.log('third')
             if (admin && accesstoken) {
-                res.status(200).send({ code: 200, message: "Login Successfully", token: user });
+                res.status(200).send({ code: 200, message: "Login Successfully", token: accesstoken });
             } else {
                 res.status(404).json({ code: 404, message: 'Invalid Access Token or Admin' });
             }
