@@ -6,7 +6,7 @@ import { HyperAgentController } from "../controller/hyperAgent.controller.js";
 import { SuperAgentController } from "../controller/superAgent.controller.js";
 import { Trash } from "../models/trash.model.js";
 import axios from "axios";
-
+import * as http from 'http';
 
 
 export const AdminRoute = (app) => {
@@ -29,21 +29,12 @@ export const AdminRoute = (app) => {
 
     app.post("/api/admin-login", async (req, res) => {
         try {
-            console.log('req', req.ip);
             const { userName, password } = req.body;
             const admin = await Admin.findOne({ userName: userName });
             const accesstoken = await AdminController.GenerateAdminAccessToken(userName, password);
-            // const loginTime = new Date();
-            // const ipAddress = req.headers['cf-connecting-ip'] || req.headers['x-real-ip'] || req.headers['x-forwarded-for'] || req.connection.remoteAddress || ' ';
-            // console.log(`Client IP address: ${ipAddress}`);
-            // console.log('first')
-            // const ipinfoResponse = await axios.get(`http://ipinfo.io/${ipAddress}?token=377a39a48cae33`);
-            // console.log('second')
-            // console.log('ipinfo', ipinfoResponse);
+            const loginTime = new Date();
 
-            // const location = ipinfoResponse.data;
             // const user = { accesstoken, loginTime, ipAddress, location };
-            // console.log('third')
             if (admin && accesstoken) {
                 res.status(200).send({ code: 200, message: "Login Successfully", token: accesstoken });
             } else {
@@ -53,6 +44,53 @@ export const AdminRoute = (app) => {
             console.error('Error:', err.message);
             res.status(err.response?.status || 500).send({ code: err.code, message: err.message });
         }
+    });
+
+    //IP
+
+    app.get('/getip/:username', async (req, res) => {
+        http.get({ 'host': 'api64.ipify.org', 'port': 80, 'path': '/' }, function (resp) {
+            let ip = '';
+
+            resp.on('data', function (chunk) {
+                ip += chunk;
+            });
+
+            resp.on('end', async function () {
+                console.log("ip", ip);
+                const userName = req.params.username
+                let admin = await Admin.findOne({ userName: userName });
+                console.log('amdin', admin)
+                try {
+                    const data = await fetch(`http://ip-api.com/json/${ip}`);
+                    const collect = await data.json();
+                    const adminInstance = new Admin({
+                        userName: admin.userName,
+                        ip: {
+                            IP: collect.query,
+                            country: collect.country,
+                            region: collect.regionName,
+                            timezone: collect.timezone,
+                        },
+                        isActive: admin.isActive,
+                        locked: admin.locked
+                    });
+
+                    await adminInstance.save();
+
+                    const responseObj = {
+                        userName: adminInstance.userName,
+                        ip: adminInstance.ip,
+                      };
+
+                    console.log("ipppp", responseObj);
+                    res.json(responseObj); // Send the collected data as a JSON response
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                    res.status(500).json({ error: 'Internal Server Error' });
+                }
+            });
+        });
     });
 
 
@@ -431,7 +469,7 @@ export const AdminRoute = (app) => {
 
     //Partnership
 
-    app.post("/api/admin/partnership/:adminId",Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
+    app.post("/api/admin/partnership/:adminId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
             const adminId = req.params.adminId;
             const { partnership } = req.body;
@@ -443,14 +481,14 @@ export const AdminRoute = (app) => {
         }
 
     });
-    
+
     // app.put("/api/admin/update-partnership/:adminId",Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
     //     try {
     //         const adminId = req.params.adminId;
     //         const { partnership } = req.body;
-    
+
     //         const updatedPartnership = await AdminController.editPartnership(adminId, partnership);
-        
+
     //         res.json(updatedPartnership);
     //     } catch (error) {
     //         console.error(error.message);
@@ -462,8 +500,8 @@ export const AdminRoute = (app) => {
         try {
             const id = req.params.id;
             const admin = await Admin.findById(id);
-            
-            console.log('admin',admin)
+
+            console.log('admin', admin)
             const transferData = {
                 partnership: admin.partnership,
                 date: admin.creditRefDate,
@@ -480,8 +518,8 @@ export const AdminRoute = (app) => {
         try {
             const id = req.params.id;
             const admin = await Admin.findById(id);
-            
-            console.log('admin',admin)
+
+            console.log('admin', admin)
             const transferData = {
                 creditRef: admin.creditRef,
                 date: admin.creditRefDate,
