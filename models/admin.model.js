@@ -7,8 +7,8 @@ export const Admin = new mongoose.model("Admin", new mongoose.Schema({
     tokens: { ResetPassword: { type: String } },
     roles: [{ type: String, required: true }],
     balance: { type: Number, default: 0},
+    partnership: { type: Number, default: 0},
     depositBalance: { type: Number, default: 0 },
-    
     transferAmount: [
         {
             amount: { type: Number, default: 0 },
