@@ -271,7 +271,6 @@ export const AdminRoute = (app) => {
 
 
     // view creates
-
     app.get("/api/view-all-creates/:createdBy", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
             const createdBy = req.params.createdBy;
@@ -290,6 +289,7 @@ export const AdminRoute = (app) => {
                     loadBalance: users.loadBalance,
                     creditRef: users.creditRef,
                     refProfitLoss: users.refProfitLoss,
+                    partnership : users.partnership,
 
                 };
             })
