@@ -37,70 +37,70 @@ export const SuperAgentController = {
 
     // trasfer amount super agent to master agent
  
-    transferAmountSuperagent: async (SuperAgentUserName,masterAgentUserName,trnsfAmnt,remarks) => {
-        try {
-            const superAgent = await Admin.findOne({ userName: SuperAgentUserName ,roles: { $in: ["SuperAgent"]}}).exec();
+    // transferAmountSuperagent: async (SuperAgentUserName,masterAgentUserName,trnsfAmnt,remarks) => {
+    //     try {
+    //         const superAgent = await Admin.findOne({ userName: SuperAgentUserName ,roles: { $in: ["SuperAgent"]}}).exec();
     
-            if (!superAgent) {
-                throw { code: 404, message: "superAgent Not Found For Transfer" };
-            }
+    //         if (!superAgent) {
+    //             throw { code: 404, message: "superAgent Not Found For Transfer" };
+    //         }
     
-            const masterAgent = await Admin.findOne({ userName: masterAgentUserName,roles: { $in: ["MasterAgent"] } }).exec();
+    //         const masterAgent = await Admin.findOne({ userName: masterAgentUserName,roles: { $in: ["MasterAgent"] } }).exec();
     
-            if (!masterAgent) {
-                throw { code: 404, message: "masterAgent Not Found" };
-            }
+    //         if (!masterAgent) {
+    //             throw { code: 404, message: "masterAgent Not Found" };
+    //         }
     
-            if (!superAgent.isActive) {
-                throw { code: 404, message: 'superAgent is inactive' };
-            }
+    //         if (!superAgent.isActive) {
+    //             throw { code: 404, message: 'superAgent is inactive' };
+    //         }
       
-            if (!masterAgent.isActive) {
-                throw { code: 404, message: 'masterAgent is inactive' };
-            }
+    //         if (!masterAgent.isActive) {
+    //             throw { code: 404, message: 'masterAgent is inactive' };
+    //         }
 
-            if (superAgent.balance < trnsfAmnt) {
-                throw { code: 400, message: "Insufficient balance for the transfer" };
-            }
-            const transferRecordDebit = {
-                transactionType:"Debit",
-                amount: trnsfAmnt,
-                From: superAgent.userName,
-                To: masterAgent.userName,
-                date: new Date(),
-                remarks : remarks 
-            };
+    //         if (superAgent.balance < trnsfAmnt) {
+    //             throw { code: 400, message: "Insufficient balance for the transfer" };
+    //         }
+    //         const transferRecordDebit = {
+    //             transactionType:"Debit",
+    //             amount: trnsfAmnt,
+    //             From: superAgent.userName,
+    //             To: masterAgent.userName,
+    //             date: new Date(),
+    //             remarks : remarks 
+    //         };
     
-            const transferRecordCredit = {
-                transactionType:"Credit",
-                amount: trnsfAmnt,
-                From: superAgent.userName,
-                To: masterAgent.userName,
-                date: new Date(),
-                remarks : remarks 
-            };
+    //         const transferRecordCredit = {
+    //             transactionType:"Credit",
+    //             amount: trnsfAmnt,
+    //             From: superAgent.userName,
+    //             To: masterAgent.userName,
+    //             date: new Date(),
+    //             remarks : remarks 
+    //         };
    
-            superAgent.remarks = remarks;
-            superAgent.balance -= trnsfAmnt;
-            masterAgent.balance += trnsfAmnt;
-            masterAgent.loadBalance += trnsfAmnt
-            // masterAgent.creditRef += trnsfAmnt;
-            // superAgent.refProfitLoss = superAgent.creditRef - superAgent.balance;
-            // masterAgent.refProfitLoss = masterAgent.creditRef - masterAgent.balance;
+    //         superAgent.remarks = remarks;
+    //         superAgent.balance -= trnsfAmnt;
+    //         masterAgent.balance += trnsfAmnt;
+    //         masterAgent.loadBalance += trnsfAmnt
+    //         // masterAgent.creditRef += trnsfAmnt;
+    //         // superAgent.refProfitLoss = superAgent.creditRef - superAgent.balance;
+    //         // masterAgent.refProfitLoss = masterAgent.creditRef - masterAgent.balance;
     
-            if (!superAgent.transferAmount) {
-                superAgent.transferAmount = [];
-            }
+    //         if (!superAgent.transferAmount) {
+    //             superAgent.transferAmount = [];
+    //         }
 
-            superAgent.transferAmount.push(transferRecordDebit); 
-            masterAgent.transferAmount.push(transferRecordCredit);
+    //         superAgent.transferAmount.push(transferRecordDebit); 
+    //         masterAgent.transferAmount.push(transferRecordCredit);
 
-            await superAgent.save();
-            await masterAgent.save();
+    //         await superAgent.save();
+    //         await masterAgent.save();
 
-            return { message: "Balance Transfer Successfully" };
-          } catch (err) {
-            throw { code: err.code, message: err.message };
-          }
-    },
+    //         return { message: "Balance Transfer Successfully" };
+    //       } catch (err) {
+    //         throw { code: err.code, message: err.message };
+    //       }
+    // },
 }

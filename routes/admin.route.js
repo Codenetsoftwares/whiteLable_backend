@@ -137,44 +137,20 @@ export const AdminRoute = (app) => {
 
     })
 
+    
     // transfer Amount
 
-    app.post("/api/transfer-amount", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent"]), async (req, res) => {
+    app.post("/api/transfer-amount/:userId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent"]), async (req, res) => {
         try {
-            const { adminUserName, whiteLabelUsername, hyperAgentUserName, SuperAgentUserName, masterAgentUserName, trnsfAmnt, remarks } = req.body;
+            const userId = req.params.userId
+            const {receiveUserId,trnsfAmnt, remarks } = req.body;
 
-            let transferResult;
-
-            if (adminUserName && whiteLabelUsername) {
-
-                transferResult = await AdminController.transferAmountadmin(adminUserName, whiteLabelUsername, trnsfAmnt, remarks);
-
-
-            }
-            else if (whiteLabelUsername && hyperAgentUserName) {
-
-                transferResult = await WhiteLabelController.transferAmountWhitelabel(whiteLabelUsername, hyperAgentUserName, trnsfAmnt, remarks);
-
-            }
-            else if (hyperAgentUserName && SuperAgentUserName) {
-
-                transferResult = await HyperAgentController.transferAmounthyperAgent(hyperAgentUserName, SuperAgentUserName, trnsfAmnt, remarks);
-
-            }
-            else if (SuperAgentUserName && masterAgentUserName) {
-
-                transferResult = await SuperAgentController.transferAmountSuperagent(SuperAgentUserName, masterAgentUserName, trnsfAmnt, remarks);
-
-            }
-            //    else if (!transferResult.isActive) {
-            //         throw { code: 404, message: 'Admin is inactive' };
-            //     }
-
-            else {
-                throw { code: 400, message: "Invalid transfer details provided" };
-            }
-
-            console.log("transferResult", transferResult);
+           const transferResult = await AdminController.transferAmountadmin(userId, receiveUserId, trnsfAmnt, remarks);
+           if(!transferResult)
+           {
+            res.status(404).send({ code: 404, message: "User Not Found For Transfer" });
+           }
+           console.log("first",transferResult)
 
             res.status(200).send({ code: 200, message: "Transfer Amount Successfully" });
 
@@ -184,50 +160,59 @@ export const AdminRoute = (app) => {
         }
     });
 
-    // view transaction details
 
-    // app.get("/api/transaction-view/:id", Authorize(["superAdmin","WhiteLabel", "HyperAgent", "SuperAgent","MasterAgent"]),async (req, res) => {
+
+    // app.post("/api/transfer-amount", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent"]), async (req, res) => {
     //     try {
-    //         const id = req.params.id;
-    //         const admin = await Admin.findById(id);
-    //         console.log("bal", admin.balance)
-    //         let balances = 0;
-    //         if (!admin) {
-    //             return res.status(404).json({ message: "User not found" });
-    //         }
+    //         const { userId, receiveUserId,
+    //             //  hyperAgentUserName, SuperAgentUserName, masterAgentUserName,
+    //               trnsfAmnt, remarks } = req.body;
 
-    //         const transferData = admin.transferAmount.map((transfer) => {
-    //             return {   
-    //                 userId: admin.id,
-    //                 From : admin.userName,
-    //                 transferAmount: transfer.amount,
-    //                 To: transfer.userName,
-    //                 date: transfer.date,
-    //                 transactionType: transfer.transactionType,
-    //             };
-    //         });
-    //         transferData.sort((a, b) => {
-    //             const dateA = new Date(a.date);
-    //             const dateB = new Date(b.date);
-    //             return dateB - dateA;
-    //           });
-    //         let allData = JSON.parse(JSON.stringify(transferData));
-    //         allData.slice(0).reverse().map((data) => {
-    // if(data.transactionType === "Debit"){
-    //     admin.balance -= data.transferAmount;
-    //     data.balance = admin.balance;
-    //     console.log("bal2", data.balance)
-    // }
-    // if(data.transactionType === "Credit"){
-    //     balances += data.transferAmount;
-    //     data.balance = balances;
-    // }
-    //         });
-    //         res.status(200).json(allData);
+            // let transferResult;
+
+        //    const transferResult = await AdminController.transferAmountadmin(userId, receiveUserId, trnsfAmnt, remarks);
+        //    console.log("first",transferResult)
+
+
+            // if (adminUserName && whiteLabelUsername) {
+
+            //     transferResult = await AdminController.transferAmountadmin(adminUserName, whiteLabelUsername, trnsfAmnt, remarks);
+
+
+            // }
+            // else if (whiteLabelUsername && hyperAgentUserName) {
+
+            //     transferResult = await WhiteLabelController.transferAmountWhitelabel(whiteLabelUsername, hyperAgentUserName, trnsfAmnt, remarks);
+
+            // }
+            // else if (hyperAgentUserName && SuperAgentUserName) {
+
+            //     transferResult = await HyperAgentController.transferAmounthyperAgent(hyperAgentUserName, SuperAgentUserName, trnsfAmnt, remarks);
+
+            // }
+            // else if (SuperAgentUserName && masterAgentUserName) {
+
+            //     transferResult = await SuperAgentController.transferAmountSuperagent(SuperAgentUserName, masterAgentUserName, trnsfAmnt, remarks);
+
+            // }
+            // //    else if (!transferResult.isActive) {
+            // //         throw { code: 404, message: 'Admin is inactive' };
+            // //     }
+
+            // else {
+            //     throw { code: 400, message: "Invalid transfer details provided" };
+            // }
+
+            // console.log("transferResult", transferResult);
+
+    //         res.status(200).send({ code: 200, message: "Transfer Amount Successfully" });
+
     //     } catch (err) {
-    //         res.status(500).json({ code: err.code, message: err.message });
+    //         const statusCode = err.code || 500;
+    //         res.status(statusCode).send({ code: err.code, message: err.message });
     //     }
     // });
+
 
     app.get("/api/transaction-view/:id", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
