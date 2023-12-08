@@ -195,75 +195,77 @@ export const AdminController = {
         }
     },
 
-    // admin transfer amount to white label transfer amount
-    transferAmountadmin: async (adminUserName, whiteLabelUsername, trnsfAmnt, remarks) => {
+    // Transfer Amount To Only Created Account
+    
+    transferAmountadmin: async (userId, receiveUserId, trnsfAmnt, remarks) => {
         try {
-            const admin = await Admin.findOne({ userName: adminUserName, roles: { $in: ["superAdmin"] } }).exec();
-
+            const admin = await Admin.findById({ _id: userId }).exec();
+    
             if (!admin) {
                 throw { code: 404, message: "Admin Not Found For Transfer" };
             }
-
-            const whiteLabel = await Admin.findOne({ userName: whiteLabelUsername, roles: { $in: ["WhiteLabel"] } }).exec();
-
-            if (!whiteLabel) {
-                throw { code: 404, message: "White Label Not Found" };
+    
+            const receiveUser = await Admin.findById({ _id: receiveUserId, createBy: userId }).exec();
+    
+            if (!receiveUser) {
+                throw { code: 404, message: "Receive User Not Found or Not Created by the Admin" };
             }
-
-
+    
             if (!admin.isActive) {
                 throw { code: 404, message: 'Admin is inactive' };
             }
-
-            if (!whiteLabel.isActive) {
-                throw { code: 404, message: 'White Label is inactive' };
+    
+            if (!receiveUser.isActive) {
+                throw { code: 404, message: 'Receive User is inactive' };
             }
-
-
+    
             if (admin.balance < trnsfAmnt) {
                 throw { code: 400, message: "Insufficient balance for the transfer" };
             }
-
+    
+            if (!receiveUser.createBy.equals(admin._id)) {
+                throw { code: 403, message: "You can only send money to users created by you." };
+            }
+    
             const transferRecordDebit = {
                 transactionType: "Debit",
                 amount: trnsfAmnt,
                 From: admin.userName,
-                To: whiteLabel.userName,
+                To: receiveUser.userName,
                 date: new Date(),
                 remarks: remarks
-
             };
-
+    
             const transferRecordCredit = {
                 transactionType: "Credit",
                 amount: trnsfAmnt,
                 From: admin.userName,
-                To: whiteLabel.userName,
+                To: receiveUser.userName,
                 date: new Date(),
                 remarks: remarks
             };
+    
             admin.remarks = remarks;
             admin.balance -= trnsfAmnt;
-            whiteLabel.balance += trnsfAmnt;
-            whiteLabel.loadBalance += trnsfAmnt;
-            // whiteLabel.creditRef += trnsfAmnt;
-            // whiteLabel.refProfitLoss =  whiteLabel.creditRef - whiteLabel.balance;
-
+            receiveUser.balance += trnsfAmnt;
+            receiveUser.loadBalance += trnsfAmnt;
+    
             if (!admin.transferAmount) {
                 admin.transferAmount = [];
             }
-
+    
             admin.transferAmount.push(transferRecordDebit);
-            whiteLabel.transferAmount.push(transferRecordCredit);
-
-
+            receiveUser.transferAmount.push(transferRecordCredit);
+    
             await admin.save();
-            await whiteLabel.save();
+            await receiveUser.save();
+    
             return { message: "Balance Transfer Successfully" };
         } catch (err) {
             throw { code: err.code, message: err.message };
         }
     },
+    
 
     // User Active status
 
