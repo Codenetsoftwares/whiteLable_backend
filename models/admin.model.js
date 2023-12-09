@@ -33,6 +33,11 @@ export const Admin = new mongoose.model("Admin", new mongoose.Schema({
     // refProfitLoss : {type : Number, default : 0},
     createBy: { type: ObjectId },
     isActive: { type: Boolean, default: true, required: true },
-    locked: { type: Boolean, default: true, require: true }
+    locked: { type: Boolean, default: true, require: true },
+    hyperActive: { type: Boolean, default: false, required: false },
+    masterActive: { type: Boolean, default: false, required: false },
+    superActive: { type: Boolean, default: false, required: false },
+    whiteActive: { type: Boolean, default: false, required: false },
+
 
 }), 'Admin');
