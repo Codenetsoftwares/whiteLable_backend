@@ -196,37 +196,37 @@ export const AdminController = {
     },
 
     // Transfer Amount To Only Created Account
-    
+
     transferAmountadmin: async (userId, receiveUserId, trnsfAmnt, remarks) => {
         try {
             const admin = await Admin.findById({ _id: userId }).exec();
-    
+
             if (!admin) {
                 throw { code: 404, message: "Admin Not Found For Transfer" };
             }
-    
+
             const receiveUser = await Admin.findById({ _id: receiveUserId, createBy: userId }).exec();
-    
+
             if (!receiveUser) {
                 throw { code: 404, message: "Receive User Not Found or Not Created by the Admin" };
             }
-    
+
             if (!admin.isActive) {
                 throw { code: 404, message: 'Admin is inactive' };
             }
-    
+
             if (!receiveUser.isActive) {
                 throw { code: 404, message: 'Receive User is inactive' };
             }
-    
+
             if (admin.balance < trnsfAmnt) {
                 throw { code: 400, message: "Insufficient balance for the transfer" };
             }
-    
+
             if (!receiveUser.createBy.equals(admin._id)) {
                 throw { code: 403, message: "You can only send money to users created by you." };
             }
-    
+
             const transferRecordDebit = {
                 transactionType: "Debit",
                 amount: trnsfAmnt,
@@ -235,7 +235,7 @@ export const AdminController = {
                 date: new Date(),
                 remarks: remarks
             };
-    
+
             const transferRecordCredit = {
                 transactionType: "Credit",
                 amount: trnsfAmnt,
@@ -244,28 +244,28 @@ export const AdminController = {
                 date: new Date(),
                 remarks: remarks
             };
-    
+
             admin.remarks = remarks;
             admin.balance -= trnsfAmnt;
             receiveUser.balance += trnsfAmnt;
             receiveUser.loadBalance += trnsfAmnt;
-    
+
             if (!admin.transferAmount) {
                 admin.transferAmount = [];
             }
-    
+
             admin.transferAmount.push(transferRecordDebit);
             receiveUser.transferAmount.push(transferRecordCredit);
-    
+
             await admin.save();
             await receiveUser.save();
-    
+
             return { message: "Balance Transfer Successfully" };
         } catch (err) {
             throw { code: err.code, message: err.message };
         }
     },
-    
+
 
     // User Active status
 
@@ -302,14 +302,15 @@ export const AdminController = {
                 console.log('zero')
                 hyperAgent.forEach((data) => {
                     console.log('first', data)
-                    if (data.isActive === false && data.hyperActive === true) {
+                    if (data.isActive === false  && data.hyperActive === true) {
                         data.isActive = true;
                         data.locked = true;
                         data.hyperActive = false;
                     }
-                    else if (data.isActive === false && data.hyperActive === false) {
+                    else if (data.isActive === false   && data.hyperActive === false) {
                         data.isActive = false;
                         data.locked = true;
+                        // data.hyperActive = false;
                     }
                 });
                 masterAgent.forEach((data) => {
@@ -369,6 +370,7 @@ export const AdminController = {
                         else if (data.isActive === false && data.locked === true && data.hyperActive === false) {
                             data.isActive = false;
                             data.locked = false;
+                            // data.hyperActive = true;
                         }
                     });
                     masterAgent.forEach((data) => {
@@ -421,6 +423,10 @@ export const AdminController = {
                             data.isActive = false;
                             data.hyperActive = false;
                         }
+                        // else if (data.isActive === false && data.locked === false && data.hyperActive === false) {
+                        //     data.isActive = false;
+                        //     data.hyperActive = true;
+                        // }
                     });
                     masterAgent.forEach((data) => {
                         if (data.isActive === true && data.hyperActive === false) {
@@ -552,42 +558,49 @@ export const AdminController = {
 
     // Partnership
 
-    // editPartnership: async (adminId, partnership) => {
-    //     try {
-    //         const admin = await Admin.findById(adminId);
-
-    //         if (!admin) {
-    //             throw { code: 404, message: "Admin not found" };
-    //         }
-
-    //         const updatedPartnership = await Admin.findByIdAndUpdate(adminId, { $set: { partnership: partnership } }, { new: true }
-    //         );
-    //         if (!updatedPartnership) {
-    //             throw new Error('Invalid Credentials');
-    //         }
-
-    //         return updatedPartnership;
-    //     } catch (err) {
-    //         throw err;
-    //     }
-    // },
-
-    partnership: async (adminId, partnership) => {
+    editPartnership: async (adminId, partnership) => {
         try {
-            const admin = await Admin.findById(adminId).exec();
+            const admin = await Admin.findById(adminId);
 
             if (!admin) {
-                throw { code: 404, message: "Invalid Credentails" };
+                throw { code: 404, message: "Admin not found" };
             }
+
+            if (admin.isActive === false) {
+                return { code: 200, message: 'Admin is inactive. Update not allowed.' };
+            }
+
             admin.partnership = partnership;
-            admin.creditRefDate = new Date();
-            await admin.save();
+            admin.partnershipDate = new Date();
 
-            return { message: "Partnership Succesfull" };
-        } catch (error) {
-            throw { code: error.code, message: error.message };
+            const updatedAdmin = await admin.save();
 
+            if (!updatedAdmin) {
+                throw { code: 500, message: 'Cannot update admin creditRef' };
+            }
+
+            return updatedAdmin;
+        } catch (err) {
+            throw err;
         }
     },
+
+    // partnership: async (adminId, partnership) => {
+    //     try {
+    //         const admin = await Admin.findById(adminId).exec();
+
+    //         if (!admin) {
+    //             throw { code: 404, message: "Invalid Credentails" };
+    //         }
+    //         admin.partnership = partnership;
+    //         admin.creditRefDate = new Date();
+    //         await admin.save();
+
+    //         return { message: "Partnership Succesfull" };
+    //     } catch (error) {
+    //         throw { code: error.code, message: error.message };
+
+    //     }
+    // },
 
 }

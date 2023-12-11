@@ -454,32 +454,20 @@ export const AdminRoute = (app) => {
 
     //Partnership
 
-    app.post("/api/admin/partnership/:adminId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
+
+    app.put("/api/admin/update-partnership/:adminId",Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
             const adminId = req.params.adminId;
             const { partnership } = req.body;
-            const partner_ship = await AdminController.partnership(adminId, partnership)
-            console.log("partnership", partner_ship)
-            res.status(200).send({ code: 200, message: "Partnership Successfully" })
-        } catch (err) {
-            res.status(500).send({ code: err.code, message: err.message })
+
+            const updatedPartnership = await AdminController.editPartnership(adminId, partnership);
+
+            res.json(updatedPartnership);
+        } catch (error) {
+            console.error(error.message);
+            res.status(500).json({ error: 'Invalid Credentials' });
         }
-
     });
-
-    // app.put("/api/admin/update-partnership/:adminId",Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
-    //     try {
-    //         const adminId = req.params.adminId;
-    //         const { partnership } = req.body;
-
-    //         const updatedPartnership = await AdminController.editPartnership(adminId, partnership);
-
-    //         res.json(updatedPartnership);
-    //     } catch (error) {
-    //         console.error(error.message);
-    //         res.status(500).json({ error: 'Invalid Credentials' });
-    //     }
-    // });
 
     app.get("/api/partnershipView/:id", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
