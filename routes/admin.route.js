@@ -275,8 +275,7 @@ export const AdminRoute = (app) => {
                     creditRef: users.creditRef,
                     refProfitLoss: users.refProfitLoss,
                     partnership : users.partnership,
-                    isActive : users.isActive,
-                    locked  : users.locked,
+                    Status : users.isActive ? "Active" : !users.locked ? "Locked" : !users.isActive? "Suspended" : ""
 
                 };
             })
@@ -315,20 +314,15 @@ export const AdminRoute = (app) => {
 
     app.post("/api/activate/:adminId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
-            const adminId = req.params.adminId;
-            const isActive = req.body.isActive;
-            const locked = req.body.locked;
-            const result = await AdminController.activateAdmin(adminId, isActive, locked);
+            const adminId = req.params.adminId
+            const { isActive, locked } = req.body;
+            const adminActive = await AdminController.activateAdmin(adminId, isActive,locked);
+            res.status(200).send(adminActive)
+        }catch(err)
+            {
+                res.status(500).send({ code: err.code, message: err.message });
 
-            if (result) {
-                res.status(200).send(result);
-            } else {
-                res.status(result.code).send(result);
             }
-        } catch (err) {
-            console.error("message", err.message);
-            res.status(500).send({ code: err.code, message: err.message });
-        }
     });
 
 
