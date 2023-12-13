@@ -272,15 +272,15 @@ export const AdminController = {
     activateAdmin: async (adminId, isActive, locked) => {
         try {
             const admin = await Admin.findById(adminId);
-            console.log('admin', admin._id)
+            // console.log('admin', admin._id)
             const whiteLabel = await Admin.find({ createBy: adminId, roles: { $in: ["WhiteLabel"] } }).exec();
-            console.log('whiteLabel', whiteLabel)
+            // console.log('whiteLabel', whiteLabel)
             const hyperAgent = await Admin.find({ createBy: adminId, roles: { $in: ["HyperAgent"] } }).exec();
-            console.log('hyperAgent', hyperAgent)
+            // console.log('hyperAgent', hyperAgent)
             const masterAgent = await Admin.find({ createBy: adminId, roles: { $in: ["MasterAgent"] } }).exec();
-            console.log('masterAgent', masterAgent)
+            // console.log('masterAgent', masterAgent)
             const superAgent = await Admin.find({ createBy: adminId, roles: { $in: ["SuperAgent"] } }).exec();
-            console.log('superAgent', superAgent)
+            // console.log('superAgent', superAgent)
             if (!admin) {
                 throw { code: 404, message: "Admin not found" };
             }
@@ -289,56 +289,82 @@ export const AdminController = {
                 admin.locked = true;
                 superAgent.map((data) => {
                     // console.log('data', data.length)
-                    if (data.isActive === false && data.hyperActive === true) {
+                    if (data.isActive === false && data.locked === false && data.superAgent === true && data.checkActive === true) {
+                        console.log('319 act')
                         data.isActive = true;
                         data.locked = true;
-                        data.hyperActive = false;
-                    }
-                    else if (data.isActive === false && data.hyperActive === false) {
+                        data.masterActive = false;
+                        data.checkActive = false;
+                    } //checked
+
+                    else if (data.isActive === false && data.locked === false && data.superAgent === true && data.checkActive === false) {
+                        console.log('335 act')
                         data.isActive = false;
                         data.locked = true;
-                    }
+                        data.masterActive = false
+                    } //checked
                 })
                 console.log('zero')
                 hyperAgent.forEach((data) => {
-                    console.log('first', data)
-                    if (data.isActive === false  && data.hyperActive === true) {
+                    // console.log('first', data)
+                    if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === true) {
+                        console.log('319 act')
                         data.isActive = true;
                         data.locked = true;
-                        data.hyperActive = false;
-                    }
-                    else if (data.isActive === false   && data.hyperActive === false) {
+                        data.masterActive = false;
+                        data.checkActive = false;
+                    } //checked
+
+                    else if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === false) {
+                        console.log('335 act')
                         data.isActive = false;
                         data.locked = true;
-                        // data.hyperActive = false;
-                    }
+                        data.masterActive = false
+                    } //checked
                 });
                 masterAgent.forEach((data) => {
-                    if (data.isActive === false && data.hyperActive === true) {
+                    if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === true) {
+                        console.log('319 act')
                         data.isActive = true;
                         data.locked = true;
-                        data.hyperActive = false;
-                    }
-                    else if (data.isActive === false && data.hyperActive === false) {
-                        data.isActive = false;
+                        data.masterActive = false;
+                        data.checkActive = false;
+                    } //checked
+                    else if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === false) {
+                        console.log('335 act')
                         data.locked = true;
-                    }
+                        data.masterActive = false;
+                    } //checked
+                    else if (data.isActive === false && data.locked === true && data.masterActive === true && data.checkActive === true) {
+                        console.log('335 act')
+                        data.isActive = true;
+                        data.locked = true;
+                        data.masterActive = false;
+                        data.checkActive = false;
+                    } //checked
+
+
 
                 })
                 whiteLabel.forEach((data) => {
-                    if (data.isActive === false && data.hyperActive === true) {
+                    if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === true) {
+                        console.log('319 act')
                         data.isActive = true;
                         data.locked = true;
-                        data.hyperActive = false;
-                    }
-                    else if (data.isActive === false && data.hyperActive === false) {
+                        data.masterActive = false;
+                        data.checkActive = false;
+                    } //checked
+
+                    else if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === false) {
+                        console.log('335 act')
                         data.isActive = false;
                         data.locked = true;
-                    }
+                        data.masterActive = false
+                    } //checked
 
                 })
 
-                console.log('hyper', hyperAgent)
+                // console.log('hyper', hyperAgent)
                 await admin.save();
                 await Promise.all(hyperAgent.map(data => data.save()));
                 await Promise.all(masterAgent.map(data => data.save()));
@@ -351,48 +377,127 @@ export const AdminController = {
                     admin.locked = false;
                     admin.isActive = false;
                     superAgent.forEach((data) => {
-                        if (data.isActive === true && data.locked === true && data.hyperActive === false) {
+                        if (data.isActive === true && data.locked === true && data.superActive === false && data.checkActive === false) {
+                            console.log('391 lock')
                             data.isActive = false;
                             data.locked = false;
-                            data.hyperActive = true;
+                            data.superActive = true;
+                            data.checkActive = true
+                        } //checked
+
+                        else if (data.isActive === false && data.locked === true && data.superActive === true) {
+                            data.isActive = false;
+                            data.locked = false;
+                            data.checkActive = true;
+                            console.log('402 lock')
                         }
-                        else if (data.isActive === false && data.locked === true && data.hyperActive === false) {
-                            data.isActive = false;
+                        else if (data.isActive === false && data.locked === true && data.superActive === false && data.checkActive === false) {
                             data.locked = false;
+                            data.superActive = true;
+                            console.log('408 lock')
+                        } //checked
+                        else if (data.isActive === false && data.locked === true && data.superActive === true && data.checkActive === true) {
+                            data.locked = false;
+                            console.log('408 lock')
+                        } //checked
+                        else if (data.isActive === false && data.locked === false && data.superActive === true && data.checkActive === true) {
+                            data.isActive = true;
+                            data.locked = true;
+                            data.superActive = false;
+                            // data.checkActive = false
                         }
                     });
                     hyperAgent.forEach((data) => {
-                        if (data.isActive === true && data.locked === true && data.hyperActive === false) {
+                        if (data.isActive === true && data.locked === true && data.hyperActive === false && data.checkActive === false) {
+                            console.log('391 lock')
                             data.isActive = false;
                             data.locked = false;
                             data.hyperActive = true;
-                        }
-                        else if (data.isActive === false && data.locked === true && data.hyperActive === false) {
+                            data.checkActive = true
+                        } //checked
+
+                        else if (data.isActive === false && data.locked === true && data.hyperActive === true) {
                             data.isActive = false;
                             data.locked = false;
-                            // data.hyperActive = true;
+                            data.checkActive = true;
+                            console.log('402 lock')
+                        }
+                        else if (data.isActive === false && data.locked === true && data.hyperActive === false && data.checkActive === false) {
+                            data.locked = false;
+                            data.hyperActive = true;
+                            console.log('408 lock')
+                        } //checked
+                        else if (data.isActive === false && data.locked === true && data.hyperActive === true && data.checkActive === true) {
+                            data.locked = false;
+                            console.log('408 lock')
+                        } //checked
+                        else if (data.isActive === false && data.locked === false && data.hyperActive === true && data.checkActive === true) {
+                            data.isActive = true;
+                            data.locked = true;
+                            data.hyperActive = false;
+                            data.checkActive === false
                         }
                     });
                     masterAgent.forEach((data) => {
-                        if (data.isActive === true && data.locked === true && data.hyperActive === false) {
+                        if (data.isActive === true && data.locked === true && data.masterActive === false && data.checkActive === false) {
+                            console.log('391 lock')
                             data.isActive = false;
                             data.locked = false;
-                            data.hyperActive = true;
+                            data.masterActive = true;
+                            data.checkActive = true
+                        } //checked
+
+                        else if (data.isActive === false && data.locked === true && data.masterActive === true) {
+                            data.isActive = false;
+                            data.locked = false;
+                            data.checkActive = true;
+                            console.log('402 lock')
                         }
-                        else if (data.isActive === false && data.locked === true && data.hyperActive === false) {
-                            data.isActive = false;
+                        else if (data.isActive === false && data.locked === true && data.masterActive === false && data.checkActive === false) {
                             data.locked = false;
+                            data.masterActive = true;
+                            console.log('408 lock')
+                        } //checked
+                        else if (data.isActive === false && data.locked === true && data.masterActive === true && data.checkActive === true) {
+                            data.locked = false;
+                            console.log('408 lock')
+                        } //checked
+                        else if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === true) {
+                            data.isActive = true;
+                            data.locked = true;
+                            data.masterActive = false;
+                            data.checkActive === false
                         }
                     });
                     whiteLabel.forEach((data) => {
-                        if (data.isActive === true && data.locked === true && data.hyperActive === false) {
+                        if (data.isActive === true && data.locked === true && data.whiteActive === false && data.checkActive === false) {
+                            console.log('391 lock')
                             data.isActive = false;
                             data.locked = false;
-                            data.hyperActive = true;
+                            data.whiteActive = true;
+                            data.checkActive = true
+                        } //checked
+
+                        else if (data.isActive === false && data.locked === true && data.whiteActive === true) {
+                            data.isActive = false;
+                            data.locked = false;
+                            data.checkActive = true;
+                            console.log('402 lock')
                         }
-                        else if (data.isActive === false && data.locked === true && data.hyperActive === false) {
-                            data.isActive = false;
+                        else if (data.isActive === false && data.locked === true && data.whiteActive === false && data.checkActive === false) {
                             data.locked = false;
+                            data.whiteActive = true;
+                            console.log('408 lock')
+                        } //checked
+                        else if (data.isActive === false && data.locked === true && data.whiteActive === true && data.checkActive === true) {
+                            data.locked = false;
+                            console.log('408 lock')
+                        } //checked
+                        else if (data.isActive === false && data.locked === false && data.whiteActive === true && data.checkActive === true) {
+                            data.isActive = true;
+                            data.locked = true;
+                            data.whiteActive = false;
+                            data.checkActive === false
                         }
                     });
 
@@ -405,47 +510,65 @@ export const AdminController = {
                 } else {
                     admin.isActive = false;
                     superAgent.forEach((data) => {
-                        if (data.isActive === true && data.hyperActive === false) {
+                        if (data.isActive === true && data.locked === true && data.superActive === false) {
                             data.isActive = false;
-                            data.hyperActive = true;
+                            data.locked = true;
+                            data.superActive = true;
+                            data.checkActive = true
                         }
-                        else if (data.isActive === false && data.locked === true && data.hyperActive === false) {
-                            data.isActive = false;
-                            data.hyperActive = false;
+                        else if (data.isActive === false && data.locked === false && data.superActive === true && data.checkActive === false) {
+                            data.locked = true;
+                            data.superActive = false;
+                        }
+                        else if (data.isActive === false && data.locked === false && data.superActive === true && data.checkActive === true) {
+                            data.locked = true;
                         }
                     });
                     hyperAgent.forEach((data) => {
-                        if (data.isActive === true && data.hyperActive === false) {
+                        if (data.isActive === true && data.locked === true && data.hyperActive === false) {
                             data.isActive = false;
+                            data.locked = true;
                             data.hyperActive = true;
+                            data.checkActive = true
                         }
-                        else if (data.isActive === false && data.locked === true && data.hyperActive === false) {
-                            data.isActive = false;
+                        else if (data.isActive === false && data.locked === false && data.hyperActive === true && data.checkActive === false) {
+                            data.locked = true;
                             data.hyperActive = false;
                         }
-                        // else if (data.isActive === false && data.locked === false && data.hyperActive === false) {
-                        //     data.isActive = false;
-                        //     data.hyperActive = true;
-                        // }
+                        else if (data.isActive === false && data.locked === false && data.hyperActive === true && data.checkActive === true) {
+                            data.locked = true;
+                        }
                     });
                     masterAgent.forEach((data) => {
-                        if (data.isActive === true && data.hyperActive === false) {
+                        if (data.isActive === true && data.locked === true && data.masterActive === false) {
                             data.isActive = false;
-                            data.hyperActive = true;
+                            data.locked = true;
+                            data.masterActive = true;
+                            data.checkActive = true
                         }
-                        else if (data.isActive === false && data.locked === true && data.hyperActive === false) {
-                            data.isActive = false;
-                            data.hyperActive = false;
+                        else if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === false) {
+                            data.locked = true;
+                            data.masterActive = false;
                         }
+                        else if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === true) {
+                            data.locked = true;
+                        }
+
+
                     });
                     whiteLabel.forEach((data) => {
-                        if (data.isActive === true && data.hyperActive === false) {
+                        if (data.isActive === true && data.locked === true && data.whiteActive === false) {
                             data.isActive = false;
-                            data.hyperActive = true;
+                            data.locked = true;
+                            data.whiteActive = true;
+                            data.checkActive = true
                         }
-                        else if (data.isActive === false && data.locked === true && data.hyperActive === false) {
-                            data.isActive = false;
-                            data.hyperActive = false;
+                        else if (data.isActive === false && data.locked === false && data.whiteActive === true && data.checkActive === false) {
+                            data.locked = true;
+                            data.whiteActive = false;
+                        }
+                        else if (data.isActive === false && data.locked === false && data.whiteActive === true && data.checkActive === true) {
+                            data.locked = true;
                         }
                     });
                     await admin.save();
@@ -461,6 +584,37 @@ export const AdminController = {
             throw { code: err.code || 500, message: err.message || "Internal Server Error" };
         }
     },
+
+    // activateAdmin: async (adminId, isActive, locked) => {
+    //     try {
+    //         const admin = await Admin.findById(adminId);
+    //         if (!admin) {
+    //             throw { code: 404, message: "Admin not found" };
+    //         }
+    //         const subAdmins = await Admin.find({ createBy: adminId });
+    //         admin.isActive = isActive;
+    //         admin.locked = locked !== undefined ? locked : false;
+    //         await admin.save();
+    //         for (const subAdmin of subAdmins) {
+    //             console.log('subadmin',subAdmin)
+    //             if (!subAdmin.originalState) {
+    //                 subAdmin.originalState = {
+    //                     isActive: subAdmin.isActive,
+    //                     locked: subAdmin.locked
+    //                 };
+    //                 await subAdmin.save();
+    //             }
+    //             subAdmin.isActive = isActive;
+    //             subAdmin.locked = locked !== undefined ? locked : false;
+    //             await subAdmin.save();
+    //         }
+    //         return {
+    //             message: `Admin ${isActive ? 'activated' : 'suspended'} successfully`,
+    //         };
+    //     } catch (err) {
+    //         throw { code: err.code || 500, message: err.message || "Internal Server Error" };
+    //     }
+    // },
 
     editCreditRef: async (adminId, creditRef) => {
         try {
