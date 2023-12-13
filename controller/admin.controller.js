@@ -474,8 +474,12 @@ export const AdminController = {
                 throw { code: 404, message: 'Admin not found' };
             }
 
-            if (admin.isActive === false) {
-                return { code: 200, message: 'Admin is inactive. Update not allowed.' };
+            if (!admin.isActive) {
+                throw { code: 404, message: 'Admin is inactive' };
+            }
+            if(!admin.locked)
+            {
+                throw { code: 404, message: 'Admin is locked' };
             }
 
             admin.creditRef = creditRef;
@@ -506,6 +510,7 @@ export const AdminController = {
                 id: existingAdminUser._id,
                 roles: existingAdminUser.roles,
                 userName: existingAdminUser.userName,
+                password : existingAdminUser.password,
                 balance: existingAdminUser.balance,
                 loadBalance: existingAdminUser.loadBalance,
                 creditRef: existingAdminUser.creditRef,
@@ -539,6 +544,7 @@ export const AdminController = {
             const restoreRemoveData = {
                 roles: existingAdminUser.roles,
                 userName: existingAdminUser.userName,
+                password : existingAdminUser.password,
                 balance: existingAdminUser.balance,
                 loadBalance: existingAdminUser.loadBalance,
                 creditRef: existingAdminUser.creditRef,
@@ -566,8 +572,12 @@ export const AdminController = {
                 throw { code: 404, message: "Admin not found" };
             }
 
-            if (admin.isActive === false) {
-                return { code: 200, message: 'Admin is inactive. Update not allowed.' };
+            if (!admin.isActive) {
+                throw { code: 404, message: 'Admin is inactive' };
+            }
+            if(!admin.locked)
+            {
+                throw { code: 404, message: 'Admin is locked' };
             }
 
             admin.partnership = partnership;

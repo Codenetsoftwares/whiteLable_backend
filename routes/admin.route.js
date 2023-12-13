@@ -275,6 +275,8 @@ export const AdminRoute = (app) => {
                     creditRef: users.creditRef,
                     refProfitLoss: users.refProfitLoss,
                     partnership : users.partnership,
+                    isActive : users.isActive,
+                    locked  : users.locked,
 
                 };
             })
@@ -336,7 +338,11 @@ export const AdminRoute = (app) => {
             const adminId = req.params.adminId;
             const { creditRef } = req.body;
             const updatedAdmin = await AdminController.editCreditRef(adminId, creditRef);
-            res.json(updatedAdmin);
+            if (updatedAdmin) {
+                res.status(200).send({ message: "CreditRef Edit successfully" });
+            } else {
+                res.status(404).send({ message: "Data not found" });
+            }
         } catch (err) {
             // console.error(err.message);
             res.status(500).json({ err: err.message });
@@ -461,8 +467,12 @@ export const AdminRoute = (app) => {
             const { partnership } = req.body;
 
             const updatedPartnership = await AdminController.editPartnership(adminId, partnership);
-
-            res.json(updatedPartnership);
+            if (updatedPartnership) {
+                res.status(200).send({ message: "Partnership Edit successfully" });
+            } else {
+                res.status(404).send({ message: "Data not found" });
+            }
+            // res.json(updatedPartnership);
         } catch (error) {
             console.error(error.message);
             res.status(500).json({ error: 'Invalid Credentials' });
