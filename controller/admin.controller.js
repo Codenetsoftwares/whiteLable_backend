@@ -288,40 +288,54 @@ export const AdminController = {
                 admin.isActive = true;
                 admin.locked = true;
                 superAgent.map((data) => {
-                    // console.log('data', data.length)
-                    if (data.isActive === false && data.locked === false && data.superAgent === true && data.checkActive === true) {
+                    if (data.isActive === false && data.locked === false && data.superActive === true && data.checkActive === true) {
                         console.log('319 act')
                         data.isActive = true;
                         data.locked = true;
-                        data.masterActive = false;
+                        data.superActive = false;
+                        data.checkActive = false;
+                    } //checked
+                    else if (data.isActive === false && data.locked === false && data.superActive === true && data.checkActive === false) {
+                        console.log('335 act')
+                        data.locked = true;
+                        data.superActive = false;
+                    } //checked
+                    else if (data.isActive === false && data.locked === true && data.superActive === true && data.checkActive === true) {
+                        console.log('335 act')
+                        data.isActive = true;
+                        data.locked = true;
+                        data.superActive = false;
                         data.checkActive = false;
                     } //checked
 
-                    else if (data.isActive === false && data.locked === false && data.superAgent === true && data.checkActive === false) {
-                        console.log('335 act')
-                        data.isActive = false;
-                        data.locked = true;
-                        data.masterActive = false
-                    } //checked
+
+
                 })
                 console.log('zero')
                 hyperAgent.forEach((data) => {
-                    // console.log('first', data)
-                    if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === true) {
+                    if (data.isActive === false && data.locked === false && data.hyperActive === true && data.checkActive === true) {
                         console.log('319 act')
                         data.isActive = true;
                         data.locked = true;
-                        data.masterActive = false;
+                        data.hyperActive = false;
+                        data.checkActive = false;
+                    } //checked
+                    else if (data.isActive === false && data.locked === false && data.hyperActive === true && data.checkActive === false) {
+                        console.log('335 act')
+                        data.locked = true;
+                        data.hyperActive = false;
+                    } //checked
+                    else if (data.isActive === false && data.locked === true && data.hyperActive === true && data.checkActive === true) {
+                        console.log('335 act')
+                        data.isActive = true;
+                        data.locked = true;
+                        data.hyperActive = false;
                         data.checkActive = false;
                     } //checked
 
-                    else if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === false) {
-                        console.log('335 act')
-                        data.isActive = false;
-                        data.locked = true;
-                        data.masterActive = false
-                    } //checked
-                });
+
+
+                })
                 masterAgent.forEach((data) => {
                     if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === true) {
                         console.log('319 act')
@@ -347,20 +361,27 @@ export const AdminController = {
 
                 })
                 whiteLabel.forEach((data) => {
-                    if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === true) {
+                    if (data.isActive === false && data.locked === false && data.whiteActive === true && data.checkActive === true) {
                         console.log('319 act')
                         data.isActive = true;
                         data.locked = true;
-                        data.masterActive = false;
+                        data.whiteActive = false;
+                        data.checkActive = false;
+                    } //checked
+                    else if (data.isActive === false && data.locked === false && data.whiteActive === true && data.checkActive === false) {
+                        console.log('335 act')
+                        data.locked = true;
+                        data.whiteActive = false;
+                    } //checked
+                    else if (data.isActive === false && data.locked === true && data.whiteActive === true && data.checkActive === true) {
+                        console.log('335 act')
+                        data.isActive = true;
+                        data.locked = true;
+                        data.whiteActive = false;
                         data.checkActive = false;
                     } //checked
 
-                    else if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === false) {
-                        console.log('335 act')
-                        data.isActive = false;
-                        data.locked = true;
-                        data.masterActive = false
-                    } //checked
+
 
                 })
 
@@ -381,7 +402,7 @@ export const AdminController = {
                             console.log('391 lock')
                             data.isActive = false;
                             data.locked = false;
-                            data.superActive = true;
+                            data.masterActive = true;
                             data.checkActive = true
                         } //checked
 
@@ -404,7 +425,7 @@ export const AdminController = {
                             data.isActive = true;
                             data.locked = true;
                             data.superActive = false;
-                            // data.checkActive = false
+                            data.checkActive === false
                         }
                     });
                     hyperAgent.forEach((data) => {
@@ -523,6 +544,8 @@ export const AdminController = {
                         else if (data.isActive === false && data.locked === false && data.superActive === true && data.checkActive === true) {
                             data.locked = true;
                         }
+
+
                     });
                     hyperAgent.forEach((data) => {
                         if (data.isActive === true && data.locked === true && data.hyperActive === false) {
@@ -538,6 +561,8 @@ export const AdminController = {
                         else if (data.isActive === false && data.locked === false && data.hyperActive === true && data.checkActive === true) {
                             data.locked = true;
                         }
+
+
                     });
                     masterAgent.forEach((data) => {
                         if (data.isActive === true && data.locked === true && data.masterActive === false) {
@@ -570,6 +595,8 @@ export const AdminController = {
                         else if (data.isActive === false && data.locked === false && data.whiteActive === true && data.checkActive === true) {
                             data.locked = true;
                         }
+
+
                     });
                     await admin.save();
                     await Promise.all(hyperAgent.map(data => data.save()));
