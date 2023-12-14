@@ -13,7 +13,7 @@ export const AdminRoute = (app) => {
 
     //Admin Create
 
-    app.post("/api/admin-create", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
+    app.post("/api/admin-create", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","SubWhiteLabel","SubAdmin","SubHyperAgent","SubSuperAgent","SubMasterAgent",]), async (req, res) => {
         try {
             const user = req.user;
             await AdminController.createAdmin(req.body, user);
@@ -325,21 +325,24 @@ export const AdminRoute = (app) => {
             }
     });
 
+//  creditref 
 
-
-    app.put("/api/admin/update-credit-ref/:adminId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
+    app.post("/api/admin/update-credit-ref/:adminId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
             const adminId = req.params.adminId;
             const { creditRef } = req.body;
+            console.log('User roles:', req.userRoles);
+
             const updatedAdmin = await AdminController.editCreditRef(adminId, creditRef);
+    
             if (updatedAdmin) {
-                res.status(200).send({ message: "CreditRef Edit successfully" });
+                res.status(200).send({ message: "creditRef Edit successfully" });
             } else {
                 res.status(404).send({ message: "Data not found" });
             }
-        } catch (err) {
-            // console.error(err.message);
-            res.status(500).json({ err: err.message });
+        } catch (error) {
+            console.error(error.message);
+            res.status(500).json({ error: error.message });
         }
     });
 
@@ -454,60 +457,72 @@ export const AdminRoute = (app) => {
 
     //Partnership
 
-
-    app.put("/api/admin/update-partnership/:adminId",Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
+    app.put("/api/admin/update-partnership/:adminId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
             const adminId = req.params.adminId;
             const { partnership } = req.body;
-
-            const updatedPartnership = await AdminController.editPartnership(adminId, partnership);
-            if (updatedPartnership) {
+            console.log('User roles:', req.userRoles);
+    
+            const updatedAdmin = await AdminController.editPartnership(adminId, partnership);
+            
+    
+            if (updatedAdmin) {
                 res.status(200).send({ message: "Partnership Edit successfully" });
             } else {
                 res.status(404).send({ message: "Data not found" });
             }
-            // res.json(updatedPartnership);
         } catch (error) {
             console.error(error.message);
-            res.status(500).json({ error: 'Invalid Credentials' });
+            res.status(500).json({ error: error.message });
         }
     });
-
+    
+    
     app.get("/api/partnershipView/:id", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
             const id = req.params.id;
             const admin = await Admin.findById(id);
-
-            console.log('admin', admin)
+    
+            if (!admin) {
+                res.status(404).json({ code: 404, message: "Admin not found" });
+                return;
+            }
+    
+            const last10Partnerships = admin.partnership.slice(-10);
+    
             const transferData = {
-                partnership: admin.partnership,
-                date: admin.creditRefDate,
+                partnership: last10Partnerships,
                 userName: admin.userName,
-
             };
+    
             res.status(200).json(transferData);
         } catch (err) {
             res.status(500).json({ code: err.code, message: err.message });
         }
     });
+    
 
     app.get("/api/creditRefView/:id", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
             const id = req.params.id;
             const admin = await Admin.findById(id);
-
-            console.log('admin', admin)
+    
+            if (!admin) {
+                res.status(404).json({ code: 404, message: "Admin not found" });
+                return;
+            }
+    
+            const last10creditRef = admin.creditRef.slice(-10);
+    
             const transferData = {
-                creditRef: admin.creditRef,
-                date: admin.creditRefDate,
+                creditRef: last10creditRef,
                 userName: admin.userName,
-
             };
+    
             res.status(200).json(transferData);
         } catch (err) {
             res.status(500).json({ code: err.code, message: err.message });
         }
     });
-
-
+    
 }

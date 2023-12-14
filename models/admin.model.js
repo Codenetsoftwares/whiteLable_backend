@@ -7,7 +7,6 @@ export const Admin = new mongoose.model("Admin", new mongoose.Schema({
     tokens: { ResetPassword: { type: String } },
     roles: [{ type: String, required: true }],
     balance: { type: Number, default: 0 },
-    partnership: { type: Number, default: 0 },
     depositBalance: { type: Number, default: 0 },
     ip: {
         IP: { type: String },
@@ -28,10 +27,21 @@ export const Admin = new mongoose.model("Admin", new mongoose.Schema({
         }
     ],
     loadBalance: { type: Number, default: 0 },
-    creditRef: { type: Number, default: 0, },
-    creditRefDate: { type: Date },
-    partnershipDate: { type: Date },
-    // refProfitLoss : {type : Number, default : 0},
+   
+    creditRef: [
+        {
+            value: { type: Number, default: 0 },
+            date: { type: Date, default: Date.now },
+        },
+    ],
+  
+    partnership: [
+        {
+            value: { type: Number, default: 0 },
+            date: { type: Date, default: Date.now },
+        },
+    ],
+    
     createBy: { type: ObjectId },
     isActive: { type: Boolean, default: true, required: true },
     locked: { type: Boolean, default: true, require: true },
