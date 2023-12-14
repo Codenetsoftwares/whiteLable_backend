@@ -616,41 +616,42 @@ export const AdminController = {
     //     }
     // },
 
-    editCreditRef: async (adminId, creditRef) => {
-        try {
-            if (typeof creditRef !== 'number' || isNaN(creditRef)) {
-                throw { code: 400, message: 'Invalid creditRef value' };
+        editCreditRef: async (adminId, creditRef) => {
+            try {
+                const admin = await Admin.findById(adminId);
+        
+                if (!admin) {
+                    throw { code: 404, message: "Admin not found" };
+                }
+        
+                if (!admin.locked && !admin.isActive) {
+                    throw { code: 404, message: 'Admin is Suspend or Locked' };
+                }
+  
+                const newcreditRefEntry = {
+                    value: creditRef,
+                    date: new Date(),
+                };
+                
+                admin.creditRef.push(newcreditRefEntry);
+                
+
+                if (admin.creditRef.length > 10) {
+                    admin.creditRef.shift(); 
+                }
+        
+                const updatedAdmin = await admin.save();
+        
+                if (!updatedAdmin) {
+                    throw { code: 500, message: 'Cannot update admin creditRef' };
+                }
+        
+                return updatedAdmin;
+            } catch (err) {
+                throw err;
             }
-
-            const admin = await Admin.findById(adminId);
-
-            if (!admin) {
-                throw { code: 404, message: 'Admin not found' };
-            }
-
-            if (!admin.isActive) {
-                throw { code: 404, message: 'Admin is inactive' };
-            }
-            if(!admin.locked)
-            {
-                throw { code: 404, message: 'Admin is locked' };
-            }
-
-            admin.creditRef = creditRef;
-            admin.creditRefDate = new Date();
-
-            const updatedAdmin = await admin.save();
-
-            if (!updatedAdmin) {
-                throw { code: 500, message: 'Cannot update admin creditRef' };
-            }
-
-            return updatedAdmin;
-        } catch (error) {
-            throw { code: error.code || 500, message: error.message };
-        }
-
-    },
+        },
+        
 
     trashAdminUser: async (adminUserId) => {
         try {
@@ -716,38 +717,48 @@ export const AdminController = {
         }
     },
 
-    // Partnership
-
     editPartnership: async (adminId, partnership) => {
         try {
             const admin = await Admin.findById(adminId);
-
+    
             if (!admin) {
                 throw { code: 404, message: "Admin not found" };
             }
-
-            if (!admin.isActive) {
-                throw { code: 404, message: 'Admin is inactive' };
+    
+            // if (!admin.isActive) {
+            //     throw { code: 404, message: 'Admin is inactive' };
+            // }
+    
+            if (!admin.locked && !admin.isActive) {
+                throw { code: 404, message: 'Admin is Suspend or Locked' };
             }
-            if(!admin.locked)
-            {
-                throw { code: 404, message: 'Admin is locked' };
+
+            const newPartnershipEntry = {
+                value: partnership,
+                date: new Date(),
+            };
+    
+            admin.partnership.push(newPartnershipEntry);
+    
+           
+            if (admin.partnership.length > 10) {
+                admin.partnership.shift(); 
             }
-
-            admin.partnership = partnership;
-            admin.partnershipDate = new Date();
-
+    
             const updatedAdmin = await admin.save();
-
+    
             if (!updatedAdmin) {
-                throw { code: 500, message: 'Cannot update admin creditRef' };
+                throw { code: 500, message: 'Cannot update admin partnership' };
             }
-
+    
             return updatedAdmin;
         } catch (err) {
             throw err;
         }
     },
+    
+    
+    
 
     // partnership: async (adminId, partnership) => {
     //     try {
