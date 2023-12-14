@@ -402,7 +402,7 @@ export const AdminController = {
                             console.log('391 lock')
                             data.isActive = false;
                             data.locked = false;
-                            data.masterActive = true;
+                            data.superActive = true;
                             data.checkActive = true
                         } //checked
 
