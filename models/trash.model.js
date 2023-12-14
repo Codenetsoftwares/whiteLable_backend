@@ -8,7 +8,19 @@ export const Trash = new mongoose.model("Trash", new mongoose.Schema({
     password: { type: String },
     balance: { type: Number, default: 0},
     loadBalance : {type : Number , default : 0},
-    creditRef : {type : Number, default : 0},
+    creditRef: [
+        {
+            value: { type: Number, default: 0 },
+            date: { type: Date, default: Date.now },
+        },
+    ],
+  
+    partnership: [
+        {
+            value: { type: Number, default: 0 },
+            date: { type: Date, default: Date.now },
+        },
+    ],
     refProfitLoss : {type : Number, default : 0},
     createBy : {type:ObjectId},
       
