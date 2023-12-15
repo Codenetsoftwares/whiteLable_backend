@@ -281,6 +281,14 @@ export const AdminController = {
             // console.log('masterAgent', masterAgent)
             const superAgent = await Admin.find({ createBy: adminId, roles: { $in: ["SuperAgent"] } }).exec();
             // console.log('superAgent', superAgent)
+            if (whiteLabel.length == 0 && hyperAgent.length == 0 && masterAgent.length == 0 && superAgent.length == 0) {
+                await admin.save();
+                await Promise.all(hyperAgent.map(data => data.save()));
+                await Promise.all(masterAgent.map(data => data.save()));
+                await Promise.all(whiteLabel.map(data => data.save()));
+                await Promise.all(superAgent.map(data => data.save()));
+                return { message: "DOne" };
+            }
             if (!admin) {
                 throw { code: 404, message: "Admin not found" };
             }
@@ -307,8 +315,7 @@ export const AdminController = {
                         data.superActive = false;
                         data.checkActive = false;
                     } //checked
-
-
+                    AdminController.activateAdmin(data._id, data.isActive, data.locked)
 
                 })
                 console.log('zero')
@@ -333,6 +340,7 @@ export const AdminController = {
                         data.checkActive = false;
                     } //checked
 
+                    AdminController.activateAdmin(data._id, data.isActive, data.locked)
 
 
                 })
@@ -357,6 +365,7 @@ export const AdminController = {
                         data.checkActive = false;
                     } //checked
 
+                    AdminController.activateAdmin(data._id, data.isActive, data.locked)
 
 
                 })
@@ -380,6 +389,7 @@ export const AdminController = {
                         data.whiteActive = false;
                         data.checkActive = false;
                     } //checked
+                    AdminController.activateAdmin(data._id, data.isActive, data.locked)
 
 
 
@@ -397,7 +407,10 @@ export const AdminController = {
                 if (locked === false) {
                     admin.locked = false;
                     admin.isActive = false;
+                    // console.log(superAgent.length)
+
                     superAgent.forEach((data) => {
+
                         if (data.isActive === true && data.locked === true && data.superActive === false && data.checkActive === false) {
                             console.log('391 lock')
                             data.isActive = false;
@@ -427,6 +440,8 @@ export const AdminController = {
                             data.superActive = false;
                             data.checkActive === false
                         }
+                        AdminController.activateAdmin(data._id, data.isActive, data.locked)
+
                     });
                     hyperAgent.forEach((data) => {
                         if (data.isActive === true && data.locked === true && data.hyperActive === false && data.checkActive === false) {
@@ -458,6 +473,8 @@ export const AdminController = {
                             data.hyperActive = false;
                             data.checkActive === false
                         }
+                        AdminController.activateAdmin(data._id, data.isActive, data.locked)
+
                     });
                     masterAgent.forEach((data) => {
                         if (data.isActive === true && data.locked === true && data.masterActive === false && data.checkActive === false) {
@@ -489,6 +506,8 @@ export const AdminController = {
                             data.masterActive = false;
                             data.checkActive === false
                         }
+                        AdminController.activateAdmin(data._id, data.isActive, data.locked)
+
                     });
                     whiteLabel.forEach((data) => {
                         if (data.isActive === true && data.locked === true && data.whiteActive === false && data.checkActive === false) {
@@ -499,7 +518,7 @@ export const AdminController = {
                             data.checkActive = true
                         } //checked
 
-                        else if (data.isActive === false && data.locked === true && data.whiteActive === true) {
+                        else if (data.isActive === false && data.locked === true && data.whiteActive === true) { ///not use
                             data.isActive = false;
                             data.locked = false;
                             data.checkActive = true;
@@ -510,7 +529,7 @@ export const AdminController = {
                             data.whiteActive = true;
                             console.log('408 lock')
                         } //checked
-                        else if (data.isActive === false && data.locked === true && data.whiteActive === true && data.checkActive === true) {
+                        else if (data.isActive === false && data.locked === true && data.whiteActive === true && data.checkActive === true) {///not use
                             data.locked = false;
                             console.log('408 lock')
                         } //checked
@@ -520,6 +539,8 @@ export const AdminController = {
                             data.whiteActive = false;
                             data.checkActive === false
                         }
+                        AdminController.activateAdmin(data._id, data.isActive, data.locked)
+
                     });
 
                     await admin.save();
@@ -529,6 +550,7 @@ export const AdminController = {
                     await Promise.all(superAgent.map(data => data.save()));
                     return { message: "Admin locked successfully" };
                 } else {
+                    console.log('suspend why')
                     admin.isActive = false;
                     superAgent.forEach((data) => {
                         if (data.isActive === true && data.locked === true && data.superActive === false) {
@@ -544,6 +566,7 @@ export const AdminController = {
                         else if (data.isActive === false && data.locked === false && data.superActive === true && data.checkActive === true) {
                             data.locked = true;
                         }
+                        AdminController.activateAdmin(data._id, data.isActive, data.locked)
 
 
                     });
@@ -562,9 +585,12 @@ export const AdminController = {
                             data.locked = true;
                         }
 
+                        AdminController.activateAdmin(data._id, data.isActive, data.locked)
+
 
                     });
                     masterAgent.forEach((data) => {
+                        console.log('mastersuspend')
                         if (data.isActive === true && data.locked === true && data.masterActive === false) {
                             data.isActive = false;
                             data.locked = true;
@@ -578,6 +604,7 @@ export const AdminController = {
                         else if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === true) {
                             data.locked = true;
                         }
+                        AdminController.activateAdmin(data._id, data.isActive, data.locked)
 
 
                     });
@@ -595,6 +622,7 @@ export const AdminController = {
                         else if (data.isActive === false && data.locked === false && data.whiteActive === true && data.checkActive === true) {
                             data.locked = true;
                         }
+                        AdminController.activateAdmin(data._id, data.isActive, data.locked)
 
 
                     });
@@ -643,42 +671,42 @@ export const AdminController = {
     //     }
     // },
 
-        editCreditRef: async (adminId, creditRef) => {
-            try {
-                const admin = await Admin.findById(adminId);
-        
-                if (!admin) {
-                    throw { code: 404, message: "Admin not found" };
-                }
-        
-                if (!admin.locked && !admin.isActive) {
-                    throw { code: 404, message: 'Admin is Suspend or Locked' };
-                }
-  
-                const newcreditRefEntry = {
-                    value: creditRef,
-                    date: new Date(),
-                };
-                
-                admin.creditRef.push(newcreditRefEntry);
-                
+    editCreditRef: async (adminId, creditRef) => {
+        try {
+            const admin = await Admin.findById(adminId);
 
-                if (admin.creditRef.length > 10) {
-                    admin.creditRef.shift(); 
-                }
-        
-                const updatedAdmin = await admin.save();
-        
-                if (!updatedAdmin) {
-                    throw { code: 500, message: 'Cannot update admin creditRef' };
-                }
-        
-                return updatedAdmin;
-            } catch (err) {
-                throw err;
+            if (!admin) {
+                throw { code: 404, message: "Admin not found" };
             }
-        },
-        
+
+            if (!admin.locked && !admin.isActive) {
+                throw { code: 404, message: 'Admin is Suspend or Locked' };
+            }
+
+            const newcreditRefEntry = {
+                value: creditRef,
+                date: new Date(),
+            };
+
+            admin.creditRef.push(newcreditRefEntry);
+
+
+            if (admin.creditRef.length > 10) {
+                admin.creditRef.shift();
+            }
+
+            const updatedAdmin = await admin.save();
+
+            if (!updatedAdmin) {
+                throw { code: 500, message: 'Cannot update admin creditRef' };
+            }
+
+            return updatedAdmin;
+        } catch (err) {
+            throw err;
+        }
+    },
+
 
     trashAdminUser: async (adminUserId) => {
         try {
@@ -692,7 +720,7 @@ export const AdminController = {
                 id: existingAdminUser._id,
                 roles: existingAdminUser.roles,
                 userName: existingAdminUser.userName,
-                password : existingAdminUser.password,
+                password: existingAdminUser.password,
                 balance: existingAdminUser.balance,
                 loadBalance: existingAdminUser.loadBalance,
                 creditRef: existingAdminUser.creditRef,
@@ -726,7 +754,7 @@ export const AdminController = {
             const restoreRemoveData = {
                 roles: existingAdminUser.roles,
                 userName: existingAdminUser.userName,
-                password : existingAdminUser.password,
+                password: existingAdminUser.password,
                 balance: existingAdminUser.balance,
                 loadBalance: existingAdminUser.loadBalance,
                 creditRef: existingAdminUser.creditRef,
@@ -747,15 +775,15 @@ export const AdminController = {
     editPartnership: async (adminId, partnership) => {
         try {
             const admin = await Admin.findById(adminId);
-    
+
             if (!admin) {
                 throw { code: 404, message: "Admin not found" };
             }
-    
+
             // if (!admin.isActive) {
             //     throw { code: 404, message: 'Admin is inactive' };
             // }
-    
+
             if (!admin.locked && !admin.isActive) {
                 throw { code: 404, message: 'Admin is Suspend or Locked' };
             }
@@ -764,28 +792,28 @@ export const AdminController = {
                 value: partnership,
                 date: new Date(),
             };
-    
+
             admin.partnership.push(newPartnershipEntry);
-    
-           
+
+
             if (admin.partnership.length > 10) {
-                admin.partnership.shift(); 
+                admin.partnership.shift();
             }
-    
+
             const updatedAdmin = await admin.save();
-    
+
             if (!updatedAdmin) {
                 throw { code: 500, message: 'Cannot update admin partnership' };
             }
-    
+
             return updatedAdmin;
         } catch (err) {
             throw err;
         }
     },
-    
-    
-    
+
+
+
 
     // partnership: async (adminId, partnership) => {
     //     try {
