@@ -783,8 +783,7 @@ export const AdminController = {
         try {
           let user;
       
-          if (userId) {
-            // If userId is provided, fetch the user details
+          if (userId) {          
             user = await Admin.findById(userId);
       
             if (!user) {
