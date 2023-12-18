@@ -50,6 +50,7 @@ export const Admin = new mongoose.model("Admin", new mongoose.Schema({
     superActive: { type: Boolean, default: false, required: false },
     whiteActive: { type: Boolean, default: false, required: false },
     checkActive: { type: Boolean, default: false, required: false },
+    Path:[{ type: String}],
 
 
 }), 'Admin');

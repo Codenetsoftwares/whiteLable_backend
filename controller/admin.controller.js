@@ -4,6 +4,8 @@ import { Admin } from "../models/admin.model.js";
 import { User } from "../models/user.model.js";
 import { Trash } from "../models/trash.model.js";
 
+const globalUsernames = [];
+
 export const AdminController = {
     createAdmin: async (data, user) => {
         if (!data.userName) {
@@ -103,7 +105,6 @@ export const AdminController = {
         }
         return Admin.findOne(filter).exec();
     },
-
 
     PasswordResetCode: async (userName, oldPassword, password) => {
         const existingUser = await AdminController.findAdmin({
@@ -640,37 +641,6 @@ export const AdminController = {
         }
     },
 
-    // activateAdmin: async (adminId, isActive, locked) => {
-    //     try {
-    //         const admin = await Admin.findById(adminId);
-    //         if (!admin) {
-    //             throw { code: 404, message: "Admin not found" };
-    //         }
-    //         const subAdmins = await Admin.find({ createBy: adminId });
-    //         admin.isActive = isActive;
-    //         admin.locked = locked !== undefined ? locked : false;
-    //         await admin.save();
-    //         for (const subAdmin of subAdmins) {
-    //             console.log('subadmin',subAdmin)
-    //             if (!subAdmin.originalState) {
-    //                 subAdmin.originalState = {
-    //                     isActive: subAdmin.isActive,
-    //                     locked: subAdmin.locked
-    //                 };
-    //                 await subAdmin.save();
-    //             }
-    //             subAdmin.isActive = isActive;
-    //             subAdmin.locked = locked !== undefined ? locked : false;
-    //             await subAdmin.save();
-    //         }
-    //         return {
-    //             message: `Admin ${isActive ? 'activated' : 'suspended'} successfully`,
-    //         };
-    //     } catch (err) {
-    //         throw { code: err.code || 500, message: err.message || "Internal Server Error" };
-    //     }
-    // },
-
     editCreditRef: async (adminId, creditRef) => {
         try {
             const admin = await Admin.findById(adminId);
@@ -780,10 +750,6 @@ export const AdminController = {
                 throw { code: 404, message: "Admin not found" };
             }
 
-            // if (!admin.isActive) {
-            //     throw { code: 404, message: 'Admin is inactive' };
-            // }
-
             if (!admin.locked && !admin.isActive) {
                 throw { code: 404, message: 'Admin is Suspend or Locked' };
             }
@@ -811,26 +777,74 @@ export const AdminController = {
             throw err;
         }
     },
+    
+
+    buildRootPath: async (userId, action) => {
+        try {
+          let user;
+      
+          if (userId) {
+            // If userId is provided, fetch the user details
+            user = await Admin.findById(userId);
+      
+            if (!user) {
+              throw { code: 404, message: 'User not found' };
+            }
+          }     
+          if (action === 'store') {
+            const newPath = user.userName;
+            const indexToRemove = globalUsernames.indexOf(newPath);
+      
+            if (indexToRemove !== -1) {
+              globalUsernames.splice(indexToRemove + 1);
+            } else {
+              globalUsernames.push(newPath);
+            }
+    
+            const createdUsers = await Admin.find({ createBy: user._id });
+
+            const userDetails = {              
+                createdUsers: createdUsers.map(createdUser => ({
+                    userName: createdUser.userName,
+                    roles: createdUser.roles,
+                    balance: createdUser.balance,
+                    loadBalance: createdUser.loadBalance,
+                    creditRef: createdUser.creditRef,
+                    refProfitLoss: createdUser.refProfitLoss,
+                    partnership: createdUser.partnership,
+                    status: createdUser.isActive ? 'Active' : createdUser.locked ? 'Locked' : 'Suspended',
+                })),
+            };
+      
+            return { message: 'Path stored successfully', path: globalUsernames, userDetails };
+          } else if (action === 'clear') {
+            const lastUsername = globalUsernames.pop();
+            if (lastUsername) {
+              const indexToRemove = globalUsernames.indexOf(lastUsername);
+              if (indexToRemove !== -1) {
+                globalUsernames.splice(indexToRemove, 1);
+              }
+            }
+          } else if (action === 'clearAll') {
+            globalUsernames.length = 0;
+          } else {
+            throw { code: 400, message: 'Invalid action provided' };
+          }
+      
+          // If no user is fetched, proceed with the path update logic
+          user.Path = globalUsernames;
+          await user.save();
+      
+          const successMessage =
+            action === 'store' ? 'Path stored successfully' : 'Path cleared successfully';
+          return { message: successMessage, path: globalUsernames };
+        } catch (err) {
+          console.error(err);
+          throw { code: err.code || 500, message: err.message || 'Internal Server Error' };
+        }
+      },
+      
+      
+        }
 
 
-
-
-    // partnership: async (adminId, partnership) => {
-    //     try {
-    //         const admin = await Admin.findById(adminId).exec();
-
-    //         if (!admin) {
-    //             throw { code: 404, message: "Invalid Credentails" };
-    //         }
-    //         admin.partnership = partnership;
-    //         admin.creditRefDate = new Date();
-    //         await admin.save();
-
-    //         return { message: "Partnership Succesfull" };
-    //     } catch (error) {
-    //         throw { code: error.code, message: error.message };
-
-    //     }
-    // },
-
-}
