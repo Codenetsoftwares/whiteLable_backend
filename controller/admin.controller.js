@@ -804,6 +804,7 @@ export const AdminController = {
 
             const userDetails = {              
                 createdUsers: createdUsers.map(createdUser => ({
+                    id: createdUser._id,
                     userName: createdUser.userName,
                     roles: createdUser.roles,
                     balance: createdUser.balance,
