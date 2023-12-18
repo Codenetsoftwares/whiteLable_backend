@@ -779,19 +779,20 @@ export const AdminController = {
     },
     
 
-    buildRootPath: async (userId, action) => {
+    buildRootPath: async (userName, action) => {
         try {
           let user;
       
-          if (userId) {          
-            user = await Admin.findById(userId);
+          if (userName) {          
+            user = await Admin.findOne({userName : userName});
       
             if (!user) {
               throw { code: 404, message: 'User not found' };
             }
           }     
           if (action === 'store') {
-            const newPath = user.userName;
+            const newPath = user.userName 
+            
             const indexToRemove = globalUsernames.indexOf(newPath);
       
             if (indexToRemove !== -1) {
@@ -802,7 +803,8 @@ export const AdminController = {
     
             const createdUsers = await Admin.find({ createBy: user._id });
 
-            const userDetails = {              
+            const userDetails = {   
+                [newPath]: user._id,           
                 createdUsers: createdUsers.map(createdUser => ({
                     id: createdUser._id,
                     userName: createdUser.userName,
@@ -812,7 +814,7 @@ export const AdminController = {
                     creditRef: createdUser.creditRef,
                     refProfitLoss: createdUser.refProfitLoss,
                     partnership: createdUser.partnership,
-                    status: createdUser.isActive ? 'Active' : createdUser.locked ? 'Locked' : 'Suspended',
+                    Status : createdUser.isActive ? "Active" : !createdUser.locked ? "Locked" : !createdUser.isActive? "Suspended" : ""
                 })),
             };
       
