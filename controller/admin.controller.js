@@ -829,8 +829,6 @@ export const AdminController = {
           } else {
             throw { code: 400, message: 'Invalid action provided' };
           }
-      
-          // If no user is fetched, proceed with the path update logic
           user.Path = globalUsernames;
           await user.save();
       
