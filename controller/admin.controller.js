@@ -106,22 +106,10 @@ export const AdminController = {
         return Admin.findOne(filter).exec();
     },
 
-    PasswordResetCode: async (userName, oldPassword, password) => {
+    PasswordResetCode: async (userName,password) => {
         const existingUser = await AdminController.findAdmin({
             userName: userName,
         });
-
-        const oldPasswordIsCorrect = await bcrypt.compare(
-            oldPassword,
-            existingUser.password
-        );
-
-        if (!oldPasswordIsCorrect) {
-            throw {
-                code: 401,
-                message: "Invalid old password",
-            };
-        }
 
         const passwordIsDuplicate = await bcrypt.compare(
             password,
