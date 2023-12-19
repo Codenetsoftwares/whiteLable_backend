@@ -13,7 +13,7 @@ export const AdminRoute = (app) => {
 
     //Admin Create
 
-    app.post("/api/admin-create", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","SubWhiteLabel","SubAdmin","SubHyperAgent","SubSuperAgent","SubMasterAgent",]), async (req, res) => {
+    app.post("/api/admin-create", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","SubWhiteLabel","SubAdmin","SubHyperAgent","SubSuperAgent","SubMasterAgent","Create-Admin"]), async (req, res) => {
         try {
             const user = req.user;
             await AdminController.createAdmin(req.body, user);
@@ -59,7 +59,7 @@ export const AdminRoute = (app) => {
 
     //IP
 
-    app.get('/getip/:username', async (req, res) => {
+    app.get('/getip/:username', Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","ActivityLog",]),async (req, res) => {
         http.get({ 'host': 'api64.ipify.org', 'port': 80, 'path': '/' }, function (resp) {
             let ip = '';
 
@@ -120,7 +120,7 @@ export const AdminRoute = (app) => {
 
     // create User
 
-    app.post("/api/admin/Create-user", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
+    app.post("/api/admin/Create-user", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","Create-User"]), async (req, res) => {
         try {
 
             const { userName, password } = req.body;
@@ -151,7 +151,7 @@ export const AdminRoute = (app) => {
     
     // transfer Amount
 
-    app.post("/api/transfer-amount/:userId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent"]), async (req, res) => {
+    app.post("/api/transfer-amount/:userId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent","TransferBalance"]), async (req, res) => {
         try {
             const userId = req.params.userId
             const {receiveUserId,trnsfAmnt, remarks } = req.body;
@@ -172,7 +172,7 @@ export const AdminRoute = (app) => {
     });
 
 
-    app.get("/api/transaction-view/:userName", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
+    app.get("/api/transaction-view/:userName", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","AccountStatement"]), async (req, res) => {
         try {
             const userName = req.params.userName;
             let balances = 0;
@@ -266,7 +266,7 @@ export const AdminRoute = (app) => {
 
     // active status
 
-    app.post("/api/activate/:adminId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
+    app.post("/api/activate/:adminId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","Status"]), async (req, res) => {
         try {
             const adminId = req.params.adminId
             const { isActive, locked } = req.body;
@@ -281,7 +281,7 @@ export const AdminRoute = (app) => {
 
 //  creditref 
 
-    app.put("/api/admin/update-credit-ref/:adminId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
+    app.put("/api/admin/update-credit-ref/:adminId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","CreditRef-Edit"]), async (req, res) => {
         try {
             const adminId = req.params.adminId;
             const { creditRef } = req.body;
@@ -302,7 +302,7 @@ export const AdminRoute = (app) => {
 
     //  Move To Trash 
 
-    app.post("/api/admin/move-to-trash-user", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
+    app.post("/api/admin/move-to-trash-user", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","Move-To-Trash"]), async (req, res) => {
         try {
             const { requestId } = req.body;
             const adminUser = await Admin.findById(requestId);
@@ -323,7 +323,7 @@ export const AdminRoute = (app) => {
 
     //   View Trash Data
 
-    app.get("/api/admin/view-trash", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
+    app.get("/api/admin/view-trash", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","Trash-View"]), async (req, res) => {
         try {
             const resultArray = await Trash.find().exec();
             res.status(200).send(resultArray);
@@ -336,7 +336,7 @@ export const AdminRoute = (app) => {
 
     //   Delete From Trash
 
-    app.delete("/api/delete/admin-user/:id", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
+    app.delete("/api/delete/admin-user/:id", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","Delete-Admin"]), async (req, res) => {
         try {
             const id = req.params.id;
             const result = await Trash.deleteOne({ _id: id });
@@ -376,7 +376,7 @@ export const AdminRoute = (app) => {
 
     //   Restore Transh Data
 
-    app.post("/api/admin/restore-to-wallet-user", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
+    app.post("/api/admin/restore-to-wallet-user", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","Restore-Admin"]), async (req, res) => {
         try {
             const { userId } = req.body;
             const restoreResult = await AdminController.restoreUser(userId);
@@ -392,7 +392,7 @@ export const AdminRoute = (app) => {
 
     //   View User Profile
 
-    app.get("/api/User-Profile-view/:userName", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
+    app.get("/api/User-Profile-view/:userName", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","User-Profile-View"]), async (req, res) => {
         try {
             const userName = req.params.userName;
             const admin = await Admin.findOne({ userName : userName }).exec();
@@ -412,7 +412,7 @@ export const AdminRoute = (app) => {
 
     //Partnership
 
-    app.put("/api/admin/update-partnership/:adminId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
+    app.put("/api/admin/update-partnership/:adminId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","Partnership-Edit"]), async (req, res) => {
         try {
             const adminId = req.params.adminId;
             const { partnership } = req.body;
@@ -433,7 +433,7 @@ export const AdminRoute = (app) => {
     });
     
     
-    app.get("/api/partnershipView/:id", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
+    app.get("/api/partnershipView/:id", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","Partnership-View"]), async (req, res) => {
         try {
             const id = req.params.id;
             const admin = await Admin.findById(id);
@@ -457,7 +457,7 @@ export const AdminRoute = (app) => {
     });
     
 
-    app.get("/api/creditRefView/:id", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
+    app.get("/api/creditRefView/:id", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","CreditRef-View"]), async (req, res) => {
         try {
             const id = req.params.id;
             const admin = await Admin.findById(id);
