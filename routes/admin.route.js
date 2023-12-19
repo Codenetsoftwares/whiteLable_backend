@@ -172,12 +172,12 @@ export const AdminRoute = (app) => {
     });
 
 
-    app.get("/api/transaction-view/:id", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
+    app.get("/api/transaction-view/:userName", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
-            const id = req.params.id;
+            const userName = req.params.userName;
             let balances = 0;
             let debitBalances = 0
-            const admin = await Admin.findById(id).exec();
+            const admin = await Admin.findOne({ userName : userName }).exec();
 
             if (!admin) {
                 return res.status(404).json({ message: "Admin not found" });
@@ -191,7 +191,7 @@ export const AdminRoute = (app) => {
             //     return dateA - dateB;
             // });
 
-            transactionData.sort((a, b) => new Date(a.date) - new Date(b.date));
+            // transactionData.sort((a, b) => new Date(a.date) - new Date(b.date));
 
             let allData = JSON.parse(JSON.stringify(transactionData));
 
@@ -205,7 +205,6 @@ export const AdminRoute = (app) => {
                     data.debitBalance = debitBalances;
                 }
             });
-
             res.status(200).json(allData);
         } catch (err) {
             res.status(500).json({ code: err.code, message: err.message });
