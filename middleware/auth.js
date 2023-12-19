@@ -139,7 +139,7 @@ export const Authorize = (roles) => {
             code: 401,
             message: "Invalid login attempt for admin (3)",
           });
-        }
+        } 
       }
       if (roles.includes("Status")) {
         existingUser = await Admin.findById(user.id).exec();
@@ -213,15 +213,15 @@ export const Authorize = (roles) => {
           });
         }
       }
-      if (roles.includes("Create-User")) {
-        existingUser = await Admin.findById(user.id).exec();
-        if (!existingUser) {
-          return res.status(401).send({
-            code: 401,
-            message: "Invalid login attempt for admin (3)",
-          });
-        }
-      }
+      // if (roles.includes("Create-User")) {
+      //   existingUser = await Admin.findById(user.id).exec();
+      //   if (!existingUser) {
+      //     return res.status(401).send({
+      //       code: 401,
+      //       message: "Invalid login attempt for admin (3)",
+      //     });
+      //   }
+      // }
       if (roles.includes("AccountStatement")) {
         existingUser = await Admin.findById(user.id).exec();
         if (!existingUser) {
@@ -276,15 +276,15 @@ export const Authorize = (roles) => {
           });
         }
       }
-      if (roles.includes("user")) {
-        existingUser = await User.findById(user.id).exec();
-        if (!existingUser) {
-          return res.status(401).send({
-            code: 401,
-            message: "Invalid login attempt for admin (4)",
-          });
-        }
-      }
+      // if (roles.includes("user")) {
+      //   existingUser = await User.findById(user.id).exec();
+      //   if (!existingUser) {
+      //     return res.status(401).send({
+      //       code: 401,
+      //       message: "Invalid login attempt for admin (4)",
+      //     });
+      //   }
+      // }
       if (roles && roles.length > 0) {
         let userHasRequiredRole = false;
         roles.forEach((role) => {

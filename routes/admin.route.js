@@ -44,6 +44,8 @@ export const AdminRoute = (app) => {
             const admin = await Admin.findOne({ userName: userName });
             const accesstoken = await AdminController.GenerateAdminAccessToken(userName, password);
             const loginTime = new Date();
+            await Admin.findOneAndUpdate({ userName: userName }, { $set: { lastLoginTime: loginTime } });
+
 
             // const user = { accesstoken, loginTime, ipAddress, location };
             if (admin && accesstoken) {
@@ -59,51 +61,60 @@ export const AdminRoute = (app) => {
 
     //IP
 
-    app.get('/getip/:username', Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","ActivityLog",]),async (req, res) => {
-        http.get({ 'host': 'api64.ipify.org', 'port': 80, 'path': '/' }, function (resp) {
-            let ip = '';
-
-            resp.on('data', function (chunk) {
-                ip += chunk;
+    app.get('/getip/:username', Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent", "ActivityLog"]), async (req, res) => {
+        try {
+            const userName = req.params.username;
+            let admin = await Admin.findOne({ userName: userName });
+    
+            if (!admin) {
+                res.status(404).json({ code: 404, message: 'Admin not found' });
+                return;
+            }
+    
+            const loginTime = admin.lastLoginTime;
+    
+            http.get({ 'host': 'api64.ipify.org', 'port': 80, 'path': '/' }, function (resp) {
+                let ip = '';
+    
+                resp.on('data', function (chunk) {
+                    ip += chunk;
+                });
+    
+                resp.on('end', async function () {
+                    console.log("ip", ip);
+    
+                    try {
+                        const data = await fetch(`http://ip-api.com/json/${ip}`);
+                        const collect = await data.json();
+                        
+                        await Admin.findOneAndUpdate({ userName: userName }, { $set: { lastLoginTime: loginTime } });
+    
+                        const responseObj = {
+                            userName: admin.userName,
+                            ip: {
+                                IP: collect.query,
+                                country: collect.country,
+                                region: collect.regionName,
+                                timezone: collect.timezone,
+                            },
+                            isActive: admin.isActive,
+                            locked: admin.locked,
+                            lastLoginTime: loginTime, 
+                        };
+    
+                        console.log("ipppp", responseObj);
+                        res.json(responseObj); 
+                    } catch (error) {
+                        console.error('Error fetching data:', error);
+                        res.status(500).json({ error: 'Internal Server Error' });
+                    }
+                });
             });
-
-            resp.on('end', async function () {
-                console.log("ip", ip);
-                const userName = req.params.username
-                let admin = await Admin.findOne({ userName: userName });
-                console.log('amdin', admin)
-                try {
-                    const data = await fetch(`http://ip-api.com/json/${ip}`);
-                    const collect = await data.json();
-                    const adminInstance = new Admin({
-                        userName: admin.userName,
-                        ip: {
-                            IP: collect.query,
-                            country: collect.country,
-                            region: collect.regionName,
-                            timezone: collect.timezone,
-                        },
-                        isActive: admin.isActive,
-                        locked: admin.locked
-                    });
-
-                    await adminInstance.save();
-
-                    const responseObj = {
-                        userName: adminInstance.userName,
-                        ip: adminInstance.ip,
-                      };
-
-                    console.log("ipppp", responseObj);
-                    res.json(responseObj); // Send the collected data as a JSON response
-                } catch (error) {
-                    console.error('Error fetching data:', error);
-                    res.status(500).json({ error: 'Internal Server Error' });
-                }
-            });
-        });
+        } catch (error) {
+            console.error('Error:', error.message);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
     });
-
 
     // reset password
 

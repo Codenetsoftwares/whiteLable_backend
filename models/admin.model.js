@@ -8,6 +8,7 @@ export const Admin = new mongoose.model("Admin", new mongoose.Schema({
     roles: [{ type: String, required: true }],
     balance: { type: Number, default: 0 },
     depositBalance: { type: Number, default: 0 },
+    lastLoginTime: { type: Date },
     ip: {
         IP: { type: String },
         country: { type: String },
