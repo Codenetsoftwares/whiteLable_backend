@@ -242,9 +242,6 @@ export const AdminRoute = (app) => {
         }
     });
 
-
-
-
     // view balance
 
     app.get("/api/view-balance/:id", async (req, res) => {
@@ -395,10 +392,11 @@ export const AdminRoute = (app) => {
 
     //   View User Profile
 
-    app.get("/api/User-Profile-view/:id", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
+    app.get("/api/User-Profile-view/:userName", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
         try {
-            const id = req.params.id;
-            const admin = await Admin.findById(id);
+            const userName = req.params.userName;
+            const admin = await Admin.findOne({ userName : userName }).exec();
+
 
             const transferData = {
                 userId: admin.id,
