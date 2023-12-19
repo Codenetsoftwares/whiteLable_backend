@@ -282,14 +282,14 @@ export const AdminController = {
             // console.log('masterAgent', masterAgent)
             const superAgent = await Admin.find({ createBy: adminId, roles: { $in: ["SuperAgent"] } }).exec();
             // console.log('superAgent', superAgent)
-            if (whiteLabel.length == 0 && hyperAgent.length == 0 && masterAgent.length == 0 && superAgent.length == 0) {
-                await admin.save();
-                await Promise.all(hyperAgent.map(data => data.save()));
-                await Promise.all(masterAgent.map(data => data.save()));
-                await Promise.all(whiteLabel.map(data => data.save()));
-                await Promise.all(superAgent.map(data => data.save()));
-                return { message: "DOne" };
-            }
+            // if (whiteLabel.length == 0 && hyperAgent.length == 0 && masterAgent.length == 0 && superAgent.length == 0) {
+            //     await admin.save();
+            //     await Promise.all(hyperAgent.map(data => data.save()));
+            //     await Promise.all(masterAgent.map(data => data.save()));
+            //     await Promise.all(whiteLabel.map(data => data.save()));
+            //     await Promise.all(superAgent.map(data => data.save()));
+            //     return 
+            // }
             if (!admin) {
                 throw { code: 404, message: "Admin not found" };
             }
