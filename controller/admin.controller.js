@@ -685,6 +685,10 @@ export const AdminController = {
             if (!existingAdminUser) {
                 throw { code: 404, message: `Admin User not found with id: ${adminUserId}` };
             }
+            
+            if (existingAdminUser.balance !== 0) {
+                throw { code: 400, message: `Balance should be 0 to move the Admin User to trash` };
+            }
 
             const updatedTransactionData = {
                 id: existingAdminUser._id,
