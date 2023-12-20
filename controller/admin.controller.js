@@ -52,6 +52,7 @@ export const AdminController = {
         const existingUser = await AdminController.findAdmin({
             userName: userName,
         });
+        console.log(existingUser)
         if (!existingUser) {
             throw { code: 401, message: "Invalid User Name or password" };
         }
@@ -63,6 +64,9 @@ export const AdminController = {
         if (!passwordValid) {
             throw { code: 401, message: "Invalid User Name or password" };
         }
+
+        console.log("Hashed password:", existingUser.password);
+
 
         const accessTokenResponse = {
             id: existingUser._id,
@@ -137,7 +141,7 @@ export const AdminController = {
     CreateUser: async (data) => {
         try {
         const existingUser = await User.findOne({ userName: data.userName })
-
+        console.log(existingUser)
         if (existingUser) {
             throw ({ code: 409, message: "User Already Exist" })
         }
@@ -261,15 +265,15 @@ export const AdminController = {
     activateAdmin: async (adminId, isActive, locked) => {
         try {
             const admin = await Admin.findById(adminId);
-   
+            // console.log('admin', admin._id)
             const whiteLabel = await Admin.find({ createBy: adminId, roles: { $in: ["WhiteLabel"] } }).exec();
-         
+            // console.log('whiteLabel', whiteLabel)
             const hyperAgent = await Admin.find({ createBy: adminId, roles: { $in: ["HyperAgent"] } }).exec();
-  
+            // console.log('hyperAgent', hyperAgent)
             const masterAgent = await Admin.find({ createBy: adminId, roles: { $in: ["MasterAgent"] } }).exec();
-         
+            // console.log('masterAgent', masterAgent)
             const superAgent = await Admin.find({ createBy: adminId, roles: { $in: ["SuperAgent"] } }).exec();
-            
+            // console.log('superAgent', superAgent)
             // if (whiteLabel.length == 0 && hyperAgent.length == 0 && masterAgent.length == 0 && superAgent.length == 0) {
             //     await admin.save();
             //     await Promise.all(hyperAgent.map(data => data.save()));
@@ -286,7 +290,7 @@ export const AdminController = {
                 admin.locked = true;
                 superAgent.map((data) => {
                     if (data.isActive === false && data.locked === false && data.superActive === true && data.checkActive === true) {
-                   
+                        console.log('319 act')
                         data.isActive = true;
                         data.locked = true;
                         data.superActive = false;
@@ -384,6 +388,7 @@ export const AdminController = {
 
                 })
 
+                // console.log('hyper', hyperAgent)
                 await admin.save();
                 await Promise.all(hyperAgent.map(data => data.save()));
                 await Promise.all(masterAgent.map(data => data.save()));
@@ -395,10 +400,12 @@ export const AdminController = {
                 if (locked === false) {
                     admin.locked = false;
                     admin.isActive = false;
+                    // console.log(superAgent.length)
 
                     superAgent.forEach((data) => {
 
-                        if (data.isActive === true && data.locked === true && data.superActive === false && data.checkActive === false) {                     
+                        if (data.isActive === true && data.locked === true && data.superActive === false && data.checkActive === false) {
+                            console.log('391 lock')
                             data.isActive = false;
                             data.locked = false;
                             data.superActive = true;
@@ -408,14 +415,17 @@ export const AdminController = {
                         else if (data.isActive === false && data.locked === true && data.superActive === true) {
                             data.isActive = false;
                             data.locked = false;
-                            data.checkActive = true;          
+                            data.checkActive = true;
+                            console.log('402 lock')
                         }
                         else if (data.isActive === false && data.locked === true && data.superActive === false && data.checkActive === false) {
                             data.locked = false;
                             data.superActive = true;
+                            console.log('408 lock')
                         } //checked
                         else if (data.isActive === false && data.locked === true && data.superActive === true && data.checkActive === true) {
                             data.locked = false;
+                            console.log('408 lock')
                         } //checked
                         else if (data.isActive === false && data.locked === false && data.superActive === true && data.checkActive === true) {
                             data.isActive = true;
@@ -439,13 +449,16 @@ export const AdminController = {
                             data.isActive = false;
                             data.locked = false;
                             data.checkActive = true;
+                            console.log('402 lock')
                         }
                         else if (data.isActive === false && data.locked === true && data.hyperActive === false && data.checkActive === false) {
                             data.locked = false;
                             data.hyperActive = true;
+                            console.log('408 lock')
                         } //checked
                         else if (data.isActive === false && data.locked === true && data.hyperActive === true && data.checkActive === true) {
                             data.locked = false;
+                            console.log('408 lock')
                         } //checked
                         else if (data.isActive === false && data.locked === false && data.hyperActive === true && data.checkActive === true) {
                             data.isActive = true;
@@ -457,7 +470,8 @@ export const AdminController = {
 
                     });
                     masterAgent.forEach((data) => {
-                        if (data.isActive === true && data.locked === true && data.masterActive === false && data.checkActive === false) {                       
+                        if (data.isActive === true && data.locked === true && data.masterActive === false && data.checkActive === false) {
+                            console.log('391 lock')
                             data.isActive = false;
                             data.locked = false;
                             data.masterActive = true;
@@ -761,66 +775,51 @@ export const AdminController = {
     },
     
 
-    buildRootPath: async (userName, action) => {
+    buildRootPath: async (userName) => {
         try {
-          let user;
-      
-          if (userName && action === 'store') {
-            user = await Admin.findOne({ userName: userName });
-      
-            if (!user) {
-              throw { code: 404, message: 'User not found' };
+            let user;
+            if (userName) {
+                user = await Admin.findOne({ userName: userName });
+                if (!user) {
+                    throw { code: 404, message: 'User not found' };
+                }
+                const newPath = userName;
+                const indexToRemove = globalUsernames.indexOf(newPath);
+                if (indexToRemove !== -1) {
+                    globalUsernames.splice(indexToRemove + 1);
+                } else {
+                    globalUsernames.push(newPath);
+                }
+                const [createdUsers] = await Promise.all([
+                    Admin.find({ createBy: user._id }),
+                ]);
+                const userDetails = {
+                    [newPath]: user._id,
+                    createdUsers: createdUsers.map((createdUser) => ({
+                        id: createdUser._id,
+                        userName: createdUser.userName,
+                        roles: createdUser.roles,
+                        balance: createdUser.balance,
+                        loadBalance: createdUser.loadBalance,
+                        creditRef: createdUser.creditRef,
+                        refProfitLoss: createdUser.refProfitLoss,
+                        partnership: createdUser.partnership,
+                        Status: createdUser.isActive
+                            ? 'Active'
+                            : !createdUser.locked
+                            ? 'Locked'
+                            : !createdUser.isActive
+                            ? 'Suspended'
+                            : '',
+                    })),
+                };
+                return { message: 'Path stored successfully', path: globalUsernames, userDetails }
             }
-          }
-      
-          if (action === 'store') {
-            const newPath = userName;
-            const indexToRemove = globalUsernames.indexOf(newPath);
-      
-            if (indexToRemove !== -1) {
-              globalUsernames.splice(indexToRemove + 1);
-            } else {
-              globalUsernames.push(newPath);
-            }
-      
-            const [createdUsers] = await Promise.all([
-              action === 'store' ? Admin.find({ createBy: user._id }) : [],
-            ]);
-      
-            const userDetails = {
-              [newPath]: user._id,
-              createdUsers: createdUsers.map((createdUser) => ({
-                id: createdUser._id,
-                userName: createdUser.userName,
-                roles: createdUser.roles,
-                balance: createdUser.balance,
-                loadBalance: createdUser.loadBalance,
-                creditRef: createdUser.creditRef,
-                refProfitLoss: createdUser.refProfitLoss,
-                partnership: createdUser.partnership,
-                Status: createdUser.isActive
-                  ? 'Active'
-                  : !createdUser.locked
-                  ? 'Locked'
-                  : !createdUser.isActive
-                  ? 'Suspended'
-                  : '',
-              })),
-            };
-      
-            return { message: 'Path stored successfully', path: globalUsernames, userDetails };
-          } else {
-            globalUsernames.length = 0;
-            user.Path = globalUsernames;
-            await user.save();
-            const successMessage = 'All data cleared successfully';
-            return { message: successMessage, path: globalUsernames };
-          }
         } catch (err) {
-          console.error(err);
-          throw { code: err.code || 500, message: err.message || 'Internal Server Error' };
+            console.error(err);
+            throw({ message: err.message || 'Internal server error' });
         }
-      },
+    }
       
       
         }

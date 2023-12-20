@@ -13,7 +13,9 @@ export const AdminRoute = (app) => {
 
     //Admin Create
 
-    app.post("/api/admin-create", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","SubWhiteLabel","SubAdmin","SubHyperAgent","SubSuperAgent","SubMasterAgent","Create-Admin"]), async (req, res) => {
+    app.post("/api/admin-create", 
+    Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","SubWhiteLabel","SubAdmin","SubHyperAgent","SubSuperAgent","SubMasterAgent","Create-Admin"]),
+     async (req, res) => {
         try {
             const user = req.user;
             await AdminController.createAdmin(req.body, user);
@@ -477,11 +479,10 @@ export const AdminRoute = (app) => {
         }
     });
     
-    app.post('/api/Root-Path/:userName/:action', async (req, res) => {
-        const { userName, action } = req.params;
-
-            try {
-                const result = await AdminController.buildRootPath(userName, action);
+    app.get('/api/Root-Path/:userName', async (req, res) => {
+        const { userName } = req.params;
+          try {
+                const result = await AdminController.buildRootPath(userName);
                 res.status(200).json(result);
             } catch (error) {
                 res.status(error.code || 500).json({ error: error.message || 'Internal Server Error' });
