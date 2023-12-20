@@ -51,58 +51,42 @@ export const AdminRoute = (app) => {
 
     app.get('/getip/:username', Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent", "ActivityLog"]), async (req, res) => {
         try {
-            const userName = req.params.username;
-            let admin = await Admin.findOne({ userName: userName });
-    
-            if (!admin) {
-                res.status(404).json({ code: 404, message: 'Admin not found' });
-                return;
-            }
-    
-            const loginTime = admin.lastLoginTime;
-    
-            http.get({ 'host': 'api64.ipify.org', 'port': 80, 'path': '/' }, function (resp) {
-                let ip = '';
-    
-                resp.on('data', function (chunk) {
-                    ip += chunk;
-                });
-    
-                resp.on('end', async function () {
-                    console.log("ip", ip);
-    
-                    try {
-                        const data = await fetch(`http://ip-api.com/json/${ip}`);
-                        const collect = await data.json();
-                        
-                        await Admin.findOneAndUpdate({ userName: userName }, { $set: { lastLoginTime: loginTime } });
-    
-                        const responseObj = {
-                            userName: admin.userName,
-                            ip: {
-                                IP: collect.query,
-                                country: collect.country,
-                                region: collect.regionName,
-                                timezone: collect.timezone,
-                            },
-                            isActive: admin.isActive,
-                            locked: admin.locked,
-                            lastLoginTime: loginTime, 
-                        };
-    
-                        console.log("ipppp", responseObj);
-                        res.json(responseObj); 
-                    } catch (error) {
-                        console.error('Error fetching data:', error);
-                        res.status(500).json({ error: 'Internal Server Error' });
-                    }
-                });
-            });
-        } catch (error) {
-            console.error('Error:', error.message);
-            res.status(500).json({ error: 'Internal Server Error' });
+        const userName = req.params.username;
+        let admin = await Admin.findOne({ userName: userName });
+
+        if (!admin) {
+            return res.status(404).json({ code: 404, message: 'Admin not found' });
         }
-    });
+
+        const loginTime = admin.lastLoginTime;
+
+        const ipResponse = await axios.get('http://api64.ipify.org/');
+        const ip = ipResponse.data;
+
+        const dataResponse = await axios.get(`http://ip-api.com/json/${ip}`);
+        const collect = dataResponse.data;
+
+        await Admin.findOneAndUpdate({ userName: userName }, { $set: { lastLoginTime: loginTime } });
+
+        const responseObj = {
+            userName: admin.userName,
+            ip: {
+                IP: collect.query,
+                country: collect.country,
+                region: collect.regionName,
+                timezone: collect.timezone,
+            },
+            isActive: admin.isActive,
+            locked: admin.locked,
+            lastLoginTime: loginTime,
+        };
+
+        res.json(responseObj);
+    } catch (error) {
+        console.error('Error:', error.message);
+        res.status(error.response?.status || 500).json({ code: error.code, message: error.message });
+    }
+});
 
     // reset password
 
@@ -124,7 +108,6 @@ export const AdminRoute = (app) => {
 
             const { userName, password } = req.body;
             const user = await AdminController.CreateUser({ userName, password });
-            console.log(user)
             res.status(200).send({ code: 200, message: "User Register Successfully" })
         }
         catch (err) {
@@ -139,7 +122,6 @@ export const AdminRoute = (app) => {
             const adminId = req.params.adminId
             const { depositeAmount } = req.body
             const amount = await AdminController.Deposit(adminId, depositeAmount)
-            console.log("amount", amount)
             res.status(200).send({ code: 200, message: "Deposite Amount Successfully" })
         } catch (err) {
             res.status(500).send({ code: err.code, message: err.message })
@@ -160,7 +142,6 @@ export const AdminRoute = (app) => {
            {
             res.status(404).send({ code: 404, message: "User Not Found For Transfer" });
            }
-           console.log("first",transferResult)
 
             res.status(200).send({ code: 200, message: "Transfer Amount Successfully" });
 
@@ -234,8 +215,7 @@ export const AdminRoute = (app) => {
     "Delete-Admin",
     "Restore-Admin",
     "Move-To-Trash",
-    "Trash-View",
-    "user"]),
+    "Trash-View",]),
       async (req, res) => {
         try {
             const createdBy = req.params.createdBy;
@@ -308,7 +288,6 @@ export const AdminRoute = (app) => {
         try {
             const adminId = req.params.adminId;
             const { creditRef } = req.body;
-            console.log('User roles:', req.userRoles);
 
             const updatedAdmin = await AdminController.editCreditRef(adminId, creditRef);
     
@@ -332,9 +311,8 @@ export const AdminRoute = (app) => {
             if (!adminUser) {
                 return res.status(404).send("Admin User not found");
             }
-            console.log("Admin User not found", adminUser);
             const updateResult = await AdminController.trashAdminUser(adminUser);
-            console.log(updateResult);
+
             if (updateResult) {
                 res.status(201).send("Admin User Moved To Trash");
             }
@@ -351,7 +329,6 @@ export const AdminRoute = (app) => {
             const resultArray = await Trash.find().exec();
             res.status(200).send(resultArray);
         } catch (error) {
-            console.log(error);
             res.status(500).send("Internal Server error");
         }
     }
@@ -392,7 +369,7 @@ export const AdminRoute = (app) => {
 
             res.status(200).send(active);
         } catch (err) {
-            console.log(err);
+    
             res.status(500).send({ code: err.code, message: err.message });
         }
     });
@@ -439,11 +416,8 @@ export const AdminRoute = (app) => {
         try {
             const adminId = req.params.adminId;
             const { partnership } = req.body;
-            console.log('User roles:', req.userRoles);
     
             const updatedAdmin = await AdminController.editPartnership(adminId, partnership);
-            
-    
             if (updatedAdmin) {
                 res.status(200).send({ message: "Partnership Edit successfully" });
             } else {

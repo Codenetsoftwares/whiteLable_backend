@@ -10,7 +10,6 @@ export const UserRoute = (app) => {
       const { userName, password } = req.body;
       const admin = await User.findOne({ userName: userName });
       const accesstoken = await UserController.UserLoginToken(userName, password);
-      console.log(accesstoken)
       if (admin && accesstoken) {
         res.status(200).send({ code: 200, message: "Login Successfully", token: accesstoken });
       } else {
