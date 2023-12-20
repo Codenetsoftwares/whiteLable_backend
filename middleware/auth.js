@@ -23,8 +23,7 @@ export const Authorize = (roles) => {
           .send({ code: 401, message: "Invalid login attempt (2)" });
       }
 
-      const user = jwt.verify(tokenParts[1], process.env.JWT_SECRET_KEY);
-      console.log('user from jwt',user.id)
+      const user = jwt.verify(tokenParts[1], process.env.JWT_SECRET_KEY); 
       if (!user) {
         return res
           .status(401)
@@ -34,7 +33,6 @@ export const Authorize = (roles) => {
       let existingUser;
       if (roles.includes("superAdmin")) {
         existingUser = await Admin.findById(user.id).exec();
-        console.log('existing user',existingUser.roles)
         if (!existingUser) {
           return res
             .status(401)
@@ -290,7 +288,7 @@ export const Authorize = (roles) => {
         roles.forEach((role) => {
           const rolesArray = existingUser.roles;
           for(const element of rolesArray) {
-            console.log(element,role)
+       
             if (role === element){
               userHasRequiredRole = true;
             }
