@@ -24,18 +24,6 @@ export const AdminRoute = (app) => {
         }
     });
 
-    app.post("/api/SubAdmin/create", Authorize(["WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","SubWhiteLabel", "SubHyperAgent","SubSuperAgent","SubMasterAgent",]), async (req, res) => {
-        try {
-            const user = req.user;
-            await AdminController.createAdmin(req.body, user);
-            res.status(200).send({ code: 200, message: 'Admin registered successfully!' })
-        }
-        catch (err) {
-            res.status(500).send({ code: err.code, message: err.message })
-        }
-    })
-
-
     // admin login
 
     app.post("/api/admin-login", async (req, res) => {

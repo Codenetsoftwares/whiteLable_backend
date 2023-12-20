@@ -781,10 +781,11 @@ export const AdminController = {
             if (!user) {
               throw { code: 404, message: 'User not found' };
             }
-          }     
+          }
+      
           if (action === 'store') {
-            const newPath = user.userName 
-            
+            const newPath = user.userName;
+      
             const indexToRemove = globalUsernames.indexOf(newPath);
       
             if (indexToRemove !== -1) {
@@ -792,50 +793,37 @@ export const AdminController = {
             } else {
               globalUsernames.push(newPath);
             }
-    
+      
             const createdUsers = await Admin.find({ createBy: user._id });
-
+      
             const userDetails = {   
-                [newPath]: user._id,           
-                createdUsers: createdUsers.map(createdUser => ({
-                    id: createdUser._id,
-                    userName: createdUser.userName,
-                    roles: createdUser.roles,
-                    balance: createdUser.balance,
-                    loadBalance: createdUser.loadBalance,
-                    creditRef: createdUser.creditRef,
-                    refProfitLoss: createdUser.refProfitLoss,
-                    partnership: createdUser.partnership,
-                    Status : createdUser.isActive ? "Active" : !createdUser.locked ? "Locked" : !createdUser.isActive? "Suspended" : ""
-                })),
+              [newPath]: user._id,           
+              createdUsers: createdUsers.map(createdUser => ({
+                id: createdUser._id,
+                userName: createdUser.userName,
+                roles: createdUser.roles,
+                balance: createdUser.balance,
+                loadBalance: createdUser.loadBalance,
+                creditRef: createdUser.creditRef,
+                refProfitLoss: createdUser.refProfitLoss,
+                partnership: createdUser.partnership,
+                Status : createdUser.isActive ? "Active" : !createdUser.locked ? "Locked" : !createdUser.isActive? "Suspended" : ""
+              })),
             };
       
             return { message: 'Path stored successfully', path: globalUsernames, userDetails };
-          } else if (action === 'clear') {
-            const lastUsername = globalUsernames.pop();
-            if (lastUsername) {
-              const indexToRemove = globalUsernames.indexOf(lastUsername);
-              if (indexToRemove !== -1) {
-                globalUsernames.splice(indexToRemove, 1);
-              }
-            }
-          } else if (action === 'clearAll') {
-            globalUsernames.length = 0;
           } else {
-            throw { code: 400, message: 'Invalid action provided' };
+            globalUsernames.length = 0;     
+            user.Path = globalUsernames;
+            await user.save();
+            const successMessage = 'All data cleared successfully';
+            return { message: successMessage, path: globalUsernames };
           }
-          user.Path = globalUsernames;
-          await user.save();
-      
-          const successMessage =
-            action === 'store' ? 'Path stored successfully' : 'Path cleared successfully';
-          return { message: successMessage, path: globalUsernames };
         } catch (err) {
           console.error(err);
           throw { code: err.code || 500, message: err.message || 'Internal Server Error' };
         }
       },
-      
       
         }
 
