@@ -212,7 +212,31 @@ export const AdminRoute = (app) => {
 
 
     // view creates
-    app.get("/api/view-all-creates/:createdBy", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
+    app.get("/api/view-all-creates/:createdBy",
+     Authorize([
+    "superAdmin",
+    "WhiteLabel",
+    "HyperAgent",
+    "SuperAgent", 
+    "MasterAgent",
+    "TransferBalance",
+    "Status",
+    "CreditRef-Edit",
+    "Partnership-Edit",
+    "CreditRef-View",
+    "Partnership-View",
+    "User-Profile-View",
+    "Profile-View",
+    "Create-Admin",
+    "Create-User",
+    "AccountStatement",
+    "ActivityLog",
+    "Delete-Admin",
+    "Restore-Admin",
+    "Move-To-Trash",
+    "Trash-View",
+    "user"]),
+      async (req, res) => {
         try {
             const createdBy = req.params.createdBy;
 
