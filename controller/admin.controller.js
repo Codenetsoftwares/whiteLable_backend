@@ -1,8 +1,9 @@
-import bcrypt from "bcryptjs"
+import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken";
 import { Admin } from "../models/admin.model.js";
 import { User } from "../models/user.model.js";
 import { Trash } from "../models/trash.model.js";
+
 
 const globalUsernames = [];
 
@@ -116,7 +117,7 @@ export const AdminController = {
 
         const passwordIsDuplicate = await bcrypt.compare(
             password,
-            existingUser.password
+            existingUser.password 
         );
 
         if (passwordIsDuplicate) {
@@ -127,11 +128,17 @@ export const AdminController = {
         }
         const passwordSalt = await bcrypt.genSalt();
         const encryptedPassword = await bcrypt.hash(password, passwordSalt);
+
         existingUser.password = encryptedPassword;
-        existingUser.save()
+
+        console.log("password", existingUser.password)
+
+        await existingUser.save();
+
+        return { code: 200, message: "Password reset successful!" };
     }catch(err)
      {
-            console.error(err);
+        console.log(err)
             throw { code: 500, message: "Failed to save new password" };
         }
     },
@@ -820,8 +827,8 @@ export const AdminController = {
             throw({ message: err.message || 'Internal server error' });
         }
     }
+    
       
-      
-        }
+     }
 
 

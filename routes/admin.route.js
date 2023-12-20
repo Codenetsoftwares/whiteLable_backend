@@ -95,8 +95,9 @@ export const AdminRoute = (app) => {
     app.post("/api/admin/reset-password", async (req, res) => {
         try {
             const { userName, password } = req.body;
-            await AdminController.PasswordResetCode(userName, password);
-            res.status(200).send({ code: 200, message: "Password reset successful!" });
+           const response = await AdminController.PasswordResetCode(userName, password);
+           console.log("Password reset",response)
+           res.status(response.code).send(response);
         } catch (err) {
             res.status(500).send({ code: err.code, message: err.message })
         }
