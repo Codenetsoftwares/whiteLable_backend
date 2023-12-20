@@ -228,7 +228,7 @@ export const Authorize = (roles) => {
           return res.status(401).send({
             code: 401,
             message: "Invalid login attempt for admin (3)",
-          });
+          }); 
         }
       }
       if (roles.includes("ActivityLog")) {
