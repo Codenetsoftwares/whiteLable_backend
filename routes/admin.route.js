@@ -72,15 +72,19 @@ export const AdminRoute = (app) => {
             }
     
             const loginTime = admin.lastLoginTime;
-            const clientIP = req.ip; // Use req.ip to get the client's IP
+            let clientIP = req.ip;
+    
+            // Check if the client is behind a proxy
+            const forwardedFor = req.headers['x-forwarded-for'];
+            if (forwardedFor) {
+                // Extract the first IP address from the list
+                const forwardedIps = forwardedFor.split(',');
+                clientIP = forwardedIps[0].trim();
+            }
     
             try {
-                const response = await fetch(`http://ip-api.com/json/${clientIP}`);
-                const data = await response.json();
-    
-                if (data.status === 'fail') {
-                    throw new Error('Failed to get location information');
-                }
+                const data = await fetch(`http://ip-api.com/json/${clientIP}`);
+                const collect = await data.json();
     
                 await Admin.findOneAndUpdate({ userName: userName }, { $set: { lastLoginTime: loginTime } });
     
@@ -88,9 +92,9 @@ export const AdminRoute = (app) => {
                     userName: admin.userName,
                     ip: {
                         IP: clientIP,
-                        country: data.country,
-                        region: data.regionName,
-                        timezone: data.timezone,
+                        country: collect.country,
+                        region: collect.regionName,
+                        timezone: collect.timezone,
                     },
                     isActive: admin.isActive,
                     locked: admin.locked,
@@ -100,7 +104,7 @@ export const AdminRoute = (app) => {
                 console.log("ipppp", responseObj);
                 res.json(responseObj);
             } catch (error) {
-                console.error('Error fetching data:', error.message);
+                console.error('Error fetching data:', error);
                 res.status(500).json({ error: 'Internal Server Error' });
             }
         } catch (error) {
@@ -108,6 +112,7 @@ export const AdminRoute = (app) => {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     });
+    
     
     
 
