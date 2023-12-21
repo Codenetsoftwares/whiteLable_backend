@@ -39,6 +39,66 @@ export const AdminController = {
 
     },
 
+    createSubAdmin: async (data, user) => {
+        if (!data.userName) {
+            throw { message: "userName Is Required" };
+        }
+        if (!data.password) {
+            throw { message: "Password Is Required" };
+        }
+        if (!data.roles || !Array.isArray(data.roles) || data.roles.length === 0) {
+            throw { code: 400, message: "Roles is required" };
+        }
+        if (user.isActive === false) {
+            throw { code: 400, message: "Account is in Inactive Mode" };
+        }
+    
+        const existingAdmin = await Admin.findOne({ userName: data.userName });
+        if (existingAdmin) {
+            throw { code: 409, message: "Admin Already Exist" };
+        }
+    
+        const Passwordsalt = await bcrypt.genSalt();
+        const encryptedPassword = await bcrypt.hash(data.password, Passwordsalt);
+    
+        let subRole = '';
+    
+        if (user.roles.includes('superAdmin')) {
+            subRole = 'SubAdmin';
+        } else if (user.roles.includes('WhiteLabel')) {
+            subRole = 'SubWhiteLabel';
+        } else if (user.roles.includes('HyperAgent')) {
+            subRole = 'SubHyperAgent';
+        } else if (user.roles.includes('SuperAgent')) {
+            subRole = 'SubSuperAgent';
+        } else if (user.roles.includes('MasterAgent')) {
+            subRole = 'SubMasterAgent';
+        } else {
+            throw { code: 400, message: "Invalid user role for creating sub-admin" };
+        }
+    
+        const index = data.roles.findIndex(roles => roles.roles === subRole);
+    
+        if (index === -1) {
+            data.roles.push(subRole);
+        }
+    
+        const newAdmin = new Admin({
+            userName: data.userName,
+            password: encryptedPassword,
+            roles: data.roles,
+            createBy: user._id
+        });
+           console.log("first", newAdmin)
+        try {
+            await newAdmin.save();
+            return newAdmin;
+        } catch (err) {
+            console.error(err);
+            throw { code: 500, message: "Failed to save user" };
+        }
+    },
+
     GenerateAdminAccessToken: async (userName, password, persist) => {
 
         if (!userName) {
