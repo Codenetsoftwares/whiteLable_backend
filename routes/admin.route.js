@@ -36,7 +36,6 @@ export const AdminRoute = (app) => {
             const loginTime = new Date();
             await Admin.findOneAndUpdate({ userName: userName }, { $set: { lastLoginTime: loginTime } });
 
-
             // const user = { accesstoken, loginTime, ipAddress, location };
             if (admin && accesstoken) {
                 res.status(200).send({ code: 200, message: "Login Successfully", token: accesstoken });
@@ -53,48 +52,60 @@ export const AdminRoute = (app) => {
 
     app.get('/getip/:username', Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent", "ActivityLog"]), async (req, res) => {
         try {
-        const userName = req.params.username;
-        let admin = await Admin.findOne({ userName: userName });
-
-        if (!admin) {
-            return res.status(404).json({ code: 404, message: 'Admin not found' });
+            const userName = req.params.username;
+            let admin = await Admin.findOne({ userName: userName });
+    
+            if (!admin) {
+                res.status(404).json({ code: 404, message: 'Admin not found' });
+                return;
+            }
+    
+            const loginTime = admin.lastLoginTime;
+            const clientIP = req.ip; // Use req.ip to get the client's IP
+    
+            try {
+                const response = await fetch(`http://ip-api.com/json/${clientIP}`);
+                const data = await response.json();
+    
+                if (data.status === 'fail') {
+                    throw new Error('Failed to get location information');
+                }
+    
+                await Admin.findOneAndUpdate({ userName: userName }, { $set: { lastLoginTime: loginTime } });
+    
+                const responseObj = {
+                    userName: admin.userName,
+                    ip: {
+                        IP: clientIP,
+                        country: data.country,
+                        region: data.regionName,
+                        timezone: data.timezone,
+                    },
+                    isActive: admin.isActive,
+                    locked: admin.locked,
+                    lastLoginTime: loginTime,
+                };
+    
+                console.log("ipppp", responseObj);
+                res.json(responseObj);
+            } catch (error) {
+                console.error('Error fetching data:', error.message);
+                res.status(500).json({ error: 'Internal Server Error' });
+            }
+        } catch (error) {
+            console.error('Error:', error.message);
+            res.status(500).json({ error: 'Internal Server Error' });
         }
-
-        const loginTime = admin.lastLoginTime;
-
-        const ipResponse = await axios.get('http://api64.ipify.org/');
-        const ip = ipResponse.data;
-
-        const dataResponse = await axios.get(`http://ip-api.com/json/${ip}`);
-        const collect = dataResponse.data;
-
-        await Admin.findOneAndUpdate({ userName: userName }, { $set: { lastLoginTime: loginTime } });
-
-        const responseObj = {
-            userName: admin.userName,
-            ip: {
-                IP: collect.query,
-                country: collect.country,
-                region: collect.regionName,
-                timezone: collect.timezone,
-            },
-            isActive: admin.isActive,
-            locked: admin.locked,
-            lastLoginTime: loginTime,
-        };
-
-        res.json(responseObj);
-    } catch (error) {
-        console.error('Error:', error.message);
-        res.status(error.response?.status || 500).json({ code: error.code, message: error.message });
-    }
-});
+    });
+    
+    
 
     // reset password
 
     app.post("/api/admin/reset-password", async (req, res) => {
         try {
             const { userName, password } = req.body;
+            const response = await AdminController.PasswordResetCode(userName, password);
            console.log("Password reset",response)
            res.status(response.code).send(response);
         } catch (err) {
