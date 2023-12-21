@@ -101,7 +101,7 @@ export const AdminRoute = (app) => {
                     lastLoginTime: loginTime,
                 };
     
-                console.log("ipppp", responseObj);
+          
                 res.json(responseObj);
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -121,7 +121,7 @@ export const AdminRoute = (app) => {
         try {
             const { userName, password } = req.body;
             const response = await AdminController.PasswordResetCode(userName, password);
-           console.log("Password reset",response)
+          
            res.status(response.code).send(response);
         } catch (err) {
             res.status(500).send({ code: err.code, message: err.message })
