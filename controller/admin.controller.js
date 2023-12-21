@@ -19,16 +19,18 @@ export const AdminController = {
             if (!data.roles || !Array.isArray(data.roles) || data.roles.length === 0) {
                 throw { code: 400, message: "Roles is required" };
             }
-    
+
             const existingAdmin = await Admin.findOne({ userName: data.userName });
             if (existingAdmin) {
                 throw { code: 409, message: "Admin Already Exists" };
             }
-    
+            if (user.isActive === false || user.locked === false) {
+                throw { code: 400, message: "Account is Not Active" };
+            }
             const Passwordsalt = await bcrypt.genSalt();
             const encryptedPassword = await bcrypt.hash(data.password, Passwordsalt);
     
-            const defaultPermission = '';
+            const defaultPermission = "All Accesses";
     
             const rolesWithDefaultPermission = data.roles.map(role => ({
                 role,
@@ -39,7 +41,7 @@ export const AdminController = {
                 userName: data.userName,
                 password: encryptedPassword,
                 roles: rolesWithDefaultPermission,
-                // createBy: user._id
+                createBy: user._id
             });
     
             await newAdmin.save();
@@ -89,8 +91,6 @@ export const AdminController = {
                 throw { code: 400, message: "Invalid user role for creating sub-admin" };
             }
         }
-    
-        
     
         const newAdmin = new Admin({
             userName: data.userName,
