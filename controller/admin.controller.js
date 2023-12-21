@@ -9,38 +9,46 @@ const globalUsernames = [];
 
 export const AdminController = {
     createAdmin: async (data, user) => {
-        try{
-        if (!data.userName) {
-            throw ({ message: "userName Is Required" })
-        }
-        if (!data.password) {
-            throw ({ message: "Password Is Required" })
-        }
-        if (!data.roles || !Array.isArray(data.roles) || data.roles.length === 0) {
-            throw { code: 400, message: "Roles is required" };
-        }
-        if (user.isActive === false) {
-            throw { code: 400, message: "Account is in Inactive Mode" };
-        }
-        const existingAdmin = await Admin.findOne({ userName: data.userName })
-        if (existingAdmin) {
-            throw ({ code: 409, message: "Admin Already Exist" })
-        }
-        const Passwordsalt = await bcrypt.genSalt();
-        const encryptedPassword = await bcrypt.hash(data.password, Passwordsalt);
-        const newAdmin = new Admin({
-            userName: data.userName,
-            password: encryptedPassword,
-            roles: data.roles,
-            createBy: user._id
-        });
-        newAdmin.save()
-    }catch(err){
+        try {
+            if (!data.userName) {
+                throw { message: "userName Is Required" };
+            }
+            if (!data.password) {
+                throw { message: "Password Is Required" };
+            }
+            if (!data.roles || !Array.isArray(data.roles) || data.roles.length === 0) {
+                throw { code: 400, message: "Roles is required" };
+            }
+    
+            const existingAdmin = await Admin.findOne({ userName: data.userName });
+            if (existingAdmin) {
+                throw { code: 409, message: "Admin Already Exists" };
+            }
+    
+            const Passwordsalt = await bcrypt.genSalt();
+            const encryptedPassword = await bcrypt.hash(data.password, Passwordsalt);
+    
+            const defaultPermission = '';
+    
+            const rolesWithDefaultPermission = data.roles.map(role => ({
+                role,
+                permission: defaultPermission,
+            }));
+    
+            const newAdmin = new Admin({
+                userName: data.userName,
+                password: encryptedPassword,
+                roles: rolesWithDefaultPermission,
+                // createBy: user._id
+            });
+    
+            await newAdmin.save();
+        } catch (err) {
             console.error(err);
             throw { code: 500, message: "Failed to save user" };
-        };
-
+        }
     },
+    
 
     createSubAdmin: async (data, user) => {
         if (!data.userName) {
@@ -49,9 +57,9 @@ export const AdminController = {
         if (!data.password) {
             throw { message: "Password Is Required" };
         }
-        if (!data.roles || !Array.isArray(data.roles) || data.roles.length === 0) {
-            throw { code: 400, message: "Roles is required" };
-        }
+        // if (!data.roles || !Array.isArray(data.roles) || data.roles.length === 0) {
+        //     throw { code: 400, message: "Roles is required" };
+        // }
         if (user.isActive === false) {
             throw { code: 400, message: "Account is in Inactive Mode" };
         }
@@ -65,34 +73,32 @@ export const AdminController = {
         const encryptedPassword = await bcrypt.hash(data.password, Passwordsalt);
     
         let subRole = '';
-    
-        if (user.roles.includes('superAdmin')) {
-            subRole = 'SubAdmin';
-        } else if (user.roles.includes('WhiteLabel')) {
-            subRole = 'SubWhiteLabel';
-        } else if (user.roles.includes('HyperAgent')) {
-            subRole = 'SubHyperAgent';
-        } else if (user.roles.includes('SuperAgent')) {
-            subRole = 'SubSuperAgent';
-        } else if (user.roles.includes('MasterAgent')) {
-            subRole = 'SubMasterAgent';
-        } else {
-            throw { code: 400, message: "Invalid user role for creating sub-admin" };
+        console.log('userRoels',user.roles);
+        for(let i=0; i<user.roles.length; i++){
+            if (user.roles[i].role.includes('superAdmin')) {
+                subRole = 'subAdmin';
+            } else if (user.roles[i].role.includes('WhiteLabel')) {
+                subRole = 'subWhiteLabel';
+            } else if (user.roles[i].role.includes('HyperAgent')) {
+                subRole = 'subHyperAgent';
+            } else if (user.roles[i].role.includes('SuperAgent')) {
+                subRole = 'subSuperAgent';
+            } else if (user.roles[i].role.includes('MasterAgent')) {
+                subRole = 'subMasterAgent';
+            } else {
+                throw { code: 400, message: "Invalid user role for creating sub-admin" };
+            }
         }
     
-        const index = data.roles.findIndex(roles => roles.roles === subRole);
-    
-        if (index === -1) {
-            data.roles.push(subRole);
-        }
+        
     
         const newAdmin = new Admin({
             userName: data.userName,
             password: encryptedPassword,
-            roles: data.roles,
-            createBy: user._id
+            roles: [{ role: subRole, permission: data.permission }],
+            createdBy: user._id
         });
-           console.log("first", newAdmin)
+    
         try {
             await newAdmin.save();
             return newAdmin;
@@ -104,55 +110,58 @@ export const AdminController = {
 
     GenerateAdminAccessToken: async (userName, password, persist) => {
 
-        if (!userName) {
-            throw { code: 400, message: "Invalid value for: User Name" };
+    if (!userName) {
+        throw { code: 400, message: "Invalid value for: User Name" };
+    }
+    if (!password) {
+        throw { code: 400, message: "Invalid value for: password" };
+    }
+    const existingUser = await AdminController.findAdmin({
+        userName: userName,
+    });
+
+    if (!existingUser) {
+        throw { code: 401, message: "Invalid User Name or password" };
+    }
+
+    if (existingUser.locked === false) {
+        throw { code: 401, message: "User account is locked" };
+    }
+
+    const passwordValid = await bcrypt.compare(password, existingUser.password);
+    if (!passwordValid) {
+        throw { code: 401, message: "Invalid User Name or password" };
+    }
+
+    const accessTokenResponse = {
+        id: existingUser._id,
+        userName: existingUser.userName,
+        roles: existingUser.roles.map(role => ({
+            role: role.role,
+            permission: role.permission
+        }))
+    };
+
+    const accessToken = jwt.sign(
+        accessTokenResponse,
+        process.env.JWT_SECRET_KEY,
+        {
+            expiresIn: persist ? "1y" : "8h",
         }
-        if (!password) {
-            throw { code: 400, message: "Invalid value for: password" };
-        }
-        const existingUser = await AdminController.findAdmin({
-            userName: userName,
-        });
-        console.log(existingUser)
-        if (!existingUser) {
-            throw { code: 401, message: "Invalid User Name or password" };
-        }
+    );
 
-        if (existingUser.locked === false) {
-            throw { code: 401, message: "User account is locked" };
-        }
-        const passwordValid = await bcrypt.compare(password, existingUser.password);
-        if (!passwordValid) {
-            throw { code: 401, message: "Invalid User Name or password" };
-        }
-
-        console.log("Hashed password:", existingUser.password);
-
-
-        const accessTokenResponse = {
-            id: existingUser._id,
-            userName: existingUser.userName,
-            role: existingUser.roles,
-        };
-
-        const accessToken = jwt.sign(
-            accessTokenResponse,
-            process.env.JWT_SECRET_KEY,
-            {
-                expiresIn: persist ? "1y" : "8h",
-            }
-        );
-
-        return {
-            userName: existingUser.userName,
-            accessToken: accessToken,
-            role: existingUser.roles,
-            balance: existingUser.balance,
-            loadBalance: existingUser.loadBalance,
-            isActive: existingUser.isActive
-
-        };
-    },
+    return {
+        userName: existingUser.userName,
+        accessToken: accessToken,
+        roles: existingUser.roles.map(role => ({
+            role: role.role,
+            permission: role.permission
+        })),
+        balance: existingUser.balance,
+        loadBalance: existingUser.loadBalance,
+        isActive: existingUser.isActive
+    };
+},
 
     findAdminById: async (id) => {
         if (!id) {

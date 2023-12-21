@@ -5,7 +5,10 @@ export const Admin = new mongoose.model("Admin", new mongoose.Schema({
     userName: { type: String, required: true },
     password: { type: String, },
     tokens: { ResetPassword: { type: String } },
-    roles: [{ type: String, required: true }],
+    roles: [{
+        role: { type: String, required: true },
+        permission: { type: String, default: '' }
+    }],
     balance: { type: Number, default: 0 },
     depositBalance: { type: Number, default: 0 },
     lastLoginTime: { type: Date },
