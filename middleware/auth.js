@@ -31,6 +31,7 @@ export const Authorize = (roles) => {
       }
 
       let existingUser;
+      
       if (roles.includes("superAdmin")) {
         existingUser = await Admin.findById(user.id).exec();
         if (!existingUser) {
@@ -39,7 +40,7 @@ export const Authorize = (roles) => {
             .send({ code: 401, message: "Invalid login attempt for user (1)" });
         }
       }
-
+      // console.log("first", existingUser)
       if (roles.includes("SubAdmin")) {
         existingUser = await Admin.findById(user.id).exec();
         if (!existingUser) {
@@ -49,7 +50,17 @@ export const Authorize = (roles) => {
           });
         }
       }
-      
+
+      if (roles.includes("All-Access")) {
+        existingUser = await Admin.findById(user.id).exec();
+        if (!existingUser) {
+          return res.status(401).send({
+            code: 401,
+            message: "Invalid login attempt for admin (3)",
+          });
+        }
+      }
+
       if (roles.includes("WhiteLabel")) {
         existingUser = await Admin.findById(user.id).exec();
         if (!existingUser) {
@@ -130,169 +141,28 @@ export const Authorize = (roles) => {
           });
         }
       }
-      if (roles.includes("TransferBalance")) {
-        existingUser = await Admin.findById(user.id).exec();
-        if (!existingUser) {
-          return res.status(401).send({
-            code: 401,
-            message: "Invalid login attempt for admin (3)",
-          });
-        } 
-      }
-      if (roles.includes("Status")) {
-        existingUser = await Admin.findById(user.id).exec();
-        if (!existingUser) {
-          return res.status(401).send({
-            code: 401,
-            message: "Invalid login attempt for admin (3)",
-          });
-        }
-      }
-      if (roles.includes("CreditRef-Edit")) {
-        existingUser = await Admin.findById(user.id).exec();
-        if (!existingUser) {
-          return res.status(401).send({
-            code: 401,
-            message: "Invalid login attempt for admin (3)",
-          });
-        }
-      }
-      if (roles.includes("Partnership-Edit")) {
-        existingUser = await Admin.findById(user.id).exec();
-        if (!existingUser) {
-          return res.status(401).send({
-            code: 401,
-            message: "Invalid login attempt for admin (3)",
-          });
-        }
-      }
-      if (roles.includes("CreditRef-View")) {
-        existingUser = await Admin.findById(user.id).exec();
-        if (!existingUser) {
-          return res.status(401).send({
-            code: 401,
-            message: "Invalid login attempt for admin (3)",
-          });
-        }
-      }
-      if (roles.includes("Partnership-View")) {
-        existingUser = await Admin.findById(user.id).exec();
-        if (!existingUser) {
-          return res.status(401).send({
-            code: 401,
-            message: "Invalid login attempt for admin (3)",
-          });
-        }
-      }
-      if (roles.includes("User-Profile-View")) {
-        existingUser = await Admin.findById(user.id).exec();
-        if (!existingUser) {
-          return res.status(401).send({
-            code: 401,
-            message: "Invalid login attempt for admin (3)",
-          });
-        }
-      }
-      if (roles.includes("Profile-View")) {
-        existingUser = await Admin.findById(user.id).exec();
-        if (!existingUser) {
-          return res.status(401).send({
-            code: 401,
-            message: "Invalid login attempt for admin (3)",
-          });
-        }
-      }
-      if (roles.includes("Create-Admin")) {
-        existingUser = await Admin.findById(user.id).exec();
-        if (!existingUser) {
-          return res.status(401).send({
-            code: 401,
-            message: "Invalid login attempt for admin (3)",
-          });
-        }
-      }
-      // if (roles.includes("Create-User")) {
-      //   existingUser = await Admin.findById(user.id).exec();
-      //   if (!existingUser) {
-      //     return res.status(401).send({
-      //       code: 401,
-      //       message: "Invalid login attempt for admin (3)",
-      //     });
-      //   }
-      // }
-      if (roles.includes("AccountStatement")) {
-        existingUser = await Admin.findById(user.id).exec();
-        if (!existingUser) {
-          return res.status(401).send({
-            code: 401,
-            message: "Invalid login attempt for admin (3)",
-          }); 
-        }
-      }
-      if (roles.includes("ActivityLog")) {
-        existingUser = await Admin.findById(user.id).exec();
-        if (!existingUser) {
-          return res.status(401).send({
-            code: 401,
-            message: "Invalid login attempt for admin (3)",
-          });
-        }
-      }
-      if (roles.includes("Delete-Admin")) {
-        existingUser = await Admin.findById(user.id).exec();
-        if (!existingUser) {
-          return res.status(401).send({
-            code: 401,
-            message: "Invalid login attempt for admin (3)",
-          });
-        }
-      }
-      if (roles.includes("Restore-Admin")) {
-        existingUser = await Admin.findById(user.id).exec();
-        if (!existingUser) {
-          return res.status(401).send({
-            code: 401,
-            message: "Invalid login attempt for admin (3)",
-          });
-        }
-      }
-      if (roles.includes("Move-To-Trash")) {
-        existingUser = await Admin.findById(user.id).exec();
-        if (!existingUser) {
-          return res.status(401).send({
-            code: 401,
-            message: "Invalid login attempt for admin (3)",
-          });
-        }
-      }
-      if (roles.includes("Trash-View")) {
-        existingUser = await Admin.findById(user.id).exec();
-        if (!existingUser) {
-          return res.status(401).send({
-            code: 401,
-            message: "Invalid login attempt for admin (3)",
-          });
-        }
-      }
-      // if (roles.includes("user")) {
-      //   existingUser = await User.findById(user.id).exec();
-      //   if (!existingUser) {
-      //     return res.status(401).send({
-      //       code: 401,
-      //       message: "Invalid login attempt for admin (4)",
-      //     });
-      //   }
-      // }
+
       if (roles && roles.length > 0) {
         let userHasRequiredRole = false;
         roles.forEach((role) => {
           const rolesArray = existingUser.roles;
-          for(const element of rolesArray) {
-       
-            if (role === element){
+          // console.log('rolesArray',rolesArray)
+        //   for(const element of rolesArray) {
+        //  console.log("second", element)
+        //  console.log('role',role)
+        //     if (role === element){
+        //       userHasRequiredRole = true;
+        //     }
+        //   }
+
+        for(let i=0; i<rolesArray.length; i++){
+          // console.log('rolesarr',role[i])
+          // console.log('permission',rolesArray[i].permission)
+          if(rolesArray[i].role === role || rolesArray[i].permission === role){
+            console.log('success')
               userHasRequiredRole = true;
-            }
           }
+        }
         });
         if (!userHasRequiredRole)
           return res
