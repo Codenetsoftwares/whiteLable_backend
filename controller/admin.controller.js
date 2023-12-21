@@ -98,7 +98,6 @@ export const AdminController = {
             roles: [{ role: subRole, permission: data.permission }],
             createdBy: user._id
         });
-    
         try {
             await newAdmin.save();
             return newAdmin;
@@ -109,29 +108,26 @@ export const AdminController = {
     },
 
     GenerateAdminAccessToken: async (userName, password, persist) => {
+        if (!userName) {
+            throw { code: 400, message: "Invalid value for: User Name" };
+        }
+        if (!password) {
+            throw { code: 400, message: "Invalid value for: password" };
+        }
+        const existingUser = await AdminController.findAdmin({
+            userName: userName,
+        });
+        if (!existingUser) {
+            throw { code: 401, message: "Invalid User Name or password" };
+        }
 
-    if (!userName) {
-        throw { code: 400, message: "Invalid value for: User Name" };
-    }
-    if (!password) {
-        throw { code: 400, message: "Invalid value for: password" };
-    }
-    const existingUser = await AdminController.findAdmin({
-        userName: userName,
-    });
-
-    if (!existingUser) {
-        throw { code: 401, message: "Invalid User Name or password" };
-    }
-
-    if (existingUser.locked === false) {
-        throw { code: 401, message: "User account is locked" };
-    }
-
-    const passwordValid = await bcrypt.compare(password, existingUser.password);
-    if (!passwordValid) {
-        throw { code: 401, message: "Invalid User Name or password" };
-    }
+        if (existingUser.locked === false) {
+            throw { code: 401, message: "User account is locked" };
+        }
+        const passwordValid = await bcrypt.compare(password, existingUser.password);
+        if (!passwordValid) {
+            throw { code: 401, message: "Invalid User Name or password" };
+        }
 
     const accessTokenResponse = {
         id: existingUser._id,
@@ -200,14 +196,13 @@ export const AdminController = {
 
         existingUser.password = encryptedPassword;
 
-        console.log("password", existingUser.password)
 
         await existingUser.save();
 
         return { code: 200, message: "Password reset successful!" };
     }catch(err)
      {
-        console.log(err)
+      
             throw { code: 500, message: "Failed to save new password" };
         }
     },
@@ -217,7 +212,7 @@ export const AdminController = {
     CreateUser: async (data) => {
         try {
         const existingUser = await User.findOne({ userName: data.userName })
-        console.log(existingUser)
+   
         if (existingUser) {
             throw ({ code: 409, message: "User Already Exist" })
         }
@@ -341,15 +336,15 @@ export const AdminController = {
     activateAdmin: async (adminId, isActive, locked) => {
         try {
             const admin = await Admin.findById(adminId);
-            // console.log('admin', admin._id)
+         
             const whiteLabel = await Admin.find({ createBy: adminId, roles: { $in: ["WhiteLabel"] } }).exec();
-            // console.log('whiteLabel', whiteLabel)
+          
             const hyperAgent = await Admin.find({ createBy: adminId, roles: { $in: ["HyperAgent"] } }).exec();
-            // console.log('hyperAgent', hyperAgent)
+      
             const masterAgent = await Admin.find({ createBy: adminId, roles: { $in: ["MasterAgent"] } }).exec();
-            // console.log('masterAgent', masterAgent)
+          
             const superAgent = await Admin.find({ createBy: adminId, roles: { $in: ["SuperAgent"] } }).exec();
-            // console.log('superAgent', superAgent)
+         
             if (whiteLabel.length == 0 && hyperAgent.length == 0 && masterAgent.length == 0 && superAgent.length == 0) {
                 if (isActive === true) {
                     admin.isActive = true;
@@ -379,19 +374,19 @@ export const AdminController = {
                 admin.locked = true;
                 superAgent.map((data) => {
                     if (data.isActive === false && data.locked === false && data.superActive === true && data.checkActive === true) {
-                        console.log('319 act')
+                       
                         data.isActive = true;
                         data.locked = true;
                         data.superActive = false;
                         data.checkActive = false;
                     } //checked
                     else if (data.isActive === false && data.locked === false && data.superActive === true && data.checkActive === false) {
-                        console.log('335 act')
+                       
                         data.locked = true;
                         data.superActive = false;
                     } //checked
                     else if (data.isActive === false && data.locked === true && data.superActive === true && data.checkActive === true) {
-                        console.log('335 act')
+                      
                         data.isActive = true;
                         data.locked = true;
                         data.superActive = false;
@@ -400,22 +395,22 @@ export const AdminController = {
                     AdminController.activateAdmin(data._id, data.isActive, data.locked)
 
                 })
-                console.log('zero')
+               
                 hyperAgent.forEach((data) => {
                     if (data.isActive === false && data.locked === false && data.hyperActive === true && data.checkActive === true) {
-                        console.log('319 act')
+                       
                         data.isActive = true;
                         data.locked = true;
                         data.hyperActive = false;
                         data.checkActive = false;
                     } //checked
                     else if (data.isActive === false && data.locked === false && data.hyperActive === true && data.checkActive === false) {
-                        console.log('335 act')
+                       
                         data.locked = true;
                         data.hyperActive = false;
                     } //checked
                     else if (data.isActive === false && data.locked === true && data.hyperActive === true && data.checkActive === true) {
-                        console.log('335 act')
+                        
                         data.isActive = true;
                         data.locked = true;
                         data.hyperActive = false;
@@ -428,19 +423,19 @@ export const AdminController = {
                 })
                 masterAgent.forEach((data) => {
                     if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === true) {
-                        console.log('319 act')
+                      
                         data.isActive = true;
                         data.locked = true;
                         data.masterActive = false;
                         data.checkActive = false;
                     } //checked
                     else if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === false) {
-                        console.log('335 act')
+                     
                         data.locked = true;
                         data.masterActive = false;
                     } //checked
                     else if (data.isActive === false && data.locked === true && data.masterActive === true && data.checkActive === true) {
-                        console.log('335 act')
+                        
                         data.isActive = true;
                         data.locked = true;
                         data.masterActive = false;
@@ -453,19 +448,19 @@ export const AdminController = {
                 })
                 whiteLabel.forEach((data) => {
                     if (data.isActive === false && data.locked === false && data.whiteActive === true && data.checkActive === true) {
-                        console.log('319 act')
+                       
                         data.isActive = true;
                         data.locked = true;
                         data.whiteActive = false;
                         data.checkActive = false;
                     } //checked
                     else if (data.isActive === false && data.locked === false && data.whiteActive === true && data.checkActive === false) {
-                        console.log('335 act')
+                      
                         data.locked = true;
                         data.whiteActive = false;
                     } //checked
                     else if (data.isActive === false && data.locked === true && data.whiteActive === true && data.checkActive === true) {
-                        console.log('335 act')
+                      
                         data.isActive = true;
                         data.locked = true;
                         data.whiteActive = false;
@@ -477,7 +472,7 @@ export const AdminController = {
 
                 })
 
-                // console.log('hyper', hyperAgent)
+           
                 await admin.save();
                 await Promise.all(hyperAgent.map(data => data.save()));
                 await Promise.all(masterAgent.map(data => data.save()));
@@ -489,12 +484,12 @@ export const AdminController = {
                 if (locked === false) {
                     admin.locked = false;
                     admin.isActive = false;
-                    // console.log(superAgent.length)
+                
 
                     superAgent.forEach((data) => {
 
                         if (data.isActive === true && data.locked === true && data.superActive === false && data.checkActive === false) {
-                            console.log('391 lock')
+                          
                             data.isActive = false;
                             data.locked = false;
                             data.superActive = true;
@@ -505,16 +500,16 @@ export const AdminController = {
                             data.isActive = false;
                             data.locked = false;
                             data.checkActive = true;
-                            console.log('402 lock')
+                  
                         }
                         else if (data.isActive === false && data.locked === true && data.superActive === false && data.checkActive === false) {
                             data.locked = false;
                             data.superActive = true;
-                            console.log('408 lock')
+                    
                         } //checked
                         else if (data.isActive === false && data.locked === true && data.superActive === true && data.checkActive === true) {
                             data.locked = false;
-                            console.log('408 lock')
+                      
                         } //checked
                         else if (data.isActive === false && data.locked === false && data.superActive === true && data.checkActive === true) {
                             data.isActive = true;
@@ -527,7 +522,7 @@ export const AdminController = {
                     });
                     hyperAgent.forEach((data) => {
                         if (data.isActive === true && data.locked === true && data.hyperActive === false && data.checkActive === false) {
-                            console.log('391 lock')
+                          
                             data.isActive = false;
                             data.locked = false;
                             data.hyperActive = true;
@@ -538,16 +533,16 @@ export const AdminController = {
                             data.isActive = false;
                             data.locked = false;
                             data.checkActive = true;
-                            console.log('402 lock')
+                         
                         }
                         else if (data.isActive === false && data.locked === true && data.hyperActive === false && data.checkActive === false) {
                             data.locked = false;
                             data.hyperActive = true;
-                            console.log('408 lock')
+                           
                         } //checked
                         else if (data.isActive === false && data.locked === true && data.hyperActive === true && data.checkActive === true) {
                             data.locked = false;
-                            console.log('408 lock')
+                           
                         } //checked
                         else if (data.isActive === false && data.locked === false && data.hyperActive === true && data.checkActive === true) {
                             data.isActive = true;
@@ -560,7 +555,7 @@ export const AdminController = {
                     });
                     masterAgent.forEach((data) => {
                         if (data.isActive === true && data.locked === true && data.masterActive === false && data.checkActive === false) {
-                            console.log('391 lock')
+                        
                             data.isActive = false;
                             data.locked = false;
                             data.masterActive = true;
@@ -571,16 +566,16 @@ export const AdminController = {
                             data.isActive = false;
                             data.locked = false;
                             data.checkActive = true;
-                            console.log('402 lock')
+                     
                         }
                         else if (data.isActive === false && data.locked === true && data.masterActive === false && data.checkActive === false) {
                             data.locked = false;
                             data.masterActive = true;
-                            console.log('408 lock')
+                        
                         } //checked
                         else if (data.isActive === false && data.locked === true && data.masterActive === true && data.checkActive === true) {
                             data.locked = false;
-                            console.log('408 lock')
+                       
                         } //checked
                         else if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === true) {
                             data.isActive = true;
@@ -593,7 +588,7 @@ export const AdminController = {
                     });
                     whiteLabel.forEach((data) => {
                         if (data.isActive === true && data.locked === true && data.whiteActive === false && data.checkActive === false) {
-                            console.log('391 lock')
+                       
                             data.isActive = false;
                             data.locked = false;
                             data.whiteActive = true;
@@ -604,16 +599,16 @@ export const AdminController = {
                             data.isActive = false;
                             data.locked = false;
                             data.checkActive = true;
-                            console.log('402 lock')
+                     
                         }
                         else if (data.isActive === false && data.locked === true && data.whiteActive === false && data.checkActive === false) {
                             data.locked = false;
                             data.whiteActive = true;
-                            console.log('408 lock')
+                       
                         } //checked
                         else if (data.isActive === false && data.locked === true && data.whiteActive === true && data.checkActive === true) {///not use
                             data.locked = false;
-                            console.log('408 lock')
+                        
                         } //checked
                         else if (data.isActive === false && data.locked === false && data.whiteActive === true && data.checkActive === true) {
                             data.isActive = true;
@@ -632,7 +627,7 @@ export const AdminController = {
                     await Promise.all(superAgent.map(data => data.save()));
                     return { message: "Admin locked successfully" };
                 } else {
-                    console.log('suspend why')
+                   
                     admin.isActive = false;
                     superAgent.forEach((data) => {
                         if (data.isActive === true && data.locked === true && data.superActive === false) {
@@ -672,7 +667,7 @@ export const AdminController = {
 
                     });
                     masterAgent.forEach((data) => {
-                        console.log('mastersuspend')
+                   
                         if (data.isActive === true && data.locked === true && data.masterActive === false) {
                             data.isActive = false;
                             data.locked = true;
