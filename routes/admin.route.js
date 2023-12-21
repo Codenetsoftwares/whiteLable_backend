@@ -16,7 +16,7 @@ export const AdminRoute = (app) => {
     app.post("/api/admin-create", 
     Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","SubWhiteLabel","SubAdmin","SubHyperAgent","SubSuperAgent","SubMasterAgent","Create-Admin"]),
      async (req, res) => {
-        try {
+        try {          
             const user = req.user;
             await AdminController.createAdmin(req.body, user);
             res.status(200).send({ code: 200, message: 'Admin registered successfully!' })
@@ -26,7 +26,7 @@ export const AdminRoute = (app) => {
         }
     });
 
-    app.post("/api/admin/create-subAdmin", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","SubWhiteLabel","SubAdmin","SubHyperAgent","SubSuperAgent","SubMasterAgent","Create-Admin"]), async (req, res) => {
+    app.post("/api/admin/create-subAdmin", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","SubWhiteLabel","SubAdmin","SubHyperAgent","SubSuperAgent","SubMasterAgent","Create-subAdmin"]), async (req, res) => {
         try {
             const user = req.user;
             await AdminController.createSubAdmin(req.body, user);

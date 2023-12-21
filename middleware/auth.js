@@ -222,6 +222,15 @@ export const Authorize = (roles) => {
           });
         }
       }
+      if (roles.includes("Create-subAdmin")) {
+        existingUser = await Admin.findById(user.id).exec();
+        if (!existingUser) {
+          return res.status(401).send({
+            code: 401,
+            message: "Invalid login attempt for admin (3)",
+          });
+        }
+      }
       // if (roles.includes("Create-User")) {
       //   existingUser = await Admin.findById(user.id).exec();
       //   if (!existingUser) {
@@ -297,30 +306,19 @@ export const Authorize = (roles) => {
       if (roles && roles.length > 0) {
         let userHasRequiredRole = false;
         roles.forEach((role) => {
-          const rolesArray = existingUser.roles;
-          // console.log('rolesArray',rolesArray)
-        //   for(const element of rolesArray) {
-        //  console.log("second", element)
-        //  console.log('role',role)
-        //     if (role === element){
-        //       userHasRequiredRole = true;
-        //     }
-        //   }
-
-        for(let i=0; i<rolesArray.length; i++){
-          // console.log('rolesarr',role[i])
-          // console.log('permission',rolesArray[i].permission)
-          if(rolesArray[i].role === role || rolesArray[i].permission === role){
-            console.log('success')
-              userHasRequiredRole = true;
-          }
-        }
+            const rolesArray = existingUser.roles;
+            for (let i = 0; i < rolesArray.length; i++) {
+                if (rolesArray[i].role === role || rolesArray[i].permission.includes(role)) {
+                    console.log('success');
+                    userHasRequiredRole = true;
+                }
+            }
         });
-        if (!userHasRequiredRole)
-          return res
-            .status(401)
-            .send({ code: 401, message: "Unauthorized access" });
-      }
+        if (!userHasRequiredRole) {
+            return res.status(401).send({ code: 401, message: "Unauthorized access" });
+        }
+    }
+    
 
       req.user = existingUser;
       next();
