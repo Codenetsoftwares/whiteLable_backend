@@ -3,7 +3,10 @@ import mongoose from "mongoose";
 
 export const Trash = new mongoose.model("Trash", new mongoose.Schema({
     id: { type: mongoose.Schema.Types.ObjectId },
-    roles: [{ type: String, required: true }],
+    roles: [{
+        role: { type: String, required: true },
+        permission: [{ type: String, default: '' }]
+    }],
     userName:  { type: String, required: true },
     password: { type: String },
     balance: { type: Number, default: 0},
