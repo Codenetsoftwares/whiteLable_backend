@@ -117,7 +117,7 @@ export const AdminRoute = (app) => {
 
     // reset password
 
-    app.post("/api/admin/reset-password", async (req, res) => {
+    app.post("/api/admin/reset-password",Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent",]) ,async (req, res) => {
         try {
             const { userName, password } = req.body;
             const response = await AdminController.PasswordResetCode(userName, password);
@@ -297,18 +297,18 @@ export const AdminRoute = (app) => {
 
     // active status
 
-    app.post("/api/activate/:adminId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","Status"]), async (req, res) => {
+    app.post("/api/activate/:adminId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent", "Status"]), async (req, res) => {
         try {
-            const adminId = req.params.adminId
+            const { adminId } = req.params;
             const { isActive, locked } = req.body;
-            const adminActive = await AdminController.activateAdmin(adminId, isActive,locked);
-            res.status(200).send(adminActive)
-        }catch(err)
-            {
-                res.status(500).send({ code: err.code, message: err.message });
-
-            }
+            const adminActive = await AdminController.activateAdmin(adminId, isActive, locked);
+            console.log("adminActive:", adminActive);
+            res.status(200).send(adminActive);
+        } catch (err) {
+            res.status(500).send({ code: err.code, message: err.message });
+        }
     });
+    
 
 //  creditref 
 

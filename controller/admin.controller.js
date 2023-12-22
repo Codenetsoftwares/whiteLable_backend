@@ -96,7 +96,7 @@ export const AdminController = {
             userName: data.userName,
             password: encryptedPassword,
             roles: [{ role: subRole, permission: data.permission }],
-            createdBy: user._id
+            createBy: user._id
         });
         try {
             await newAdmin.save();
@@ -333,425 +333,425 @@ export const AdminController = {
 
     // User Active status
 
-    activateAdmin: async (adminId, isActive, locked) => {
-        try {
-            const admin = await Admin.findById(adminId);
-         
-            const whiteLabel = await Admin.find({ createBy: adminId, roles: { $in: ["WhiteLabel"] } }).exec();
-          
-            const hyperAgent = await Admin.find({ createBy: adminId, roles: { $in: ["HyperAgent"] } }).exec();
-      
-            const masterAgent = await Admin.find({ createBy: adminId, roles: { $in: ["MasterAgent"] } }).exec();
-          
-            const superAgent = await Admin.find({ createBy: adminId, roles: { $in: ["SuperAgent"] } }).exec();
-         
-            if (whiteLabel.length == 0 && hyperAgent.length == 0 && masterAgent.length == 0 && superAgent.length == 0) {
-                if (isActive === true) {
-                    admin.isActive = true;
-                    admin.locked = true;
-                }
-                else if (isActive === false) {
-                    if (locked === false) {
-                        admin.locked = false;
-                        admin.isActive = false;
-                    }
-                    else {
-                        admin.isActive = false;
-                    }
-                }
-                await admin.save();
-                await Promise.all(hyperAgent.map(data => data.save()));
-                await Promise.all(masterAgent.map(data => data.save()));
-                await Promise.all(whiteLabel.map(data => data.save()));
-                await Promise.all(superAgent.map(data => data.save()));
-                return
-            }
-            if (!admin) {
-                throw { code: 404, message: "Admin not found" };
-            }
-            if (isActive === true) {
-                admin.isActive = true;
-                admin.locked = true;
-                superAgent.map((data) => {
-                    if (data.isActive === false && data.locked === false && data.superActive === true && data.checkActive === true) {
-                       
-                        data.isActive = true;
-                        data.locked = true;
-                        data.superActive = false;
-                        data.checkActive = false;
-                    } //checked
-                    else if (data.isActive === false && data.locked === false && data.superActive === true && data.checkActive === false) {
-                       
-                        data.locked = true;
-                        data.superActive = false;
-                    } //checked
-                    else if (data.isActive === false && data.locked === true && data.superActive === true && data.checkActive === true) {
-                      
-                        data.isActive = true;
-                        data.locked = true;
-                        data.superActive = false;
-                        data.checkActive = false;
-                    } //checked
-                    AdminController.activateAdmin(data._id, data.isActive, data.locked)
+activateAdmin: async (adminId, isActive, locked) => {
+try {
+console.log("adminId:", adminId); 
+const admin = await Admin.findById(adminId);
 
-                })
-               
-                hyperAgent.forEach((data) => {
-                    if (data.isActive === false && data.locked === false && data.hyperActive === true && data.checkActive === true) {
-                       
-                        data.isActive = true;
-                        data.locked = true;
-                        data.hyperActive = false;
-                        data.checkActive = false;
-                    } //checked
-                    else if (data.isActive === false && data.locked === false && data.hyperActive === true && data.checkActive === false) {
-                       
-                        data.locked = true;
-                        data.hyperActive = false;
-                    } //checked
-                    else if (data.isActive === false && data.locked === true && data.hyperActive === true && data.checkActive === true) {
-                        
-                        data.isActive = true;
-                        data.locked = true;
-                        data.hyperActive = false;
-                        data.checkActive = false;
-                    } //checked
-
-                    AdminController.activateAdmin(data._id, data.isActive, data.locked)
+const whiteLabel = await Admin.find({ createBy: adminId, roles: { $elemMatch: { role: "WhiteLabel" } } }).exec();
+const hyperAgent = await Admin.find({ createBy: adminId, roles: { $elemMatch: { role: "HyperAgent" } } }).exec();
+const masterAgent = await Admin.find({ createBy: adminId, roles: { $elemMatch: { role: "MasterAgent" } } }).exec();
+const superAgent = await Admin.find({ createBy: adminId, roles: { $elemMatch: { role: "SuperAgent" } } }).exec();
 
 
-                })
-                masterAgent.forEach((data) => {
-                    if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === true) {
-                      
-                        data.isActive = true;
-                        data.locked = true;
-                        data.masterActive = false;
-                        data.checkActive = false;
-                    } //checked
-                    else if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === false) {
-                     
-                        data.locked = true;
-                        data.masterActive = false;
-                    } //checked
-                    else if (data.isActive === false && data.locked === true && data.masterActive === true && data.checkActive === true) {
-                        
-                        data.isActive = true;
-                        data.locked = true;
-                        data.masterActive = false;
-                        data.checkActive = false;
-                    } //checked
-
-                    AdminController.activateAdmin(data._id, data.isActive, data.locked)
-
-
-                })
-                whiteLabel.forEach((data) => {
-                    if (data.isActive === false && data.locked === false && data.whiteActive === true && data.checkActive === true) {
-                       
-                        data.isActive = true;
-                        data.locked = true;
-                        data.whiteActive = false;
-                        data.checkActive = false;
-                    } //checked
-                    else if (data.isActive === false && data.locked === false && data.whiteActive === true && data.checkActive === false) {
-                      
-                        data.locked = true;
-                        data.whiteActive = false;
-                    } //checked
-                    else if (data.isActive === false && data.locked === true && data.whiteActive === true && data.checkActive === true) {
-                      
-                        data.isActive = true;
-                        data.locked = true;
-                        data.whiteActive = false;
-                        data.checkActive = false;
-                    } //checked
-                    AdminController.activateAdmin(data._id, data.isActive, data.locked)
-
-
-
-                })
-
-           
-                await admin.save();
-                await Promise.all(hyperAgent.map(data => data.save()));
-                await Promise.all(masterAgent.map(data => data.save()));
-                await Promise.all(whiteLabel.map(data => data.save()));
-                await Promise.all(superAgent.map(data => data.save()));
-                return { message: "Admin activated successfully" };
-            }
-            else if (isActive === false) {
-                if (locked === false) {
-                    admin.locked = false;
-                    admin.isActive = false;
-                
-
-                    superAgent.forEach((data) => {
-
-                        if (data.isActive === true && data.locked === true && data.superActive === false && data.checkActive === false) {
-                          
-                            data.isActive = false;
-                            data.locked = false;
-                            data.superActive = true;
-                            data.checkActive = true
-                        } //checked
-
-                        else if (data.isActive === false && data.locked === true && data.superActive === true) {
-                            data.isActive = false;
-                            data.locked = false;
-                            data.checkActive = true;
-                  
-                        }
-                        else if (data.isActive === false && data.locked === true && data.superActive === false && data.checkActive === false) {
-                            data.locked = false;
-                            data.superActive = true;
-                    
-                        } //checked
-                        else if (data.isActive === false && data.locked === true && data.superActive === true && data.checkActive === true) {
-                            data.locked = false;
-                      
-                        } //checked
-                        else if (data.isActive === false && data.locked === false && data.superActive === true && data.checkActive === true) {
-                            data.isActive = true;
-                            data.locked = true;
-                            data.superActive = false;
-                            data.checkActive === false
-                        }
-                        AdminController.activateAdmin(data._id, data.isActive, data.locked)
-
-                    });
-                    hyperAgent.forEach((data) => {
-                        if (data.isActive === true && data.locked === true && data.hyperActive === false && data.checkActive === false) {
-                          
-                            data.isActive = false;
-                            data.locked = false;
-                            data.hyperActive = true;
-                            data.checkActive = true
-                        } //checked
-
-                        else if (data.isActive === false && data.locked === true && data.hyperActive === true) {
-                            data.isActive = false;
-                            data.locked = false;
-                            data.checkActive = true;
-                         
-                        }
-                        else if (data.isActive === false && data.locked === true && data.hyperActive === false && data.checkActive === false) {
-                            data.locked = false;
-                            data.hyperActive = true;
-                           
-                        } //checked
-                        else if (data.isActive === false && data.locked === true && data.hyperActive === true && data.checkActive === true) {
-                            data.locked = false;
-                           
-                        } //checked
-                        else if (data.isActive === false && data.locked === false && data.hyperActive === true && data.checkActive === true) {
-                            data.isActive = true;
-                            data.locked = true;
-                            data.hyperActive = false;
-                            data.checkActive === false
-                        }
-                        AdminController.activateAdmin(data._id, data.isActive, data.locked)
-
-                    });
-                    masterAgent.forEach((data) => {
-                        if (data.isActive === true && data.locked === true && data.masterActive === false && data.checkActive === false) {
-                        
-                            data.isActive = false;
-                            data.locked = false;
-                            data.masterActive = true;
-                            data.checkActive = true
-                        } //checked
-
-                        else if (data.isActive === false && data.locked === true && data.masterActive === true) {
-                            data.isActive = false;
-                            data.locked = false;
-                            data.checkActive = true;
-                     
-                        }
-                        else if (data.isActive === false && data.locked === true && data.masterActive === false && data.checkActive === false) {
-                            data.locked = false;
-                            data.masterActive = true;
-                        
-                        } //checked
-                        else if (data.isActive === false && data.locked === true && data.masterActive === true && data.checkActive === true) {
-                            data.locked = false;
-                       
-                        } //checked
-                        else if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === true) {
-                            data.isActive = true;
-                            data.locked = true;
-                            data.masterActive = false;
-                            data.checkActive === false
-                        }
-                        AdminController.activateAdmin(data._id, data.isActive, data.locked)
-
-                    });
-                    whiteLabel.forEach((data) => {
-                        if (data.isActive === true && data.locked === true && data.whiteActive === false && data.checkActive === false) {
-                       
-                            data.isActive = false;
-                            data.locked = false;
-                            data.whiteActive = true;
-                            data.checkActive = true
-                        } //checked
-
-                        else if (data.isActive === false && data.locked === true && data.whiteActive === true) { ///not use
-                            data.isActive = false;
-                            data.locked = false;
-                            data.checkActive = true;
-                     
-                        }
-                        else if (data.isActive === false && data.locked === true && data.whiteActive === false && data.checkActive === false) {
-                            data.locked = false;
-                            data.whiteActive = true;
-                       
-                        } //checked
-                        else if (data.isActive === false && data.locked === true && data.whiteActive === true && data.checkActive === true) {///not use
-                            data.locked = false;
-                        
-                        } //checked
-                        else if (data.isActive === false && data.locked === false && data.whiteActive === true && data.checkActive === true) {
-                            data.isActive = true;
-                            data.locked = true;
-                            data.whiteActive = false;
-                            data.checkActive === false
-                        }
-                        AdminController.activateAdmin(data._id, data.isActive, data.locked)
-
-                    });
-
-                    await admin.save();
-                    await Promise.all(hyperAgent.map(data => data.save()));
-                    await Promise.all(masterAgent.map(data => data.save()));
-                    await Promise.all(whiteLabel.map(data => data.save()));
-                    await Promise.all(superAgent.map(data => data.save()));
-                    return { message: "Admin locked successfully" };
-                } else {
-                   
-                    admin.isActive = false;
-                    superAgent.forEach((data) => {
-                        if (data.isActive === true && data.locked === true && data.superActive === false) {
-                            data.isActive = false;
-                            data.locked = true;
-                            data.superActive = true;
-                            data.checkActive = true
-                        }
-                        else if (data.isActive === false && data.locked === false && data.superActive === true && data.checkActive === false) {
-                            data.locked = true;
-                            data.superActive = false;
-                        }
-                        else if (data.isActive === false && data.locked === false && data.superActive === true && data.checkActive === true) {
-                            data.locked = true;
-                        }
-                        AdminController.activateAdmin(data._id, data.isActive, data.locked)
-
-
-                    });
-                    hyperAgent.forEach((data) => {
-                        if (data.isActive === true && data.locked === true && data.hyperActive === false) {
-                            data.isActive = false;
-                            data.locked = true;
-                            data.hyperActive = true;
-                            data.checkActive = true
-                        }
-                        else if (data.isActive === false && data.locked === false && data.hyperActive === true && data.checkActive === false) {
-                            data.locked = true;
-                            data.hyperActive = false;
-                        }
-                        else if (data.isActive === false && data.locked === false && data.hyperActive === true && data.checkActive === true) {
-                            data.locked = true;
-                        }
-
-                        AdminController.activateAdmin(data._id, data.isActive, data.locked)
-
-
-                    });
-                    masterAgent.forEach((data) => {
-                   
-                        if (data.isActive === true && data.locked === true && data.masterActive === false) {
-                            data.isActive = false;
-                            data.locked = true;
-                            data.masterActive = true;
-                            data.checkActive = true
-                        }
-                        else if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === false) {
-                            data.locked = true;
-                            data.masterActive = false;
-                        }
-                        else if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === true) {
-                            data.locked = true;
-                        }
-                        AdminController.activateAdmin(data._id, data.isActive, data.locked)
-
-
-                    });
-                    whiteLabel.forEach((data) => {
-                        if (data.isActive === true && data.locked === true && data.whiteActive === false) {
-                            data.isActive = false;
-                            data.locked = true;
-                            data.whiteActive = true;
-                            data.checkActive = true
-                        }
-                        else if (data.isActive === false && data.locked === false && data.whiteActive === true && data.checkActive === false) {
-                            data.locked = true;
-                            data.whiteActive = false;
-                        }
-                        else if (data.isActive === false && data.locked === false && data.whiteActive === true && data.checkActive === true) {
-                            data.locked = true;
-                        }
-                        AdminController.activateAdmin(data._id, data.isActive, data.locked)
-
-
-                    });
-                    await admin.save();
-                    await Promise.all(hyperAgent.map(data => data.save()));
-                    await Promise.all(masterAgent.map(data => data.save()));
-                    await Promise.all(whiteLabel.map(data => data.save()));
-                    await Promise.all(superAgent.map(data => data.save()));
-
-                    return { message: "Admin Suspended successfully" };
-                }
-            }
-        } catch (err) {
-            throw { code: err.code || 500, message: err.message || "Internal Server Error" };
+if (whiteLabel.length == 0 && hyperAgent.length == 0 && masterAgent.length == 0 && superAgent.length == 0) {
+    if (isActive === true) {
+        admin.isActive = true;
+        admin.locked = true;
+    }
+    else if (isActive === false) {
+        if (locked === false) {
+            admin.locked = false;
+            admin.isActive = false;
         }
-    },
-
-    editCreditRef: async (adminId, creditRef) => {
-        try {
-            const admin = await Admin.findById(adminId);
-
-            if (!admin) {
-                throw { code: 404, message: "Admin not found" };
-            }
-
-            if (!admin.locked && !admin.isActive) {
-                throw { code: 404, message: 'Admin is Suspend or Locked' };
-            }
-
-            const newcreditRefEntry = {
-                value: creditRef,
-                date: new Date(),
-            };
-
-            admin.creditRef.push(newcreditRefEntry);
-
-
-            if (admin.creditRef.length > 10) {
-                admin.creditRef.shift();
-            }
-
-            const updatedAdmin = await admin.save();
-
-            if (!updatedAdmin) {
-                throw { code: 500, message: 'Cannot update admin creditRef' };
-            }
-
-            return updatedAdmin;
-        } catch (err) {
-            throw err;
+        else {
+            admin.isActive = false;
         }
-    },
+    }
+    await admin.save();
+    await Promise.all(hyperAgent.map(data => data.save()));
+    await Promise.all(masterAgent.map(data => data.save()));
+    await Promise.all(whiteLabel.map(data => data.save()));
+    await Promise.all(superAgent.map(data => data.save()));
+    return
+}
+if (!admin) {
+    throw { code: 404, message: "Admin not found" };
+}
+if (isActive === true) {
+    admin.isActive = true;
+    admin.locked = true;
+    superAgent.map((data) => {
+        if (data.isActive === false && data.locked === false && data.superActive === true && data.checkActive === true) {
+        
+            data.isActive = true;
+            data.locked = true;
+            data.superActive = false;
+            data.checkActive = false;
+        } //checked
+        else if (data.isActive === false && data.locked === false && data.superActive === true && data.checkActive === false) {
+        
+            data.locked = true;
+            data.superActive = false;
+        } //checked
+        else if (data.isActive === false && data.locked === true && data.superActive === true && data.checkActive === true) {
+        
+            data.isActive = true;
+            data.locked = true;
+            data.superActive = false;
+            data.checkActive = false;
+        } //checked
+        AdminController.activateAdmin(data._id, data.isActive, data.locked)
+
+    })
+
+    hyperAgent.forEach((data) => {
+        if (data.isActive === false && data.locked === false && data.hyperActive === true && data.checkActive === true) {
+        
+            data.isActive = true;
+            data.locked = true;
+            data.hyperActive = false;
+            data.checkActive = false;
+        } //checked
+        else if (data.isActive === false && data.locked === false && data.hyperActive === true && data.checkActive === false) {
+        
+            data.locked = true;
+            data.hyperActive = false;
+        } //checked
+        else if (data.isActive === false && data.locked === true && data.hyperActive === true && data.checkActive === true) {
+            
+            data.isActive = true;
+            data.locked = true;
+            data.hyperActive = false;
+            data.checkActive = false;
+        } //checked
+
+        AdminController.activateAdmin(data._id, data.isActive, data.locked)
+
+
+    })
+    masterAgent.forEach((data) => {
+        if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === true) {
+        
+            data.isActive = true;
+            data.locked = true;
+            data.masterActive = false;
+            data.checkActive = false;
+        } //checked
+        else if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === false) {
+        
+            data.locked = true;
+            data.masterActive = false;
+        } //checked
+        else if (data.isActive === false && data.locked === true && data.masterActive === true && data.checkActive === true) {
+            
+            data.isActive = true;
+            data.locked = true;
+            data.masterActive = false;
+            data.checkActive = false;
+        } //checked
+
+        AdminController.activateAdmin(data._id, data.isActive, data.locked)
+
+
+    })
+    whiteLabel.forEach((data) => {
+        if (data.isActive === false && data.locked === false && data.whiteActive === true && data.checkActive === true) {
+        
+            data.isActive = true;
+            data.locked = true;
+            data.whiteActive = false;
+            data.checkActive = false;
+        } //checked
+        else if (data.isActive === false && data.locked === false && data.whiteActive === true && data.checkActive === false) {
+        
+            data.locked = true;
+            data.whiteActive = false;
+        } //checked
+        else if (data.isActive === false && data.locked === true && data.whiteActive === true && data.checkActive === true) {
+        
+            data.isActive = true;
+            data.locked = true;
+            data.whiteActive = false;
+            data.checkActive = false;
+        } //checked
+        AdminController.activateAdmin(data._id, data.isActive, data.locked)
+
+
+
+    })
+
+
+    await admin.save();
+    await Promise.all(hyperAgent.map(data => data.save()));
+    await Promise.all(masterAgent.map(data => data.save()));
+    await Promise.all(whiteLabel.map(data => data.save()));
+    await Promise.all(superAgent.map(data => data.save()));
+    return { message: "Admin activated successfully" };
+}
+else if (isActive === false) {
+    if (locked === false) {
+        admin.locked = false;
+        admin.isActive = false;
+    
+
+        superAgent.forEach((data) => {
+
+            if (data.isActive === true && data.locked === true && data.superActive === false && data.checkActive === false) {
+            
+                data.isActive = false;
+                data.locked = false;
+                data.superActive = true;
+                data.checkActive = true
+            } //checked
+
+            else if (data.isActive === false && data.locked === true && data.superActive === true) {
+                data.isActive = false;
+                data.locked = false;
+                data.checkActive = true;
+    
+            }
+            else if (data.isActive === false && data.locked === true && data.superActive === false && data.checkActive === false) {
+                data.locked = false;
+                data.superActive = true;
+        
+            } //checked
+            else if (data.isActive === false && data.locked === true && data.superActive === true && data.checkActive === true) {
+                data.locked = false;
+        
+            } //checked
+            else if (data.isActive === false && data.locked === false && data.superActive === true && data.checkActive === true) {
+                data.isActive = true;
+                data.locked = true;
+                data.superActive = false;
+                data.checkActive === false
+            }
+            AdminController.activateAdmin(data._id, data.isActive, data.locked)
+
+        });
+        hyperAgent.forEach((data) => {
+            if (data.isActive === true && data.locked === true && data.hyperActive === false && data.checkActive === false) {
+            
+                data.isActive = false;
+                data.locked = false;
+                data.hyperActive = true;
+                data.checkActive = true
+            } //checked
+
+            else if (data.isActive === false && data.locked === true && data.hyperActive === true) {
+                data.isActive = false;
+                data.locked = false;
+                data.checkActive = true;
+            
+            }
+            else if (data.isActive === false && data.locked === true && data.hyperActive === false && data.checkActive === false) {
+                data.locked = false;
+                data.hyperActive = true;
+            
+            } //checked
+            else if (data.isActive === false && data.locked === true && data.hyperActive === true && data.checkActive === true) {
+                data.locked = false;
+            
+            } //checked
+            else if (data.isActive === false && data.locked === false && data.hyperActive === true && data.checkActive === true) {
+                data.isActive = true;
+                data.locked = true;
+                data.hyperActive = false;
+                data.checkActive === false
+            }
+            AdminController.activateAdmin(data._id, data.isActive, data.locked)
+
+        });
+        masterAgent.forEach((data) => {
+            if (data.isActive === true && data.locked === true && data.masterActive === false && data.checkActive === false) {
+            
+                data.isActive = false;
+                data.locked = false;
+                data.masterActive = true;
+                data.checkActive = true
+            } //checked
+
+            else if (data.isActive === false && data.locked === true && data.masterActive === true) {
+                data.isActive = false;
+                data.locked = false;
+                data.checkActive = true;
+        
+            }
+            else if (data.isActive === false && data.locked === true && data.masterActive === false && data.checkActive === false) {
+                data.locked = false;
+                data.masterActive = true;
+            
+            } //checked
+            else if (data.isActive === false && data.locked === true && data.masterActive === true && data.checkActive === true) {
+                data.locked = false;
+        
+            } //checked
+            else if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === true) {
+                data.isActive = true;
+                data.locked = true;
+                data.masterActive = false;
+                data.checkActive === false
+            }
+            AdminController.activateAdmin(data._id, data.isActive, data.locked)
+
+        });
+        whiteLabel.forEach((data) => {
+            if (data.isActive === true && data.locked === true && data.whiteActive === false && data.checkActive === false) {
+        
+                data.isActive = false;
+                data.locked = false;
+                data.whiteActive = true;
+                data.checkActive = true
+            } //checked
+
+            else if (data.isActive === false && data.locked === true && data.whiteActive === true) { ///not use
+                data.isActive = false;
+                data.locked = false;
+                data.checkActive = true;
+        
+            }
+            else if (data.isActive === false && data.locked === true && data.whiteActive === false && data.checkActive === false) {
+                data.locked = false;
+                data.whiteActive = true;
+        
+            } //checked
+            else if (data.isActive === false && data.locked === true && data.whiteActive === true && data.checkActive === true) {///not use
+                data.locked = false;
+            
+            } //checked
+            else if (data.isActive === false && data.locked === false && data.whiteActive === true && data.checkActive === true) {
+                data.isActive = true;
+                data.locked = true;
+                data.whiteActive = false;
+                data.checkActive === false
+            }
+            AdminController.activateAdmin(data._id, data.isActive, data.locked)
+
+        });
+
+        await admin.save();
+        await Promise.all(hyperAgent.map(data => data.save()));
+        await Promise.all(masterAgent.map(data => data.save()));
+        await Promise.all(whiteLabel.map(data => data.save()));
+        await Promise.all(superAgent.map(data => data.save()));
+        return { message: "Admin locked successfully" };
+    } else {
+    
+        admin.isActive = false;
+        superAgent.forEach((data) => {
+            if (data.isActive === true && data.locked === true && data.superActive === false) {
+                data.isActive = false;
+                data.locked = true;
+                data.superActive = true;
+                data.checkActive = true
+            }
+            else if (data.isActive === false && data.locked === false && data.superActive === true && data.checkActive === false) {
+                data.locked = true;
+                data.superActive = false;
+            }
+            else if (data.isActive === false && data.locked === false && data.superActive === true && data.checkActive === true) {
+                data.locked = true;
+            }
+            AdminController.activateAdmin(data._id, data.isActive, data.locked)
+
+
+        });
+        hyperAgent.forEach((data) => {
+            if (data.isActive === true && data.locked === true && data.hyperActive === false) {
+                data.isActive = false;
+                data.locked = true;
+                data.hyperActive = true;
+                data.checkActive = true
+            }
+            else if (data.isActive === false && data.locked === false && data.hyperActive === true && data.checkActive === false) {
+                data.locked = true;
+                data.hyperActive = false;
+            }
+            else if (data.isActive === false && data.locked === false && data.hyperActive === true && data.checkActive === true) {
+                data.locked = true;
+            }
+
+            AdminController.activateAdmin(data._id, data.isActive, data.locked)
+
+
+        });
+        masterAgent.forEach((data) => {
+    
+            if (data.isActive === true && data.locked === true && data.masterActive === false) {
+                data.isActive = false;
+                data.locked = true;
+                data.masterActive = true;
+                data.checkActive = true
+            }
+            else if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === false) {
+                data.locked = true;
+                data.masterActive = false;
+            }
+            else if (data.isActive === false && data.locked === false && data.masterActive === true && data.checkActive === true) {
+                data.locked = true;
+            }
+            AdminController.activateAdmin(data._id, data.isActive, data.locked)
+
+
+        });
+        whiteLabel.forEach((data) => {
+            if (data.isActive === true && data.locked === true && data.whiteActive === false) {
+                data.isActive = false;
+                data.locked = true;
+                data.whiteActive = true;
+                data.checkActive = true
+            }
+            else if (data.isActive === false && data.locked === false && data.whiteActive === true && data.checkActive === false) {
+                data.locked = true;
+                data.whiteActive = false;
+            }
+            else if (data.isActive === false && data.locked === false && data.whiteActive === true && data.checkActive === true) {
+                data.locked = true;
+            }
+            AdminController.activateAdmin(data._id, data.isActive, data.locked)
+
+
+        });
+        await admin.save();
+        await Promise.all(hyperAgent.map(data => data.save()));
+        await Promise.all(masterAgent.map(data => data.save()));
+        await Promise.all(whiteLabel.map(data => data.save()));
+        await Promise.all(superAgent.map(data => data.save()));
+
+        return { message: "Admin Suspended successfully" };
+    }
+} 
+
+} catch (err) {
+throw { code: err.code || 500, message: err.message || "Internal Server Error" };
+}
+},
+
+editCreditRef: async (adminId, creditRef) => {
+    try {
+        const admin = await Admin.findById(adminId);
+
+        if (!admin) {
+            throw { code: 404, message: "Admin not found" };
+        }
+
+        if (!admin.locked && !admin.isActive) {
+            throw { code: 404, message: 'Admin is Suspend or Locked' };
+        }
+
+        const newcreditRefEntry = {
+            value: creditRef,
+            date: new Date(),
+        };
+
+        admin.creditRef.push(newcreditRefEntry);
+
+
+        if (admin.creditRef.length > 10) {
+            admin.creditRef.shift();
+        }
+
+        const updatedAdmin = await admin.save();
+
+        if (!updatedAdmin) {
+            throw { code: 500, message: 'Cannot update admin creditRef' };
+        }
+
+        return updatedAdmin;
+    } catch (err) {
+        throw err;
+    }
+},
 
 
     trashAdminUser: async (adminUserId) => {

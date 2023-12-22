@@ -308,8 +308,7 @@ export const Authorize = (roles) => {
         roles.forEach((role) => {
             const rolesArray = existingUser.roles;
             for (let i = 0; i < rolesArray.length; i++) {
-                if (rolesArray[i].role === role || rolesArray[i].permission.includes(role)) {
-                    console.log('success');
+                if (rolesArray[i].role === role || rolesArray[i].permission.includes(role)) {                  
                     userHasRequiredRole = true;
                 }
             }
