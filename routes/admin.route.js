@@ -302,7 +302,6 @@ export const AdminRoute = (app) => {
             const { adminId } = req.params;
             const { isActive, locked } = req.body;
             const adminActive = await AdminController.activateAdmin(adminId, isActive, locked);
-            console.log("adminActive:", adminActive);
             res.status(200).send(adminActive);
         } catch (err) {
             res.status(500).send({ code: err.code, message: err.message });
