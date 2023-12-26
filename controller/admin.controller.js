@@ -355,9 +355,11 @@ if (whiteLabel.length == 0 && hyperAgent.length == 0 && masterAgent.length == 0 
             admin.isActive = false;
         }
         else {
-            admin.isActive = false;
+            admin.isActive = false;  
+            admin.locked = true;       
         }
     }
+    
     await admin.save();
     await Promise.all(hyperAgent.map(data => data.save()));
     await Promise.all(masterAgent.map(data => data.save()));
@@ -891,6 +893,7 @@ editCreditRef: async (adminId, creditRef) => {
 
             const userDetails = {              
                 createdUsers: createdUsers.map(createdUser => ({
+                    id: createdUser._id,
                     userName: createdUser.userName,
                     roles: createdUser.roles,
                     balance: createdUser.balance,
