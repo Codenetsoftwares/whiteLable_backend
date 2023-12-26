@@ -391,7 +391,8 @@ export const AdminRoute = (app) => {
             const active = {
                 id: activateStatus.id,
                 isActive: activateStatus.isActive,
-                locked: activateStatus.locked
+                locked: activateStatus.locked,
+                Status : activateStatus.isActive ? "Active" : !activateStatus.locked ? "Locked" : !activateStatus.isActive? "Suspended" : ""
             };
 
             res.status(200).send(active);
