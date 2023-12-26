@@ -78,15 +78,15 @@ export const AdminController = {
         console.log('userRoels',user.roles);
         for(let i=0; i<user.roles.length; i++){
             if (user.roles[i].role.includes('superAdmin')) {
-                subRole = 'subAdmin';
+                subRole = 'SubAdmin';
             } else if (user.roles[i].role.includes('WhiteLabel')) {
-                subRole = 'subWhiteLabel';
+                subRole = 'SubWhiteLabel';
             } else if (user.roles[i].role.includes('HyperAgent')) {
-                subRole = 'subHyperAgent';
+                subRole = 'SubHyperAgent';
             } else if (user.roles[i].role.includes('SuperAgent')) {
-                subRole = 'subSuperAgent';
+                subRole = 'SubSuperAgent';
             } else if (user.roles[i].role.includes('MasterAgent')) {
-                subRole = 'subMasterAgent';
+                subRole = 'SubMasterAgent';
             } else {
                 throw { code: 400, message: "Invalid user role for creating sub-admin" };
             }
@@ -131,6 +131,7 @@ export const AdminController = {
 
     const accessTokenResponse = {
         id: existingUser._id,
+        createBy:existingUser.createBy,
         userName: existingUser.userName,
         roles: existingUser.roles.map(role => ({
             role: role.role,

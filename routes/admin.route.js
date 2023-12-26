@@ -37,6 +37,16 @@ export const AdminRoute = (app) => {
         }
     });
 
+    app.post("/api/view-subAdmin-details", Authorize(["superAdmin","superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","SubWhiteLabel","SubAdmin","SubHyperAgent","SubSuperAgent","SubMasterAgent"]), async (req, res) => {
+        try {
+            const {  createBy } = req.body
+            const subAdminData = await Admin.find({createBy}).exec();
+            res.status(200).json(subAdminData)
+        } catch (err) {
+            res.status(500).json({ code: err.code, message: err.message });
+        }
+    });
+
     // admin login
 
     app.post("/api/admin-login", async (req, res) => {
@@ -262,6 +272,7 @@ export const AdminRoute = (app) => {
                     loadBalance: users.loadBalance,
                     creditRef: users.creditRef,
                     refProfitLoss: users.refProfitLoss,
+                    createBy: users.createBy,
                     partnership : users.partnership,
                     Status : users.isActive ? "Active" : !users.locked ? "Locked" : !users.isActive? "Suspended" : ""
 
