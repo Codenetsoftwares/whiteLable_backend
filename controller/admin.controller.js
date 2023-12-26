@@ -628,6 +628,7 @@ else if (isActive === false) {
     } else {
     
         admin.isActive = false;
+        admin.locked = true;
         superAgent.forEach((data) => {
             if (data.isActive === true && data.locked === true && data.superActive === false) {
                 data.isActive = false;
@@ -725,7 +726,10 @@ editCreditRef: async (adminId, creditRef) => {
             throw { code: 404, message: "Admin not found" };
         }
 
-        if (!admin.locked && !admin.isActive) {
+        if (!admin.locked){
+            throw { code: 404, message: 'Admin is Suspend or Locked' };
+        }
+        if( !admin.isActive) {
             throw { code: 404, message: 'Admin is Suspend or Locked' };
         }
 
@@ -830,7 +834,10 @@ editCreditRef: async (adminId, creditRef) => {
                 throw { code: 404, message: "Admin not found" };
             }
 
-            if (!admin.locked && !admin.isActive) {
+            if (!admin.locked){
+                throw { code: 404, message: 'Admin is Suspend or Locked' };
+            }
+            if( !admin.isActive) {
                 throw { code: 404, message: 'Admin is Suspend or Locked' };
             }
 
@@ -923,6 +930,9 @@ editCreditRef: async (adminId, creditRef) => {
       },
       
     
+
+
+      
       
      }
 
