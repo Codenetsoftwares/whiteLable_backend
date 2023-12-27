@@ -246,6 +246,7 @@ export const AdminRoute = (app) => {
     "Partnership-View",
     "User-Profile-View",
     "Profile-View",
+    "View-Admin-Data",
     "Create-Admin",
     "Create-User",
     "AccountStatement",
@@ -286,7 +287,7 @@ export const AdminRoute = (app) => {
 
     // view balance
 
-    app.get("/api/view-balance/:id", async (req, res) => {
+    app.get("/api/view-balance/:id", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent", "View-Balance"]), async (req, res) => {
         try {
             const id = req.params.id;
 
