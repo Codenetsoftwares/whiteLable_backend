@@ -294,6 +294,24 @@ export const Authorize = (roles) => {
           });
         }
       }
+      if (roles.includes("View-Balance")) {
+        existingUser = await Admin.findById(user.id).exec();
+        if (!existingUser) {
+          return res.status(401).send({
+            code: 401,
+            message: "Invalid login attempt for admin (3)",
+          });
+        }
+      }
+      if (roles.includes("View-Admin-Data")) {
+        existingUser = await Admin.findById(user.id).exec();
+        if (!existingUser) {
+          return res.status(401).send({
+            code: 401,
+            message: "Invalid login attempt for admin (3)",
+          });
+        }
+      }
       // if (roles.includes("user")) {
       //   existingUser = await User.findById(user.id).exec();
       //   if (!existingUser) {
@@ -304,17 +322,28 @@ export const Authorize = (roles) => {
       //   }
       // }
       if (roles && roles.length > 0) {
+        // console.log('roles',roles)
         let userHasRequiredRole = false;
+        let userHasRequiredPermission = false;
         roles.forEach((role) => {
+          console.log('role',role)
             const rolesArray = existingUser.roles;
+          console.log('rolesArray',rolesArray)
             for (let i = 0; i < rolesArray.length; i++) {
+          console.log('rolesAr',rolesArray[i])
+
                 if (rolesArray[i].role === role || rolesArray[i].permission.includes(role)) {                  
                     userHasRequiredRole = true;
+                    userHasRequiredPermission = true;
                 }
             }
         });
-        if (!userHasRequiredRole) {
+        if (!userHasRequiredRole && !userHasRequiredPermission) {
+          // console.log('unauthorised')
             return res.status(401).send({ code: 401, message: "Unauthorized access" });
+        }
+        else{
+          console.log('Inform karo')
         }
     }
     
