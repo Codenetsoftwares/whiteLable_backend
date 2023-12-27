@@ -392,7 +392,7 @@ export const AdminRoute = (app) => {
 
     //   View Active Locked Status
 
-    app.get("/api/admin/active-status/:adminId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
+    app.get("/api/admin/active-status/:adminId", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","View-Status"]), async (req, res) => {
         try {
             const adminId = req.params.adminId
             const activateStatus = await Admin.findById(adminId).exec();
