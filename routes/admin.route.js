@@ -287,7 +287,9 @@ export const AdminRoute = (app) => {
 
     // view balance
 
-    app.get("/api/view-balance/:id", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent"]), async (req, res) => {
+    app.get("/api/view-balance/:id", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent", "SubAdmin", "SubWhiteLabel",
+    "SubHyperAgent", "SubSuperAgent", "SubMasterAgent", 
+    ]), async (req, res) => {
         try {
             const id = req.params.id;
 
