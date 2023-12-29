@@ -129,8 +129,8 @@ export const AdminRoute = (app) => {
 
     app.post("/api/admin/reset-password",Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent",]) ,async (req, res) => {
         try {
-            const { userName, password } = req.body;
-            const response = await AdminController.PasswordResetCode(userName, password);
+            const { userName, oldPassword, password } = req.body;
+            const response = await AdminController.PasswordResetCode(userName, oldPassword, password);
           
            res.status(response.code).send(response);
         } catch (err) {
