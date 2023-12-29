@@ -177,37 +177,39 @@ export const AdminController = {
         return Admin.findOne(filter).exec();
     },
 
-    PasswordResetCode: async (userName,password) => {
-        try{
+    PasswordResetCode: async (userName, oldPassword, password) => {
         const existingUser = await AdminController.findAdmin({
             userName: userName,
         });
-
-        const passwordIsDuplicate = await bcrypt.compare(
-            password,
-            existingUser.password 
-        );
-
-        if (passwordIsDuplicate) {
+        const oldPasswordIsCorrect = await bcrypt.compare(
+            oldPassword,
+            existingUser.password
+          );
+          if (!oldPasswordIsCorrect) {
             throw {
-                code: 409,
-                message: "New Password cannot be the same as existing password",
+              code: 401,
+              message: "Invalid old password",
             };
-        }
-        const passwordSalt = await bcrypt.genSalt();
-        const encryptedPassword = await bcrypt.hash(password, passwordSalt);
-
-        existingUser.password = encryptedPassword;
-
-
-        await existingUser.save();
-
-        return { code: 200, message: "Password reset successful!" };
-    }catch(err)
-     {
-      
+          }
+          const passwordIsDuplicate = await bcrypt.compare(
+            password,
+            existingUser.password
+          );
+          if (passwordIsDuplicate) {
+            throw {
+              code: 409,
+              message: "New Password cannot be the same as existing password",
+            };
+          }
+          const passwordSalt = await bcrypt.genSalt();
+          const encryptedPassword = await bcrypt.hash(password, passwordSalt);
+          existingUser.password = encryptedPassword;
+          existingUser.save().catch((err) => {
+            console.error(err);
             throw { code: 500, message: "Failed to save new password" };
-        }
+          });
+      
+          return true;
     },
 
     //create user
