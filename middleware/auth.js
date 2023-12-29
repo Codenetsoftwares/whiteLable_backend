@@ -294,15 +294,15 @@ export const Authorize = (roles) => {
           });
         }
       }
-      if (roles.includes("View-Status")) {
-        existingUser = await Admin.findById(user.id).exec();
-        if (!existingUser) {
-          return res.status(401).send({
-            code: 401,
-            message: "Invalid login attempt for admin (3)",
-          });
-        }
-      }
+      // if (roles.includes("View-Status")) {
+      //   existingUser = await Admin.findById(user.id).exec();
+      //   if (!existingUser) {
+      //     return res.status(401).send({
+      //       code: 401,
+      //       message: "Invalid login attempt for admin (3)",
+      //     });
+      //   }
+      // }
       if (roles.includes("View-Admin-Data")) {
         existingUser = await Admin.findById(user.id).exec();
         if (!existingUser) {
