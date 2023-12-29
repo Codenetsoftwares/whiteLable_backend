@@ -41,7 +41,8 @@ export const AdminController = {
                 userName: data.userName,
                 password: encryptedPassword,
                 roles: rolesWithDefaultPermission,
-                createBy: user._id
+                createBy: user._id,
+                createUser : user.userName
             });
     
             await newAdmin.save();
@@ -96,7 +97,8 @@ export const AdminController = {
             userName: data.userName,
             password: encryptedPassword,
             roles: [{ role: subRole, permission: data.permission }],
-            createBy: user._id
+            createBy: user._id,
+            createUser : user.username,
         });
         try {
             await newAdmin.save();
@@ -264,73 +266,75 @@ export const AdminController = {
 
     transferAmountadmin: async (userId, receiveUserId, trnsfAmnt, remarks) => {
         try {
-            const admin = await Admin.findById({ _id: userId }).exec();
-
-            if (!admin) {
+            const sender = await Admin.findById({ _id: userId }).exec();
+    
+            if (!sender) {
                 throw { code: 404, message: "Admin Not Found For Transfer" };
             }
-
-            const receiveUser = await Admin.findById({ _id: receiveUserId, createBy: userId }).exec();
-
-            if (!receiveUser) {
-                throw { code: 404, message: "Receive User Not Found or Not Created by the Admin" };
+    
+            const receiver = await Admin.findById({ _id: receiveUserId }).exec();
+    
+            if (!receiver) {
+                throw { code: 404, message: "Receive User Not Found" };
             }
-
-            if (!admin.isActive) {
-                throw { code: 404, message: 'Admin is inactive' };
+    
+            if (!sender.isActive) {
+                throw { code: 404, message: 'Sender is inactive' };
             }
-
-            if (!receiveUser.isActive) {
-                throw { code: 404, message: 'Receive User is inactive' };
+    
+            if (!receiver.isActive) {
+                throw { code: 404, message: 'Receiver is inactive' };
             }
-
-            if (admin.balance < trnsfAmnt) {
+    
+            if (sender.balance < trnsfAmnt) {
                 throw { code: 400, message: "Insufficient balance for the transfer" };
             }
-
-            if (!receiveUser.createBy.equals(admin._id)) {
+    
+            if (sender.roles.includes
+            ("SubAdmin" || "SubWhiteLabel" || "SubHyperAgent" || "SubSuperAgent" ||"SubMasterAgent" )
+            &&!receiver.createBy.equals(sender._id))
+            {
                 throw { code: 403, message: "You can only send money to users created by you." };
             }
-
+    
             const transferRecordDebit = {
                 transactionType: "Debit",
                 amount: trnsfAmnt,
-                From: admin.userName,
-                To: receiveUser.userName,
+                From: sender.userName,
+                To: receiver.userName,
                 date: new Date(),
                 remarks: remarks
             };
-
+    
             const transferRecordCredit = {
                 transactionType: "Credit",
                 amount: trnsfAmnt,
-                From: admin.userName,
-                To: receiveUser.userName,
+                From: sender.userName,
+                To: receiver.userName,
                 date: new Date(),
                 remarks: remarks
             };
-
-            admin.remarks = remarks;
-            admin.balance -= trnsfAmnt;
-            receiveUser.balance += trnsfAmnt;
-            receiveUser.loadBalance += trnsfAmnt;
-
-            if (!admin.transferAmount) {
-                admin.transferAmount = [];
+    
+            sender.remarks = remarks;
+            sender.balance -= trnsfAmnt;
+            receiver.balance += trnsfAmnt;
+            receiver.loadBalance += trnsfAmnt;
+    
+            if (!sender.transferAmount) {
+                sender.transferAmount = [];
             }
-
-            admin.transferAmount.push(transferRecordDebit);
-            receiveUser.transferAmount.push(transferRecordCredit);
-
-            await admin.save();
-            await receiveUser.save();
-
+    
+            sender.transferAmount.push(transferRecordDebit);
+            receiver.transferAmount.push(transferRecordCredit);
+    
+            await sender.save();
+            await receiver.save();
+    
             return { message: "Balance Transfer Successfully" };
         } catch (err) {
             throw { code: err.code, message: err.message };
         }
     },
-
 
     // User Active status
 
