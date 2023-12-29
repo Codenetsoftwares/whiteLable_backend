@@ -47,6 +47,7 @@ export const Admin = new mongoose.model("Admin", new mongoose.Schema({
     ],
     
     createBy: { type: ObjectId },
+    createUser: { type: String},
     isActive: { type: Boolean, default: true, required: true },
     locked: { type: Boolean, default: true, require: true },
     hyperActive: { type: Boolean, default: false, required: false },
