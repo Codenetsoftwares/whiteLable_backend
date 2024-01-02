@@ -343,7 +343,7 @@ export const Authorize = (roles) => {
             return res.status(401).send({ code: 401, message: "Unauthorized access" });
         }
         else{
-          console.log('Inform karo')
+          // console.log('Inform karo')
         }
     }
     

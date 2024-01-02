@@ -260,7 +260,7 @@ export const AdminRoute = (app) => {
           const createdBy = req.params.createdBy;
           const page = parseInt(req.query.page) || 1;
           const searchName = req.query.searchName || "";
-          let pageSize = 10;
+          let pageSize = 5;
     
           const skip = (page - 1) * pageSize;
     
