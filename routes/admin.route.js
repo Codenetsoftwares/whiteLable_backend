@@ -255,35 +255,58 @@ export const AdminRoute = (app) => {
     "Restore-Admin",
     "Move-To-Trash",
     "Trash-View",]),
-      async (req, res) => {
+    async (req, res) => {
         try {
-            const createdBy = req.params.createdBy;
+          const createdBy = req.params.createdBy;
+          const page = parseInt(req.query.page) || 1;
+          const searchName = req.query.searchName || "";
+          let pageSize = 10;
+    
+          const skip = (page - 1) * pageSize;
+    
+          let query = { createBy: createdBy };
+    
+          if (searchName) {
+            query.$or = [
+              { userName: { $regex: new RegExp(searchName, "i") } },
+              { roles: { $elemMatch: { role: { $regex: new RegExp(searchName, "i") } } } }
+            ];
+          }
+    
+          const admin = await Admin.find(query)
+            .skip(skip)
+            .limit(pageSize);
+    
 
-            const admin = await Admin.find({ createBy: createdBy });
-
-            if (!admin) {
-                return res.status(404).send({ code: 404, message: `Not Found` });
-            }
-            const user = admin.map((users) => {
-                return {
-                    id: users.id,
-                    userName: users.userName,
-                    roles: users.roles,
-                    balance: users.balance,
-                    loadBalance: users.loadBalance,
-                    creditRef: users.creditRef,
-                    refProfitLoss: users.refProfitLoss,
-                    createBy: users.createBy,
-                    partnership : users.partnership,
-                    Status : users.isActive ? "Active" : !users.locked ? "Locked" : !users.isActive? "Suspended" : ""
-
-                };
-            })
-            res.status(200).send({ user });
+          const adminCount = admin.length;
+    
+          if (!admin || admin.length === 0) {
+            return res.status(404).send({ code: 404, message: `No records found` });
+          }
+    
+          const user = admin.map((users) => {
+            return {
+              id: users.id,
+              userName: users.userName,
+              roles: users.roles,
+              balance: users.balance,
+              loadBalance: users.loadBalance,
+              creditRef: users.creditRef,
+              refProfitLoss: users.refProfitLoss,
+              createBy: users.createBy,
+              partnership: users.partnership,
+              Status: users.isActive ? "Active" : !users.locked ? "Locked" : !users.isActive ? "Suspended" : ""
+            };
+          });
+    
+          const totalPages = Math.ceil(adminCount / pageSize);
+    
+          res.status(200).send({ user, totalPages });
+          
         } catch (err) {
-            res.status(500).send({ code: err.code, message: err.message });
+          res.status(500).send({ code: err.code, message: err.message });
         }
-    });
+      });
 
     // view balance
 
