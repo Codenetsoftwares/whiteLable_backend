@@ -874,18 +874,21 @@ editCreditRef: async (adminId, creditRef) => {
         }
     },
     
-
-    buildRootPath: async (userName, action) => {
+    buildRootPath: async (userName, action, page, searchName) => {
         try {
           let user;
       
           if (userName) {
-            user = await Admin.findOne({ userName: userName});
+            user = await Admin.findOne({ userName: userName });
       
             if (!user) {
               throw { code: 404, message: 'User not found' };
             }
-          }     
+          }
+      
+          let totalPages = 1;
+          let currentPage = 1;
+      
           if (action === 'store') {
             const newPath = user.userName;
             const indexToRemove = globalUsernames.indexOf(newPath);
@@ -895,8 +898,25 @@ editCreditRef: async (adminId, creditRef) => {
             } else {
               globalUsernames.push(newPath);
             }
-    
-            const createdUsers = await Admin.find({ createBy: user._id });
+
+            const pageSize = 2;
+      
+            const skip = (page - 1) * pageSize;
+            const query = {
+              createBy: user._id,
+              $or: [
+                { userName: { $regex: new RegExp(searchName, "i") } },
+                
+              ],
+            };
+      
+          const createdUsers = await Admin.find(query)
+              .skip(skip)
+              .limit(pageSize);
+      
+            const totalUsers = await Admin.countDocuments(query);
+            totalPages = Math.ceil(totalUsers / pageSize);
+            currentPage = page;
 
             const userDetails = {              
                 createdUsers: createdUsers.map(createdUser => ({
@@ -912,7 +932,7 @@ editCreditRef: async (adminId, creditRef) => {
                 })),
             };
       
-            return { message: 'Path stored successfully', path: globalUsernames, userDetails };
+            return { message: 'Path stored successfully', path: globalUsernames, userDetails,totalPages };
           } else if (action === 'clear') {
             const lastUsername = globalUsernames.pop();
             if (lastUsername) {
