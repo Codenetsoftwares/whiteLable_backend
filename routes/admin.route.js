@@ -260,7 +260,7 @@ export const AdminRoute = (app) => {
           const createdBy = req.params.createdBy;
           const page = parseInt(req.query.page) || 1;
           const searchName = req.query.searchName || "";
-          let pageSize = 5;
+          let pageSize = 5
     
           const skip = (page - 1) * pageSize;
     
@@ -273,12 +273,10 @@ export const AdminRoute = (app) => {
             ];
           }
     
+          const adminCount = await Admin.countDocuments(query);
           const admin = await Admin.find(query)
             .skip(skip)
             .limit(pageSize);
-    
-
-          const adminCount = admin.length;
     
           if (!admin || admin.length === 0) {
             return res.status(404).send({ code: 404, message: `No records found` });
@@ -302,12 +300,11 @@ export const AdminRoute = (app) => {
           const totalPages = Math.ceil(adminCount / pageSize);
     
           res.status(200).send({ user, totalPages });
-          
         } catch (err) {
           res.status(500).send({ code: err.code, message: err.message });
         }
       });
-
+      
     // view balance
 
     app.get("/api/view-balance/:id", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent", "SubAdmin", "SubWhiteLabel",
