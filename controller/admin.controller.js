@@ -245,12 +245,17 @@ export const AdminController = {
 
     // Deposit Amount 
 
-    Deposit: async (adminId, depositAmount) => {
+    Deposit: async (adminId, depositAmount, password) => {
         try {
             const admin = await Admin.findById(adminId).exec();
 
             if (!admin) {
                 throw { code: 404, message: "Admin Not Found For Deposit" };
+            }
+            const isPasswordValid = await bcrypt.compare(password, admin.password);
+
+            if (!isPasswordValid) {
+                throw { code: 401, message: "Invalid password for the deposit" };
             }
 
             admin.depositBalance += depositAmount;
@@ -264,9 +269,9 @@ export const AdminController = {
         }
     },
 
-    // Transfer Amount To Only Created Account
-    
-    transferAmountadmin: async (userId, receiveUserId, trnsfAmnt, withdrawlAmt, remarks,password) => {
+// transfer amount
+    transferAmountadmin: async (userId, receiveUserId, trnsfAmnt, withdrawlAmt, remarks,password) => 
+    {
         try {
             const sender = await Admin.findById({ _id: userId }).exec();
     
@@ -358,17 +363,19 @@ export const AdminController = {
     },
     
 
-    
-    
-    
-    
 
     // User Active status
 
-activateAdmin: async (adminId, isActive, locked) => {
+activateAdmin: async (adminId, isActive, locked,password) => {
 try {
 console.log("adminId:", adminId); 
 const admin = await Admin.findById(adminId);
+
+const isPasswordValid = await bcrypt.compare(password, admin.password);
+
+if (!isPasswordValid) {
+    throw { code: 401, message: "Invalid password for the deposit" };
+}
 
 const whiteLabel = await Admin.find({ createBy: adminId, roles: { $elemMatch: { role: "WhiteLabel" } } }).exec();
 const hyperAgent = await Admin.find({ createBy: adminId, roles: { $elemMatch: { role: "HyperAgent" } } }).exec();
@@ -752,12 +759,17 @@ throw { code: err.code || 500, message: err.message || "Internal Server Error" }
 }
 },
 
-editCreditRef: async (adminId, creditRef) => {
+editCreditRef: async (adminId, creditRef,password) => {
     try {
         const admin = await Admin.findById(adminId);
 
         if (!admin) {
             throw { code: 404, message: "Admin not found" };
+        }
+        const isPasswordValid = await bcrypt.compare(password, admin.password);
+
+        if (!isPasswordValid) {
+            throw { code: 401, message: "Invalid password for the deposit" };
         }
 
         if (!admin.locked){
@@ -798,6 +810,12 @@ editCreditRef: async (adminId, creditRef) => {
 
             if (!existingAdminUser) {
                 throw { code: 404, message: `Admin User not found with id: ${adminUserId}` };
+            }
+
+            const isPasswordValid = await bcrypt.compare(password, existingAdminUser.password);
+
+            if (!isPasswordValid) {
+                throw { code: 401, message: "Invalid password for the deposit" };
             }
             
             if (existingAdminUser.balance !== 0) {
@@ -841,7 +859,11 @@ editCreditRef: async (adminId, creditRef) => {
             if (!existingAdminUser) {
                 throw { code: 404, message: `Admin not found in trash` };
             }
+            const isPasswordValid = await bcrypt.compare(password, existingAdminUser.password);
 
+            if (!isPasswordValid) {
+                throw { code: 401, message: "Invalid password for the deposit" };
+            }
             const restoreRemoveData = {
                 roles: existingAdminUser.roles,
                 userName: existingAdminUser.userName,
@@ -863,14 +885,18 @@ editCreditRef: async (adminId, creditRef) => {
         }
     },
 
-    editPartnership: async (adminId, partnership) => {
+    editPartnership: async (adminId, partnership, password) => {
         try {
             const admin = await Admin.findById(adminId);
 
             if (!admin) {
                 throw { code: 404, message: "Admin not found" };
             }
+            const isPasswordValid = await bcrypt.compare(password, admin.password);
 
+            if (!isPasswordValid) {
+                throw { code: 401, message: "Invalid password for the deposit" };
+            }
             if (!admin.locked){
                 throw { code: 404, message: 'Admin is Suspend or Locked' };
             }
