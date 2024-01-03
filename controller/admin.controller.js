@@ -265,13 +265,19 @@ export const AdminController = {
     },
 
     // Transfer Amount To Only Created Account
-
-    transferAmountadmin: async (userId, receiveUserId, trnsfAmnt, remarks) => {
+    
+    transferAmountadmin: async (userId, receiveUserId, trnsfAmnt, withdrawlAmt, remarks,password) => {
         try {
             const sender = await Admin.findById({ _id: userId }).exec();
     
             if (!sender) {
                 throw { code: 404, message: "Admin Not Found For Transfer" };
+            }
+    
+            const isPasswordValid = await bcrypt.compare(password, sender.password);
+    
+            if (!isPasswordValid) {
+                throw { code: 401, message: "Invalid password for the transaction" };
             }
     
             const receiver = await Admin.findById({ _id: receiveUserId }).exec();
@@ -288,46 +294,59 @@ export const AdminController = {
                 throw { code: 404, message: 'Receiver is inactive' };
             }
     
-            if (sender.balance < trnsfAmnt) {
-                throw { code: 400, message: "Insufficient balance for the transfer" };
+            if (withdrawlAmt && withdrawlAmt > 0) {
+                if (receiver.balance < withdrawlAmt) {
+                    throw { code: 400, message: "Insufficient balance for withdrawal" };
+                }
+    
+                const withdrawalRecord = {
+                    transactionType: "Withdrawal",
+                    withdraw: withdrawlAmt,
+                    From: receiver.userName,
+                    To: sender.userName,
+                    date: new Date(),
+                    remarks: remarks
+                };
+    
+                receiver.balance -= withdrawlAmt;
+                sender.balance += withdrawlAmt;
+                sender.transferAmount.push(withdrawalRecord);
+            } else {
+                if (sender.balance < trnsfAmnt) {
+                    throw { code: 400, message: "Insufficient balance for the transfer" };
+                }
+    
+                const transferRecordDebit = {
+                    transactionType: "Debit",
+                    amount: trnsfAmnt,
+                    From: sender.userName,
+                    To: receiver.userName,
+                    date: new Date(),
+                    remarks: remarks
+                };
+    
+                const transferRecordCredit = {
+                    transactionType: "Credit",
+                    amount: trnsfAmnt,
+                    From: sender.userName,
+                    To: receiver.userName,
+                    date: new Date(),
+                    remarks: remarks
+                };
+    
+                console.log("Transfer: " + trnsfAmnt);
+                console.log("Withdrawal: " + withdrawlAmt);
+    
+                sender.remarks = remarks;
+                sender.balance -= trnsfAmnt;
+                receiver.balance += trnsfAmnt;
+                receiver.transferAmount.push(transferRecordCredit);
+                sender.transferAmount.push(transferRecordDebit);
             }
-    
-            if (sender.roles.includes
-            ("SubAdmin" || "SubWhiteLabel" || "SubHyperAgent" || "SubSuperAgent" ||"SubMasterAgent" )
-            &&!receiver.createBy.equals(sender._id))
-            {
-                throw { code: 403, message: "You can only send money to users created by you." };
-            }
-    
-            const transferRecordDebit = {
-                transactionType: "Debit",
-                amount: trnsfAmnt,
-                From: sender.userName,
-                To: receiver.userName,
-                date: new Date(),
-                remarks: remarks
-            };
-    
-            const transferRecordCredit = {
-                transactionType: "Credit",
-                amount: trnsfAmnt,
-                From: sender.userName,
-                To: receiver.userName,
-                date: new Date(),
-                remarks: remarks
-            };
-    
-            sender.remarks = remarks;
-            sender.balance -= trnsfAmnt;
-            receiver.balance += trnsfAmnt;
-            receiver.loadBalance += trnsfAmnt;
     
             if (!sender.transferAmount) {
                 sender.transferAmount = [];
             }
-    
-            sender.transferAmount.push(transferRecordDebit);
-            receiver.transferAmount.push(transferRecordCredit);
     
             await sender.save();
             await receiver.save();
@@ -337,6 +356,12 @@ export const AdminController = {
             throw { code: err.code, message: err.message };
         }
     },
+    
+
+    
+    
+    
+    
 
     // User Active status
 
@@ -962,9 +987,6 @@ editCreditRef: async (adminId, creditRef) => {
         }
       },
       
-    
-
-
       
       
      }
