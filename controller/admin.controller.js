@@ -778,6 +778,9 @@ editCreditRef: async (adminId, creditRef) => {
             if (existingAdminUser.balance !== 0) {
                 throw { code: 400, message: `Balance should be 0 to move the Admin User to trash` };
             }
+            if (existingAdminUser.isActive === false) {
+                throw { code: 404, message: "Admin Is IsActive Or Lock" }
+            }
 
             const updatedTransactionData = {
                 id: existingAdminUser._id,
@@ -899,7 +902,7 @@ editCreditRef: async (adminId, creditRef) => {
               globalUsernames.push(newPath);
             }
 
-            const pageSize = 2;
+            const pageSize = 5;
       
             const skip = (page - 1) * pageSize;
             const query = {
