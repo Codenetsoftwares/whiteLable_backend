@@ -368,14 +368,14 @@ export const AdminController = {
 
 activateAdmin: async (adminId, isActive, locked,password) => {
 try {
+    console.log("pwd",adminId,isActive,locked,password)
+
 console.log("adminId:", adminId); 
 const admin = await Admin.findById(adminId);
-
-const isPasswordValid = await bcrypt.compare(password, admin.password);
-
-if (!isPasswordValid) {
-    throw { code: 401, message: "Invalid password" };
-}
+console.log("passs", password);
+// if (!password) {
+//     throw { code: 400, message: "Password is required" };
+// }
 
 const whiteLabel = await Admin.find({ createBy: adminId, roles: { $elemMatch: { role: "WhiteLabel" } } }).exec();
 const hyperAgent = await Admin.find({ createBy: adminId, roles: { $elemMatch: { role: "HyperAgent" } } }).exec();
@@ -383,7 +383,9 @@ const masterAgent = await Admin.find({ createBy: adminId, roles: { $elemMatch: {
 const superAgent = await Admin.find({ createBy: adminId, roles: { $elemMatch: { role: "SuperAgent" } } }).exec();
 
 
+
 if (whiteLabel.length == 0 && hyperAgent.length == 0 && masterAgent.length == 0 && superAgent.length == 0) {
+    console.log("first")
     if (isActive === true) {
         admin.isActive = true;
         admin.locked = true;
@@ -755,6 +757,7 @@ else if (isActive === false) {
 } 
 
 } catch (err) {
+    console.error(err);
 throw { code: err.code || 500, message: err.message || "Internal Server Error" };
 }
 },
