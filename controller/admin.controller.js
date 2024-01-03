@@ -374,7 +374,7 @@ const admin = await Admin.findById(adminId);
 const isPasswordValid = await bcrypt.compare(password, admin.password);
 
 if (!isPasswordValid) {
-    throw { code: 401, message: "Invalid password for the deposit" };
+    throw { code: 401, message: "Invalid password" };
 }
 
 const whiteLabel = await Admin.find({ createBy: adminId, roles: { $elemMatch: { role: "WhiteLabel" } } }).exec();
@@ -769,7 +769,7 @@ editCreditRef: async (adminId, creditRef,password) => {
         const isPasswordValid = await bcrypt.compare(password, admin.password);
 
         if (!isPasswordValid) {
-            throw { code: 401, message: "Invalid password for the deposit" };
+            throw { code: 401, message: "Invalid password " };
         }
 
         if (!admin.locked){
@@ -815,7 +815,7 @@ editCreditRef: async (adminId, creditRef,password) => {
             const isPasswordValid = await bcrypt.compare(password, existingAdminUser.password);
 
             if (!isPasswordValid) {
-                throw { code: 401, message: "Invalid password for the deposit" };
+                throw { code: 401, message: "Invalid password " };
             }
             
             if (existingAdminUser.balance !== 0) {
@@ -862,7 +862,7 @@ editCreditRef: async (adminId, creditRef,password) => {
             const isPasswordValid = await bcrypt.compare(password, existingAdminUser.password);
 
             if (!isPasswordValid) {
-                throw { code: 401, message: "Invalid password for the deposit" };
+                throw { code: 401, message: "Invalid password" };
             }
             const restoreRemoveData = {
                 roles: existingAdminUser.roles,
@@ -895,7 +895,7 @@ editCreditRef: async (adminId, creditRef,password) => {
             const isPasswordValid = await bcrypt.compare(password, admin.password);
 
             if (!isPasswordValid) {
-                throw { code: 401, message: "Invalid password for the deposit" };
+                throw { code: 401, message: "Invalid password " };
             }
             if (!admin.locked){
                 throw { code: 404, message: 'Admin is Suspend or Locked' };
