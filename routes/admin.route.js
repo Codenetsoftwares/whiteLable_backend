@@ -146,7 +146,7 @@ export const AdminRoute = (app) => {
 
             const { userName, password } = req.body;
             const user = await AdminController.CreateUser({ userName, password });
-            res.status(200).send({ code: 200, message: "User Register Successfully" })
+            res.status(200).send({ code: 200, message: "User Register Successfully",user })
         }
         catch (err) {
             res.status(500).send({ code: err.code, message: err.message })
@@ -158,8 +158,8 @@ export const AdminRoute = (app) => {
     app.post("/api/admin/deposit-amount/:adminId", Authorize(["superAdmin"]), async (req, res) => {
         try {
             const adminId = req.params.adminId
-            const { depositeAmount } = req.body
-            const amount = await AdminController.Deposit(adminId, depositeAmount)
+            const { depositeAmount, password } = req.body
+            const amount = await AdminController.Deposit(adminId, depositeAmount, password)
             res.status(200).send({ code: 200, message: "Deposite Amount Successfully" })
         } catch (err) {
             res.status(500).send({ code: err.code, message: err.message })
@@ -191,45 +191,42 @@ export const AdminRoute = (app) => {
     
     
 
-    app.get("/api/transaction-view/:userName", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","AccountStatement"]), async (req, res) => {
+    app.get("/api/transaction-view/:userName", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent", "AccountStatement"]), async (req, res) => {
         try {
             const userName = req.params.userName;
             let balances = 0;
-            let debitBalances = 0
-            const admin = await Admin.findOne({ userName : userName }).exec();
-
+            let debitBalances = 0;
+            let withdrawalBalances = 0;
+    
+            const admin = await Admin.findOne({ userName: userName }).exec();
+    
             if (!admin) {
                 return res.status(404).json({ message: "Admin not found" });
             }
-
+    
             const transactionData = admin.transferAmount;
-
-            // transactionData.sort((a, b) => {
-            //     const dateA = new Date(a.date);
-            //     const dateB = new Date(b.date);
-            //     return dateA - dateB;
-            // });
-
-            // transactionData.sort((a, b) => new Date(a.date) - new Date(b.date));
-
+    
             let allData = JSON.parse(JSON.stringify(transactionData));
-
+    
             allData.slice(0).reverse().map((data) => {
                 if (data.transactionType === "Credit") {
                     balances += data.amount;
                     data.balance = balances;
-                }
-                if (data.transactionType === "Debit") {
+                } else if (data.transactionType === "Debit") {
                     debitBalances += data.amount;
                     data.debitBalance = debitBalances;
+                } else if (data.transactionType === "Withdrawal") {
+                    withdrawalBalances += data.withdraw;
+                    data.withdrawalBalance = withdrawalBalances;
                 }
             });
+    
             res.status(200).json(allData);
         } catch (err) {
             res.status(500).json({ code: err.code, message: err.message });
         }
     });
-
+    
 
     // view creates
     app.get("/api/view-all-creates/:createdBy",
@@ -317,8 +314,8 @@ export const AdminRoute = (app) => {
     async (req, res) => {
         try {
             const { adminId } = req.params;
-            const { isActive, locked } = req.body;
-            const adminActive = await AdminController.activateAdmin(adminId, isActive, locked);
+            const { isActive, locked ,password } = req.body;
+            const adminActive = await AdminController.activateAdmin(adminId, isActive, locked, password);
             res.status(200).send(adminActive);
         } catch (err) {
             res.status(500).send({ code: err.code, message: err.message });
@@ -332,9 +329,9 @@ export const AdminRoute = (app) => {
      async (req, res) => {
         try {
             const adminId = req.params.adminId;
-            const { creditRef } = req.body;
+            const { creditRef ,password} = req.body;
 
-            const updatedAdmin = await AdminController.editCreditRef(adminId, creditRef);
+            const updatedAdmin = await AdminController.editCreditRef(adminId, creditRef, password);
     
             if (updatedAdmin) {
                 res.status(200).send({ message: "creditRef Edit successfully" });
@@ -352,12 +349,12 @@ export const AdminRoute = (app) => {
     app.post("/api/admin/move-to-trash-user", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","Move-To-Trash"]),
      async (req, res) => {
         try {
-            const { requestId } = req.body;
+            const { requestId ,password} = req.body;
             const adminUser = await Admin.findById(requestId);
             if (!adminUser) {
                 return res.status(404).send("Admin User not found");
             }
-            const updateResult = await AdminController.trashAdminUser(adminUser);
+            const updateResult = await AdminController.trashAdminUser(adminUser ,password);
 
             if (updateResult) {
                 res.status(201).send("Admin User Moved To Trash");
@@ -429,8 +426,8 @@ export const AdminRoute = (app) => {
     app.post("/api/admin/restore-to-wallet-user", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent","Restore-Admin"]),
      async (req, res) => {
         try {
-            const { userId } = req.body;
-            const restoreResult = await AdminController.restoreUser(userId);
+            const { userId ,password } = req.body;
+            const restoreResult = await AdminController.restoreUser(userId ,password);
             if (restoreResult) {
                 res.status(201).send("Admin User Moved To Wallet");
             } else {
@@ -468,9 +465,9 @@ export const AdminRoute = (app) => {
      async (req, res) => {
         try {
             const adminId = req.params.adminId;
-            const { partnership } = req.body;
+            const { partnership , password } = req.body;
     
-            const updatedAdmin = await AdminController.editPartnership(adminId, partnership);
+            const updatedAdmin = await AdminController.editPartnership(adminId, partnership , password);
             if (updatedAdmin) {
                 res.status(200).send({ message: "Partnership Edit successfully" });
             } else {
