@@ -326,11 +326,11 @@ export const Authorize = (roles) => {
         let userHasRequiredRole = false;
         let userHasRequiredPermission = false;
         roles.forEach((role) => {
-          console.log('role',role)
+          // console.log('role',role)
             const rolesArray = existingUser.roles;
-          console.log('rolesArray',rolesArray)
+          // console.log('rolesArray',rolesArray)
             for (let i = 0; i < rolesArray.length; i++) {
-          console.log('rolesAr',rolesArray[i])
+          // console.log('rolesAr',rolesArray[i])
 
                 if (rolesArray[i].role === role || rolesArray[i].permission.includes(role)) {                  
                     userHasRequiredRole = true;

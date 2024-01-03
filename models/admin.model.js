@@ -20,6 +20,7 @@ export const Admin = new mongoose.model("Admin", new mongoose.Schema({
     },
     transferAmount: [
         {
+            withdraw: { type: Number,  default: 0},
             amount: { type: Number, default: 0 },
             userName: { type: String },
             date: { type: Date },
