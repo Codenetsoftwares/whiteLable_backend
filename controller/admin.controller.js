@@ -245,18 +245,18 @@ export const AdminController = {
 
     // Deposit Amount 
 
-    Deposit: async (adminId, depositAmount, password) => {
+    Deposit: async (adminId, depositAmount) => {
         try {
             const admin = await Admin.findById(adminId).exec();
 
             if (!admin) {
                 throw { code: 404, message: "Admin Not Found For Deposit" };
             }
-            const isPasswordValid = await bcrypt.compare(password, admin.password);
+            // const isPasswordValid = await bcrypt.compare(password, admin.password);
 
-            if (!isPasswordValid) {
-                throw { code: 401, message: "Invalid password for the deposit" };
-            }
+            // if (!isPasswordValid) {
+            //     throw { code: 401, message: "Invalid password for the deposit" };
+            // }
 
             admin.depositBalance += depositAmount;
             admin.balance += depositAmount;
@@ -957,13 +957,12 @@ editCreditRef: async (adminId, creditRef,password) => {
       
             const skip = (page - 1) * pageSize;
             const query = {
-              createBy: user._id,
-              $or: [
-                { userName: { $regex: new RegExp(searchName, "i") } },
-                
-              ],
+                createBy: user._id,
+                $or: [
+                    { userName: { $regex: new RegExp(searchName, "i") } },
+                ],
             };
-      
+            
           const createdUsers = await Admin.find(query)
               .skip(skip)
               .limit(pageSize);

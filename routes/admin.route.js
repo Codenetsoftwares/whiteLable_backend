@@ -158,9 +158,9 @@ export const AdminRoute = (app) => {
     app.post("/api/admin/deposit-amount/:adminId", Authorize(["superAdmin"]), async (req, res) => {
         try {
             const adminId = req.params.adminId
-            const { depositeAmount, password } = req.body
-            const amount = await AdminController.Deposit(adminId, depositeAmount, password)
-            res.status(200).send({ code: 200, message: "Deposite Amount Successfully" })
+            const { depositeAmount } = req.body
+            const amount = await AdminController.Deposit(adminId, depositeAmount)
+            res.status(200).send({ code: 200, message: "Deposite Amount Successfully" +amount })
         } catch (err) {
             res.status(500).send({ code: err.code, message: err.message })
         }
