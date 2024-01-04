@@ -343,7 +343,7 @@ export const AdminRoute = (app) => {
         async (req, res) => {
             try {
                 const { adminId } = req.params;
-                const { isActive, locked } = req.body;
+                const { isActive, locked ,password } = req.body;
                 const admin = await Admin.findById(adminId);
 
                 const isPasswordValid = await bcrypt.compare(password, admin.password);
@@ -351,7 +351,7 @@ export const AdminRoute = (app) => {
                     throw { code: 401, message: "Invalid password" };
                 }
                 // console.log("Password......", isPasswordValid)
-                const adminActive = await AdminController.activateAdmin(adminId, isActive, locked);
+                const adminActive = await AdminController.activateAdmin(adminId, isActive, locked,password);
                 res.status(200).send(adminActive);
             } catch (err) {
                 res.status(500).send({ code: err.code, message: err.message });
