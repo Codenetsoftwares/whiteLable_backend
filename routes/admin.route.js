@@ -297,11 +297,17 @@ export const AdminRoute = (app) => {
                         partnership: users.partnership,
                         Status: users.isActive ? "Active" : !users.locked ? "Locked" : !users.isActive ? "Suspended" : ""
                     };
+                    
                 });
 
                 const totalPages = Math.ceil(adminCount / pageSize);
 
-                res.status(200).send({ user, totalPages });
+                res.status(200).send({
+                    user,
+                    totalPages,
+                    totalItems: adminCount
+                });
+                
             } catch (err) {
                 res.status(500).send({ code: err.code, message: err.message });
             }
@@ -337,7 +343,7 @@ export const AdminRoute = (app) => {
         async (req, res) => {
             try {
                 const { adminId } = req.params;
-                const { isActive, locked, password } = req.body;
+                const { isActive, locked } = req.body;
                 const admin = await Admin.findById(adminId);
 
                 const isPasswordValid = await bcrypt.compare(password, admin.password);
@@ -345,7 +351,7 @@ export const AdminRoute = (app) => {
                     throw { code: 401, message: "Invalid password" };
                 }
                 // console.log("Password......", isPasswordValid)
-                const adminActive = await AdminController.activateAdmin(adminId, isActive, locked, password);
+                const adminActive = await AdminController.activateAdmin(adminId, isActive, locked);
                 res.status(200).send(adminActive);
             } catch (err) {
                 res.status(500).send({ code: err.code, message: err.message });
@@ -379,12 +385,12 @@ export const AdminRoute = (app) => {
     app.post("/api/admin/move-to-trash-user", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent", "Move-To-Trash"]),
         async (req, res) => {
             try {
-                const { requestId, password } = req.body;
+                const { requestId,  } = req.body;
                 const adminUser = await Admin.findById(requestId);
                 if (!adminUser) {
                     return res.status(404).send("Admin User not found");
                 }
-                const updateResult = await AdminController.trashAdminUser(adminUser, password);
+                const updateResult = await AdminController.trashAdminUser(adminUser, );
 
                 if (updateResult) {
                     res.status(201).send("Admin User Moved To Trash");
