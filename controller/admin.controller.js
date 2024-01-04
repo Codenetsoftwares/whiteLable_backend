@@ -372,7 +372,7 @@ try {
 
 console.log("adminId:", adminId); 
 const admin = await Admin.findById(adminId);
-console.log("passs", password);
+// console.log("passs", password);
 // if (!password) {
 //     throw { code: 400, message: "Password is required" };
 // }
