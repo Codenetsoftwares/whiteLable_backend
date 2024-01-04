@@ -195,21 +195,40 @@ export const AdminRoute = (app) => {
     app.get("/api/transaction-view/:userName", Authorize(["superAdmin", "WhiteLabel", "HyperAgent", "SuperAgent", "MasterAgent", "AccountStatement"]), async (req, res) => {
         try {
             const userName = req.params.userName;
+            const page = parseInt(req.query.page) || 1;
+            const startDate = req.query.startDate ? new Date(req.query.startDate) : null;
+            const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date();
+            endDate.setDate(endDate.getDate() + 1); 
+            let pageSize = 5;
+    
             let balances = 0;
             let debitBalances = 0;
             let withdrawalBalances = 0;
-
-            const admin = await Admin.findOne({ userName: userName }).exec();
-
+    
+            const admin = await Admin.findOne({ userName }).exec();
+    
             if (!admin) {
                 return res.status(404).json({ message: "Admin not found" });
             }
-
-            const transactionData = admin.transferAmount;
-
-            let allData = JSON.parse(JSON.stringify(transactionData));
-
-            allData.slice(0).reverse().map((data) => {
+    
+            let transactionData = admin.transferAmount;
+    
+            transactionData = transactionData.filter(data => {
+                const transactionDate = new Date(data.date); 
+                return (!startDate || transactionDate >= startDate) && (transactionDate < endDate);
+            });
+    
+            const totalItems = transactionData.length;
+            const totalPages = Math.ceil(totalItems / pageSize);
+    
+            const skip = (page - 1) * pageSize;
+            const endIndex = page * pageSize;
+    
+            const paginatedData = transactionData.slice(skip, endIndex);
+    
+            let allData = JSON.parse(JSON.stringify(paginatedData));
+    
+            allData.reverse().map((data) => {
                 if (data.transactionType === "Credit") {
                     balances += data.amount;
                     data.balance = balances;
@@ -219,14 +238,17 @@ export const AdminRoute = (app) => {
                 } else if (data.transactionType === "Withdrawal") {
                     withdrawalBalances += data.withdraw;
                     data.withdrawalBalance = withdrawalBalances;
-                }
+                } 
             });
-
-            res.status(200).json(allData);
+    
+            res.status(200).json({ allData, totalPages, totalItems });
+    
         } catch (err) {
             res.status(500).json({ code: err.code, message: err.message });
         }
     });
+    
+    
 
 
     // view creates
@@ -322,7 +344,7 @@ export const AdminRoute = (app) => {
                 if (!isPasswordValid) {
                     throw { code: 401, message: "Invalid password" };
                 }
-                console.log("Password......", isPasswordValid)
+                // console.log("Password......", isPasswordValid)
                 const adminActive = await AdminController.activateAdmin(adminId, isActive, locked, password);
                 res.status(200).send(adminActive);
             } catch (err) {
