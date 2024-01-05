@@ -199,7 +199,7 @@ export const AdminRoute = (app) => {
             const startDate = req.query.startDate ? new Date(req.query.startDate) : null;
             const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date();
             endDate.setDate(endDate.getDate() + 1); 
-            let pageSize = 5;
+            const pageSize = parseInt(req.query.pageSize) || 5;
     
             let balances = 0;
             let debitBalances = 0;
@@ -262,7 +262,7 @@ export const AdminRoute = (app) => {
                 const createdBy = req.params.createdBy;
                 const page = parseInt(req.query.page) || 1;
                 const searchName = req.query.searchName || "";
-                let pageSize = 5
+                const pageSize = parseInt(req.query.pageSize) || 5;
 
                 const skip = (page - 1) * pageSize;
 
@@ -570,8 +570,10 @@ export const AdminRoute = (app) => {
             const { userName, action } = req.params;
             const searchName = req.body.searchName;
             const page = req.body.page;
+            const pageSize = parseInt(req.query.pageSize) || 5;
+
             try {
-                const result = await AdminController.buildRootPath(userName, action, parseInt(page), searchName);
+                const result = await AdminController.buildRootPath(userName, action, parseInt(page), searchName, pageSize);
                 res.status(200).json(result);
             } catch (error) {
                 res.status(error.code || 500).json({ error: error.message || 'Internal Server Error' });
