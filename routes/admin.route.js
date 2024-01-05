@@ -218,7 +218,6 @@ export const AdminRoute = (app) => {
                 return (!startDate || transactionDate >= startDate) && (transactionDate < endDate);
             });
     
-            // Sort transactions by date in descending order
             transactionData.sort((a, b) => new Date(b.date) - new Date(a.date));
     
             const totalItems = transactionData.length;
