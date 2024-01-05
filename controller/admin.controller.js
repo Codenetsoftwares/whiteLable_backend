@@ -38,19 +38,24 @@ export const AdminController = {
             }));
     
             const newAdmin = new Admin({
-                userName: data.userName,
-                password: encryptedPassword,
-                roles: rolesWithDefaultPermission,
-                createBy: user._id,
-                createUser : user.userName
-            });
-    
-            await newAdmin.save();
-        } catch (err) {
-            console.error(err);
-            throw { code: 500, message: "Failed to save user" };
+            userName: data.userName,
+            password: encryptedPassword,
+            roles: rolesWithDefaultPermission,
+            createBy: user._id, 
+            createUser: user.userName,
+        });
+
+        const isSubRole = ["SubAdmin", "SubWhiteLabel", "SubHyperAgent", "SubSuperAgent", "SubMasterAgent"].includes(user.roles[0].role);
+        if (isSubRole) {
+            newAdmin.createBy = user.createBy || user._id;
         }
-    },
+
+        await newAdmin.save();
+    } catch (err) {
+        console.error(err);
+        throw { code: 500, message: "Failed to save user" };
+    }
+},
     
 
     createSubAdmin: async (data, user) => {
