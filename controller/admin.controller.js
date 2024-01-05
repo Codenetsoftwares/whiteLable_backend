@@ -978,8 +978,10 @@ editCreditRef: async (adminId, creditRef,password) => {
                     status: createdUser.isActive ? "Active" : !createdUser.locked ? "Locked" : !createdUser.isActive ? "Suspended" : ""
                 })),
             };
+
+           const totalItems = totalUsers
       
-            return { message: 'Path stored successfully', path: globalUsernames, userDetails,totalPages };
+            return { message: 'Path stored successfully', path: globalUsernames, userDetails,totalPages ,totalItems};
           } else if (action === 'clear') {
             const lastUsername = globalUsernames.pop();
             if (lastUsername) {
