@@ -218,6 +218,9 @@ export const AdminRoute = (app) => {
                 return (!startDate || transactionDate >= startDate) && (transactionDate < endDate);
             });
     
+            // Sort transactions by date in descending order
+            transactionData.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
             const totalItems = transactionData.length;
             const totalPages = Math.ceil(totalItems / pageSize);
     
@@ -228,7 +231,7 @@ export const AdminRoute = (app) => {
     
             let allData = JSON.parse(JSON.stringify(paginatedData));
     
-            allData.reverse().map((data) => {
+            allData.map((data) => {
                 if (data.transactionType === "Credit") {
                     balances += data.amount;
                     data.balance = balances;
@@ -247,6 +250,7 @@ export const AdminRoute = (app) => {
             res.status(500).json({ code: err.code, message: err.message });
         }
     });
+    
     
     
 
