@@ -352,7 +352,7 @@ export const AdminController = {
                 sender.balance -= trnsfAmnt;
                 receiver.balance += trnsfAmnt;
                 receiver.loadBalance += trnsfAmnt;
-                receiver.loadBalance -= trnsfAmnt;
+                // receiver.loadBalance -= trnsfAmnt;
                 receiver.transferAmount.push(transferRecordCredit);
                 sender.transferAmount.push(transferRecordDebit);
             }
