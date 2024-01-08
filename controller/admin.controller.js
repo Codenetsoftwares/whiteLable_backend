@@ -319,6 +319,7 @@ export const AdminController = {
                 };
     
                 receiver.balance -= withdrawlAmt;
+                receiver.loadBalance -= withdrawlAmt;
                 sender.balance += withdrawlAmt;
                 sender.transferAmount.push(withdrawalRecord);
             } else {
@@ -351,6 +352,7 @@ export const AdminController = {
                 sender.balance -= trnsfAmnt;
                 receiver.balance += trnsfAmnt;
                 receiver.loadBalance += trnsfAmnt;
+                receiver.loadBalance -= trnsfAmnt;
                 receiver.transferAmount.push(transferRecordCredit);
                 sender.transferAmount.push(transferRecordDebit);
             }
